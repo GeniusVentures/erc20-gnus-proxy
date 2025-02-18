@@ -53,6 +53,7 @@ export interface INetworkDeployInfo {
   DeployerAddress: string;
   FacetDeployedInfo: FacetDeployedInfo;
   ExternalLibraries?: any;
+  provider?: any;
 }
 
 export type AfterDeployInit = (

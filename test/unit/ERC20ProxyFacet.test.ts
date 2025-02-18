@@ -1,10 +1,11 @@
 import { ethers, network } from 'hardhat';
-import { dc, assert, expect, toWei, GNUS_TOKEN_ID, debuglog } from '../scripts/common';
+import { assert } from 'chai';
+import { dc, expect, toWei, GNUS_TOKEN_ID, debuglog } from '../../scripts/common';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
-import { ProxyDiamond } from '../typechain-types';
-import { getInterfaceID } from '../scripts/FacetSelectors';
-import { IERC20Upgradeable__factory } from '../typechain-types';
-import { deployments } from '../scripts/deployments';
+import { ProxyDiamond } from '../../typechain-types';
+import { getInterfaceID } from '../../scripts/FacetSelectors';
+import { IERC20Upgradeable__factory } from '../../typechain-types';
+import { deployments } from '../../scripts/deployments';
 
 export function suite() {
   describe('Proxy ERC20 -> GNUS.ai Testing', async function () {
