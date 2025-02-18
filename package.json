@@ -55,7 +55,7 @@
     "prettier": "^2.5.1",
     "prettier-plugin-solidity": "^1.0.0-beta.19",
     "solhint": "^3.3.7",
-    "solidity-coverage": "^0.7.20",
+    "solidity-coverage": "^0.8.14",
     "typechain": "^7.0.0",
     "typescript": "^4.5.5",
     "uint32": "^0.2.1"
@@ -64,6 +64,7 @@
     "@axelar-network/axelarjs-sdk": "^0.15.0",
     "@axelar-network/interchain-token-service": "^1.2.1",
     "@nomiclabs/hardhat-web3": "^2.0.0",
+    "hardhat-multichain": "git+https://github.com/GeniusVentures/hardhat-multchain.git",
     "ts-node": "^10.9.1"
   }
 }
