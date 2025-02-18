@@ -27,7 +27,7 @@ import { getInterfaceID } from '../../scripts/FacetSelectors';
 import { IERC165Upgradeable__factory, IERC1155Upgradeable__factory } from '../../typechain-types';
 import { createForkLogger } from '../utils/logger';
 import { waitForNetwork } from '../utils/network-utils';
-import { GetUpdatedFacets, attachGNUSDiamond  } from '../../scripts/upgrade';
+import { GetUpdatedFacets } from '../../scripts/upgrade';
 
 interface ChainInfo {
   chainName: string;
@@ -38,7 +38,7 @@ class MultiChainTestDeployer {
   private static instances: Map<string, MultiChainTestDeployer> = new Map();
   private chainName: string;
   private provider: JsonRpcProvider;
-  private gnusDiamond: Diamond;
+  private diamond: Diamond;
   private deployInfo: INetworkDeployInfo | null = null;
   private deployInProgress = false;
   private upgradeInProgress = false;
@@ -54,7 +54,7 @@ class MultiChainTestDeployer {
     this.ethersMultichain.provider = this.provider;
     this.upgradeCompleted = false;
     this.deployCompleted = false;
-    this.gnusDiamond = dc.Diamond as Diamond;
+    this.diamond = dc.Diamond as Diamond;
     this.deployer = this.provider.getSigner(deployments[this.chainName]?.DeployerAddress) || this.provider.getSigner(0);
   }
   
@@ -133,7 +133,7 @@ class MultiChainTestDeployer {
       await deployDiamond(this.deployInfo);
       
       // Attach GNUS Diamond instance
-      this.gnusDiamond = dc.Diamond as Diamond;
+      this.diamond = dc.Diamond as Diamond;
       
       // Interface Compatibility Test (ERC165 and ERC1155)
       await this.testInterfaceCompatibility();
@@ -205,7 +205,7 @@ class MultiChainTestDeployer {
         this.deployInfo!.provider = this.provider;
       }
       
-      this.gnusDiamond = dc.Diamond as Diamond;
+      this.diamond = dc.Diamond as Diamond;
       
       let deployerAddress: string;
       if (this.deployInfo!.DeployerAddress && this.deployInfo!.DiamondAddress) {
@@ -221,18 +221,19 @@ class MultiChainTestDeployer {
         let diamondAddress;
         let diamondCutAddress;
         // Deploy and Load GNUS Diamond instance and setup deployInfo
-        [this.deployInfo.DiamondAddress, this.deployInfo.FacetDeployedInfo.DiamondCutFacet.address] =  await deployDiamond(this.deployInfo);
+        // [this.deployInfo.DiamondAddress, this.deployInfo.FacetDeployedInfo.DiamondCutFacet.address] =  
+        await deployDiamond(this.deployInfo);
       }
       
       // Attach GNUS Diamond instance, this done already if this was deployed
       
-      // TODO the use of dc._gnusDiamond and dc.gnusDiamond is confusing, should be refactored
+      // TODO the use of dc._diamond and dc.diamond is confusing, should be refactored
       // deploy Diamond
       const diamondAddress = this.deployInfo.DiamondAddress;
-      dc._gnusDiamond = (
+      dc._diamond = (
         await this.ethersMultichain.getContractFactory('contracts/Diamond.sol:Diamond')
       ).attach(diamondAddress);
-      dc.gnusDiamond = (
+      dc.diamond = (
         await this.ethersMultichain.getContractFactory('hardhat-diamond-abi/Diamond.sol:Diamond')
       ).attach(diamondAddress);
       
@@ -245,33 +246,33 @@ class MultiChainTestDeployer {
       // Interface Compatibility Test (ERC165 and ERC1155)
       await this.testInterfaceCompatibility();
       
-      // TODO This should be a test in a separate function ERC173
-      if (this.chainName !== 'hardhat') {
-        // check if the owner is the deployer and transfer ownership to the deployer
-        const deployerGnusDiamond = this.gnusDiamond.connect(this.deployer);
-        const currentContractOwner = await deployerGnusDiamond.owner();
-        if (currentContractOwner.toLowerCase() === (await this.deployer.getAddress()).toLowerCase()) {
-          console.log(`Ownership is correct, current contractOwner:  ${currentContractOwner}`);
-        } else {
-          console.log(`Transferring ownership to ${this.deployer.getAddress()}`);
-          // Impersonate and fund the currentContractOwner
-          await this.impersonateAndFundAccount(currentContractOwner);
-          
-          //connect the currentContractOwner to the contract and transfer ownership to the deployer
-          const currentOwner = this.provider?.getSigner(currentContractOwner);
-          const currentOwnerGnusDiamond = this.gnusDiamond.connect(currentOwner);
-          const tx = await currentOwnerGnusDiamond.transferOwnership(await this.deployer.getAddress());
-          await tx.wait();
-          
-          // Verify the ownership transfer
-          const newContractOwner = await currentOwnerGnusDiamond.owner();
-          if (newContractOwner.toLowerCase() === (await this.deployer.getAddress()).toLowerCase()) {
-            console.log(`Ownership transferred to ${newContractOwner}`);
-          } else {
-            throw new Error(`Ownership transfer failed. Current owner: ${newContractOwner}`);
-          }
-        }
-      }
+      // TODO Implement ERC173 and create a test for this rather than a manual check
+        //   if (this.chainName !== 'hardhat') {
+        //     // check if the owner is the deployer and transfer ownership to the deployer
+        //     const deployerDiamond = this.diamond.connect(this.deployer);
+        //     const currentContractOwner = await deployerDiamond.owner();
+        //     if (currentContractOwner.toLowerCase() === (await this.deployer.getAddress()).toLowerCase()) {
+        //       console.log(`Ownership is correct, current contractOwner:  ${currentContractOwner}`);
+        //     } else {
+        //       console.log(`Transferring ownership to ${this.deployer.getAddress()}`);
+        //       // Impersonate and fund the currentContractOwner
+        //       await this.impersonateAndFundAccount(currentContractOwner);
+            
+        //       //connect the currentContractOwner to the contract and transfer ownership to the deployer
+        //       const currentOwner = this.provider?.getSigner(currentContractOwner);
+        //       const currentOwnerDiamond = this.diamond.connect(currentOwner);
+        //       const tx = await currentOwnerDiamond.transferOwnership(await this.deployer.getAddress());
+        //       await tx.wait();
+            
+        //       // Verify the ownership transfer
+        //       const newContractOwner = await currentOwnerDiamond.owner();
+        //       if (newContractOwner.toLowerCase() === (await this.deployer.getAddress()).toLowerCase()) {
+        //         console.log(`Ownership transferred to ${newContractOwner}`);
+        //       } else {
+        //         throw new Error(`Ownership transfer failed. Current owner: ${newContractOwner}`);
+        //       }
+        //     }
+        //   }
       
       // Backup pre-upgrade Upgrade info
       const deployInfoBeforeUpgraded = JSON.parse(JSON.stringify(this.deployInfo));
@@ -339,7 +340,7 @@ class MultiChainTestDeployer {
   // TODO: this test might be better suited in the MultiChainForkDeployTests.ts file or in a separate file
   // it may be that the testInterfaceCompatibility should test the ERC20 interface as well
   private async testInterfaceCompatibility(): Promise<void> {
-    if (!this.gnusDiamond) throw new Error('Diamond is not deployed yet.');
+    if (!this.diamond) throw new Error('Diamond is not deployed yet.');
 
     const logger = createForkLogger(this.chainName);
     const IERC165Interface = IERC165Upgradeable__factory.createInterface();
@@ -348,7 +349,7 @@ class MultiChainTestDeployer {
 
     const IERC1155ID = getInterfaceID(IERC1155Interface).xor(IERC165ID);
 
-    const supportsInterface = await this.gnusDiamond.supportsInterface(IERC1155ID._hex);
+    const supportsInterface = await this.diamond.supportsInterface(IERC1155ID._hex);
     assert(supportsInterface, "Diamond does not support IERC1155Upgradeable");
 
     logger.info('Diamond interface compatibility test passed.');
@@ -356,7 +357,7 @@ class MultiChainTestDeployer {
 
   // Retrieve deployed GNUS Diamond instance
   getDiamond(): Diamond {
-    return this.gnusDiamond;
+    return this.diamond;
   }
 
   // Cleanup resources

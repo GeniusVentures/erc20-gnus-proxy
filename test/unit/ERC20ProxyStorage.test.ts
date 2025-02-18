@@ -1,5 +1,7 @@
-const { expect } = require("chai");
-const { ethers } = require("hardhat");
+import { expect, assert } from "chai";
+import { ethers } from "hardhat";
+import { ERC20ProxyFacet } from "../../typechain-types";
+import { ERC20ProxyStorage } from "../../typechain-types";
 
 describe("ERC20ProxyStorage", function () {
   let ERC20ProxyStorage;
