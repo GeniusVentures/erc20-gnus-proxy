@@ -11,7 +11,6 @@ import 'solidity-coverage';
 import '@nomiclabs/hardhat-ethers';
 import '@nomiclabs/hardhat-web3';
 import 'solidity-coverage';
-import 'hardhat-multichain';
 
 dotenv.config();
 
