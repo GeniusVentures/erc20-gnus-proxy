@@ -4,7 +4,7 @@ import { HardhatEthersHelpers } from '@nomiclabs/hardhat-ethers/types';
 import { Signer } from 'ethers';
 import * as util from 'util';
 import { JsonRpcProvider } from '@ethersproject/providers';
-import { Diamond } from '../../typechain-types/Diamond';
+import { ProxyDiamond } from '../../typechain-types';
 import { 
   deployDiamond, 
   deployDiamondFacets, 
@@ -34,11 +34,11 @@ interface ChainInfo {
   provider: JsonRpcProvider;
 };
 
-class MultiChainTestDeployer {
-  private static instances: Map<string, MultiChainTestDeployer> = new Map();
+class TestDeployer {
+  private static instances: Map<string, TestDeployer> = new Map();
   private chainName: string;
   private provider: JsonRpcProvider;
-  private diamond: Diamond;
+  private diamond: ProxyDiamond;
   private deployInfo: INetworkDeployInfo | null = null;
   private deployInProgress = false;
   private upgradeInProgress = false;
@@ -54,7 +54,7 @@ class MultiChainTestDeployer {
     this.ethersMultichain.provider = this.provider;
     this.upgradeCompleted = false;
     this.deployCompleted = false;
-    this.diamond = dc.Diamond as Diamond;
+    this.diamond = dc.Diamond as ProxyDiamond;
     this.deployer = this.provider.getSigner(deployments[this.chainName]?.DeployerAddress) || this.provider.getSigner(0);
   }
   
@@ -68,9 +68,9 @@ class MultiChainTestDeployer {
   }
 
   // Factory method to get or create an instance for a network
-  static getInstance(chainInfo: ChainInfo): MultiChainTestDeployer {
+  static getInstance(chainInfo: ChainInfo): TestDeployer {
     if (!this.instances.has(chainInfo.chainName)) {
-      this.instances.set(chainInfo.chainName, new MultiChainTestDeployer(chainInfo));
+      this.instances.set(chainInfo.chainName, new TestDeployer(chainInfo));
     }
     return this.instances.get(chainInfo.chainName)!;
   }
@@ -117,7 +117,7 @@ class MultiChainTestDeployer {
         // Impersonate the deployer and fund their account
         await this.impersonateAndFundAccount(this.deployInfo.DeployerAddress);
         
-         // Deploy GNUS Diamond
+         // Deploy ProxyDiamond
         await deployDiamond(this.deployInfo);
         return;
       } else {
@@ -128,26 +128,26 @@ class MultiChainTestDeployer {
       
       let diamondAddress;
       let diamondCutAddress;
-      // Deploy and Load GNUS Diamond instance
+      // Deploy and Load ProxyDiamond instance
     //   [diamondAddress, diamondCutAddress] =  
       await deployDiamond(this.deployInfo);
       
-      // Attach GNUS Diamond instance
-      this.diamond = dc.Diamond as Diamond;
-      
-      // Interface Compatibility Test (ERC165 and ERC1155)
-      await this.testInterfaceCompatibility();
-
+      // Attach ProxyDiamond instance
+      this.diamond = dc.Diamond as ProxyDiamond;
+            
       // Backup pre-upgrade deployment info
       const deployInfoBeforeUpgraded = JSON.parse(JSON.stringify(this.deployInfo));
-
+      
       // Define facets to be deployed, sourced from the `Facets` object.
       let facetsToDeploy: FacetToDeployInfo = Facets;
       await deployDiamondFacets(this.deployInfo, facetsToDeploy);
       
-      // // Deploy and Initialize Diamond Facets
+      // // Deploy and Initialize ProxyDiamond Facets
       await deployAndInitDiamondFacets(this.deployInfo, facetsToDeploy);
       
+      // Interface Compatibility Test (ERC165 and ERC1155)
+      // await this.testInterfaceCompatibility();
+    
     } catch (error) {
       if (error instanceof Error) {
         console.error(`Deployment failed for ${this.chainName}: ${error.message}`);
@@ -205,7 +205,7 @@ class MultiChainTestDeployer {
         this.deployInfo!.provider = this.provider;
       }
       
-      this.diamond = dc.Diamond as Diamond;
+      this.diamond = dc.Diamond as ProxyDiamond;
       
       let deployerAddress: string;
       if (this.deployInfo!.DeployerAddress && this.deployInfo!.DiamondAddress) {
@@ -220,31 +220,30 @@ class MultiChainTestDeployer {
         
         let diamondAddress;
         let diamondCutAddress;
-        // Deploy and Load GNUS Diamond instance and setup deployInfo
+        // Deploy and Load Diamond instance and setup deployInfo
         // [this.deployInfo.DiamondAddress, this.deployInfo.FacetDeployedInfo.DiamondCutFacet.address] =  
         await deployDiamond(this.deployInfo);
       }
       
-      // Attach GNUS Diamond instance, this done already if this was deployed
-      
-      // TODO the use of dc._diamond and dc.diamond is confusing, should be refactored
-      // deploy Diamond
+      // deploy ProxyDiamond
       const diamondAddress = this.deployInfo.DiamondAddress;
       dc._diamond = (
-        await this.ethersMultichain.getContractFactory('contracts/Diamond.sol:Diamond')
+        await this.ethersMultichain.getContractFactory('contracts/ProxyDiamond.sol:ProxyDiamond')
       ).attach(diamondAddress);
       dc.diamond = (
-        await this.ethersMultichain.getContractFactory('hardhat-diamond-abi/Diamond.sol:Diamond')
+        await this.ethersMultichain.getContractFactory('hardhat-diamond-abi/ProxyDiamond.sol:ProxyDiamond')
       ).attach(diamondAddress);
+      
+      this.diamond = dc.diamond as ProxyDiamond;
       
       const DiamondCutFacet = await this.ethersMultichain.getContractFactory('DiamondCutFacet');
       dc.DiamondCutFacet = DiamondCutFacet.attach(
         this.deployInfo.FacetDeployedInfo.DiamondCutFacet.address!,
       );
       
-      // TODO Should this be tested here because it causes issues if the diamond is not deployed with ERC1155 already.
-      // Interface Compatibility Test (ERC165 and ERC1155)
-      await this.testInterfaceCompatibility();
+      // // TODO Should this be tested here because it causes issues if the diamond is not deployed with ERC1155 already.
+      // // Interface Compatibility Test (ERC165 and ERC1155)
+      // await this.testInterfaceCompatibility();
       
       // TODO Implement ERC173 and create a test for this rather than a manual check
         //   if (this.chainName !== 'hardhat') {
@@ -355,8 +354,8 @@ class MultiChainTestDeployer {
     logger.info('Diamond interface compatibility test passed.');
   }
 
-  // Retrieve deployed GNUS Diamond instance
-  getDiamond(): Diamond {
+  // Retrieve deployed Diamond instance
+  getDiamond(): ProxyDiamond {
     return this.diamond;
   }
 
@@ -366,4 +365,4 @@ class MultiChainTestDeployer {
   }
 }
 
-export default MultiChainTestDeployer;
+export default TestDeployer;

@@ -11,8 +11,76 @@ import 'solidity-coverage';
 import '@nomiclabs/hardhat-ethers';
 import '@nomiclabs/hardhat-web3';
 import 'solidity-coverage';
+import 'hardhat-multichain';
 
 dotenv.config();
+
+/*
+ * Destructuring environment variables required for the configuration.
+ * These variables are fetched from the `.env` file to avoid hardcoding sensitive data.
+ * - HH_CHAIN_ID: Custom chain ID for the Hardhat network (default is 31337 if not set).
+ * - DEPLOYER_PRIVATE_KEY: Private key of the deployer account.
+ * - SEPOLIA_RPC: RPC URL for the Sepolia network.
+ * - ETHEREUM_RPC: RPC URL for the Ethereum network.
+ * - POLYGON_RPC: RPC URL for the Polygon network.
+ * - AMOY_RPC: RPC URL for the Amoy network.
+ * - ETH_BLOCK: Block number for the Ethereum network.
+ * - POLY_BLOCK: Block number for the Polygon network.
+ * - AMOY_BLOCK: Block number for the Amoy network.
+ * - SEPOLIA_BLOCK: Block number for the Sepolia network.
+ */
+const { 
+  HH_CHAIN_ID,
+  DEPLOYER_PRIVATE_KEY, 
+  SEPOLIA_RPC, 
+  MAINNET_RPC,
+  POLYGON_RPC,
+  POLYGON_AMOY_RPC, 
+  MAINNET_BLOCK,
+  POLYGON_BLOCK,
+  POLYGON_AMOY_BLOCK,
+  SEPOLIA_BLOCK,
+  BASE_RPC,
+  BASE_BLOCK,
+  BASE_SEPOLIA_RPC,
+  BASE_SEPOLIA_BLOCK,
+  BSC_RPC,
+  BSC_BLOCK,
+  BSC_TESTNET_RPC,
+  BSC_TESTNET_BLOCK,
+} = process.env;
+
+// default blank RPC URLs will return an error. Must be configured in the .env file. 
+export const mainnetUrl: string = MAINNET_RPC || ""; // Ethereum RPC URL
+export const polyUrl: string = POLYGON_RPC || ""; // Polygon RPC URL
+export const amoyUrl: string = POLYGON_AMOY_RPC || ""; // Amoy RPC URL
+export const sepoliaUrl: string = SEPOLIA_RPC || ""; // Sepolia RPC URL
+export const baseUrl: string = BASE_RPC || ""; // Base RPC URL
+export const baseSepoliaUrl: string = BASE_SEPOLIA_RPC || ""; // Base Sepolia RPC URL
+export const bscUrl: string = BSC_RPC || ""; // BSC RPC URL
+export const bscTestnetUrl: string = BSC_TESTNET_RPC || ""; // BSC Testnet RPC URL
+// These set default values as well so missing environment variables set default to latest block.
+export const mainnetBlock: number = parseInt(MAINNET_BLOCK || "0"); // Ethereum block number
+export const polyBlock: number = parseInt(POLYGON_BLOCK || "0"); // Polygon block number
+export const amoyBlock: number = parseInt(POLYGON_AMOY_BLOCK || "0"); // Amoy block number
+export const sepoliaBlock: number = parseInt(SEPOLIA_BLOCK || "0"); // Sepolia block number
+export const baseBlock: number = parseInt(BASE_BLOCK || "0"); // Base block number
+export const baseSepoliaBlock: number = parseInt(BASE_SEPOLIA_BLOCK || "0"); // Base Sepolia block number
+export const bscBlock: number = parseInt(BSC_BLOCK || "0"); // BSC block number
+export const bscTestnetBlock: number = parseInt(BSC_TESTNET_BLOCK || "0"); // BSC Testnet block number
+
+let multichainTestHardhat = '';
+// If this is a test-multichain task then we need to parse the --chains argument to get the chain names
+if (process.argv.includes('test-multichain') && process.argv.includes('--chains')) {
+  const chains = process.argv[process.argv.indexOf('--chains') + 1].split(',');
+  if (chains.includes('hardhat') || chains.includes('localhost') || !chains) {
+    multichainTestHardhat = 'http://localhost:8545';
+  }
+}
+if (process.argv.includes('coverage')) {
+  multichainTestHardhat = 'http://localhost:8555';
+}
+export const multichainHardhat = multichainTestHardhat;
 
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
@@ -63,6 +131,47 @@ const config: HardhatUserConfig = {
       optimizer: {
         enabled: true,
         runs: 1000,
+      },
+    },
+  },
+  chainManager: {
+    chains: {
+      mainnet: {
+        rpcUrl: mainnetUrl,
+        blockNumber: mainnetBlock,
+      }, 
+      polygon: {
+        rpcUrl: polyUrl,
+        blockNumber: polyBlock,
+      }, 
+      sepolia: {
+        rpcUrl: sepoliaUrl,
+        blockNumber: sepoliaBlock,
+        chainId: 11155111
+      }, 
+      polygon_amoy: {
+        rpcUrl: amoyUrl,
+        blockNumber: amoyBlock,
+        chainId: 80002
+      },
+      hardhat: { 
+        rpcUrl: multichainHardhat,
+      },
+      base: {
+        rpcUrl: baseUrl,
+        blockNumber: baseBlock,
+      },
+      base_sepolia: {
+        rpcUrl: baseSepoliaUrl,
+        blockNumber: baseSepoliaBlock,
+      },
+      bsc: {
+        rpcUrl: bscUrl,
+        blockNumber: bscBlock,
+      },
+      bsc_testnet: {
+        rpcUrl: bscTestnetUrl,
+        blockNumber: bscTestnetBlock,
       },
     },
   },

@@ -1,7 +1,9 @@
-import { BaseContract, BigNumber } from 'ethers';
+import { BaseContract, BigNumber, Contract, ContractTransaction } from 'ethers';
 import { ethers } from 'hardhat';
 import { debug } from 'debug';
 import * as chai from 'chai';
+import { ERC1155SupplyUpgradeable } from "../typechain-types";
+
 
 export const assert = chai.assert;
 export const expect = chai.expect;
@@ -9,7 +11,7 @@ import chaiAsPromised from 'chai-as-promised';
 import { Fragment } from '@ethersproject/abi';
 import fs from 'fs';
 import util from 'util';
-import { ExternalApiCreateProposalRequest } from "@openzeppelin/defender-admin-client/lib/models/proposal";
+import { ExternalApiCreateProposalRequest } from "@openzeppelin/defender-base-client";
 
 chai.use(chaiAsPromised);
 
@@ -154,4 +156,35 @@ export function createPreviousVersionRecordWithMap(facetInfo: FacetDeployedInfo)
   });
 
   return previousVersionRecord;
+}
+
+
+export interface ERC20ProxyStorageLayout {
+  erc1155Contract: ERC1155SupplyUpgradeable;
+  childTokenId: BigNumber;
+  name: string;
+  symbol: string;
+}
+
+export interface ERC20ProxyStorage extends Contract {
+  layout(): Promise<ERC20ProxyStorageLayout>;
+  initializeERC20Proxy(
+    erc1155Address: string,
+    childTokenId: BigNumber,
+    name: string,
+    symbol: string
+  ): Promise<ContractTransaction>;
+  name(): Promise<string>;
+  symbol(): Promise<string>;
+  decimals(): Promise<number>;
+  totalSupply(): Promise<BigNumber>;
+  balanceOf(account: string): Promise<BigNumber>;
+  transfer(recipient: string, amount: BigNumber): Promise<ContractTransaction>;
+  approve(spender: string, amount: BigNumber): Promise<ContractTransaction>;
+  allowance(owner: string, spender: string): Promise<BigNumber>;
+  transferFrom(
+    sender: string,
+    recipient: string,
+    amount: BigNumber
+  ): Promise<ContractTransaction>;
 }

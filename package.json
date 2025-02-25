@@ -5,6 +5,7 @@
   "main": "index.ts",
   "scripts": {
     "test": "npx hardhat test",
+    "test-multichain": "npx hardhat test-multichain",
     "compile": "npx hardhat compile",
     "upgrade": "npx hardhat run scripts/upgrade.ts",
     "deploy": "npx hardhat run scripts/deploy.ts",
@@ -52,6 +53,7 @@
     "hardhat-abi-exporter": "^2.8.0",
     "hardhat-diamond-abi": "^2.0.0",
     "hardhat-gas-reporter": "^1.0.8",
+    "hardhat-multichain": "git+https://github.com/GeniusVentures/hardhat-multchain.git#",
     "prettier": "^2.5.1",
     "prettier-plugin-solidity": "^1.0.0-beta.19",
     "solhint": "^3.3.7",
@@ -64,6 +66,7 @@
     "@axelar-network/axelarjs-sdk": "^0.15.0",
     "@axelar-network/interchain-token-service": "^1.2.1",
     "@nomiclabs/hardhat-web3": "^2.0.0",
-    "ts-node": "^10.9.1"
+    "ts-node": "^10.9.1",
+    "winston": "^3.17.0"
   }
 }
