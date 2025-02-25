@@ -6,6 +6,7 @@
   "scripts": {
     "test": "npx hardhat test",
     "test-multichain": "npx hardhat test-multichain",
+    "coverage": "npx hardhat coverage",
     "compile": "npx hardhat compile",
     "upgrade": "npx hardhat run scripts/upgrade.ts",
     "deploy": "npx hardhat run scripts/deploy.ts",
