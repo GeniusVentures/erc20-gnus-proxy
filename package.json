@@ -8,6 +8,7 @@
     "test-multichain": "npx hardhat test-multichain",
     "coverage": "npx hardhat coverage",
     "compile": "npx hardhat compile",
+    "clean": "npx hardhat clean",
     "upgrade": "npx hardhat run scripts/upgrade.ts",
     "deploy": "npx hardhat run scripts/deploy.ts",
     "deploy:erc20proxy": "npx hardhat run scripts/deployERC20Proxy.ts",
@@ -16,7 +17,10 @@
     "getgascost": "npx hardhat run scripts/getgascost.ts",
     "getaccessinfo": "npx hardhat run scripts/getaccessinfo.ts"
   },
-  "author": "gvtopcoder",
+  "authors": [
+    "SuperGenius",
+    "Am0rfu5"
+  ],
   "license": "MIT",
   "devDependencies": {
     "@gnus.ai/contracts-upgradeable-diamond": "=4.5.0",

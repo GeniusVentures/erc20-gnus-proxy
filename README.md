@@ -11,7 +11,6 @@ This is a proxy contract sample to map ERC20 smart contract into ERC1155 contrac
 GNUS.AI Smart contract includes NFT creation and minting with a Payment channel that is a generalized payment network that supports efficient off-chain token transfer with the Genius Token on on-chain ethereum. 
 These contracts use Diamond Storage/Facets to split the contracts into deployable pieces and for upgradeability.
 
-
 ## Solidity Version
 Solidity `^0.8.4` or above is required to compile these smart contracts
 

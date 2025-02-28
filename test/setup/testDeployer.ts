@@ -105,6 +105,7 @@ class TestDeployer {
       // Initialize deployment info, default to signer[0] as deployer
       this.deployInfo = deployments[this.chainName] || {
         provider: this.provider,
+        networkName: this.chainName,
         DiamondAddress: '',
         DeployerAddress:  this.deployer.getAddress(),
         FacetDeployedInfo: {},

@@ -136,7 +136,7 @@ describe('ERC20Proxy Tests', async function () {
       // });
 
       // TODO: await creator being able to mint
-      // it('Testing GNUS transferFrom & approval', async () => {
+      // it('Testing Proxy transferFrom & approval', async () => {
       //   await signer2Diamond.approve(owner, toWei(50));
 
       //   await expect(

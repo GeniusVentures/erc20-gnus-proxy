@@ -11,7 +11,8 @@ import chaiAsPromised from 'chai-as-promised';
 import { Fragment } from '@ethersproject/abi';
 import fs from 'fs';
 import util from 'util';
-import { ExternalApiCreateProposalRequest } from "@openzeppelin/defender-base-client";
+import { CreateProposalRequest } from "@openzeppelin/defender-admin-client";
+import { JsonRpcProvider } from '@ethersproject/providers';
 
 chai.use(chaiAsPromised);
 
@@ -55,7 +56,9 @@ export interface INetworkDeployInfo {
   DeployerAddress: string;
   FacetDeployedInfo: FacetDeployedInfo;
   ExternalLibraries?: any;
-  provider?: any;
+  protocolVersion?: number;
+  provider?: JsonRpcProvider;
+  networkName?: string;
 }
 
 export type AfterDeployInit = (
@@ -139,8 +142,8 @@ export const diamondCutFuncAbi = {
 };
 
 export interface IDefenderViaInfo {
-  via: ExternalApiCreateProposalRequest['via'],
-  viaType: ExternalApiCreateProposalRequest['viaType'];
+  via: CreateProposalRequest['via'],
+  viaType: CreateProposalRequest['viaType'];
 }
 
 export function createPreviousVersionRecordWithMap(facetInfo: FacetDeployedInfo): PreviousVersionRecord {

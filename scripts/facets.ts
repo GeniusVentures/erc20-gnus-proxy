@@ -4,8 +4,8 @@ import { glob } from 'glob';
 // ... (keep existing imports and types)
 
 export const Facets: FacetToDeployInfo = {
-
-};
+  // ... (keep existing facets)
+}
 
 export async function LoadFacetDeployments() {
   const imports = glob.sync(`${__dirname}/facetdeployments/*.ts`);
