@@ -1,0 +1,3 @@
+[submodule "test/integration/gnus-ai"]
+	path = test/integration/gnus-ai
+	url = ssh://github.com/GeniusVentures/gnus-ai.git
