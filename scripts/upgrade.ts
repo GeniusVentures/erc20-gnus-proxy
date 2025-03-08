@@ -51,7 +51,7 @@ export async function attachGNUSDiamond(networkDeployInfo: INetworkDeployInfo) {
       await ethers.getContractFactory('contracts/ProxyDiamond.sol:ProxyDiamond')
   ).attach(diamondAddress);
   dc.ProxyDiamond = (
-      await ethers.getContractFactory('hardhat-diamond-abi/ProxyDiamond.sol:ProxyDiamond')
+      await ethers.getContractFactory('hardhat-diamond-abi/HardhatDiamondABI.sol:ProxyDiamond')
   ).attach(diamondAddress);
 
   log(`Diamond attached ${diamondAddress}`);

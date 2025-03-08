@@ -1,3 +1,6 @@
 [submodule "test/integration/gnus-ai"]
 	path = test/integration/gnus-ai
 	url = ssh://github.com/GeniusVentures/gnus-ai.git
+[submodule "packages/hardhat-diamond-abi"]
+	path = packages/hardhat-diamond-abi
+	url = https://github.com/Am0rfu5/hardhat-diamond-abi

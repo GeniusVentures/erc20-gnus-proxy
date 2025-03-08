@@ -45,8 +45,8 @@ const afterDeploy: AfterDeployInit = async (networkDeployInfo: INetworkDeployInf
     await proxyDiamond.initializeERC20Proxy(
       GNUSAIContractAddress,
       chainID,
-      "TestToken",
-      "TST"
+      "ExampleToken",
+      "XMPL"
     );
   } else {
     debuglog(`No GNUS.ai ERC1155 contract address found for network: ${networkName}`);

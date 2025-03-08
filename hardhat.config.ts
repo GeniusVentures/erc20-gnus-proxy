@@ -12,6 +12,7 @@ import '@nomiclabs/hardhat-ethers';
 import '@nomiclabs/hardhat-web3';
 import 'solidity-coverage';
 import 'hardhat-multichain';
+// import './test/integration/setup/compileGNUSAI';
 
 dotenv.config();
 
@@ -82,8 +83,7 @@ if (process.argv.includes('coverage')) {
 }
 export const multichainHardhat = multichainTestHardhat;
 
-// This is a sample Hardhat task. To learn how to create your own go to
-// https://hardhat.org/guides/create-task.html
+// Prints the HH created accounts to the console
 task('accounts', 'Prints the list of accounts', async (taskArgs, hre) => {
   const accounts = await hre.ethers.getSigners();
 
@@ -92,7 +92,6 @@ task('accounts', 'Prints the list of accounts', async (taskArgs, hre) => {
   }
 });
 
-const elementSeenSet = new Set<string>();
 // filter out duplicate function signatures
 function genSignature(name: string, inputs: Array<any>, type: string): string {
   return `${type} ${name}(${inputs.reduce((previous, key) => {
@@ -101,18 +100,21 @@ function genSignature(name: string, inputs: Array<any>, type: string): string {
   }, '')})`;
 }
 
-function filterDuplicateFunctions(
-    abiElement: any,
-    index: number,
-    fullAbiL: any[],
-    fullyQualifiedName: string,
+// Custom filtering of duplicate function signatures for hardhat-diamond-abi 
+let proxyDiamondElements = new Set<string>();
+
+function filterDupeProxyFunctions(
+  abiElement: any,
+  index: number,
+  fullAbiL: any[],
+  fullyQualifiedName: string,
 ) {
   if (['function', 'event'].includes(abiElement.type)) {
     const funcSignature = genSignature(abiElement.name, abiElement.inputs, abiElement.type);
-    if (elementSeenSet.has(funcSignature)) {
+    if (proxyDiamondElements.has(funcSignature)) {
       return false;
     }
-    elementSeenSet.add(funcSignature);
+    proxyDiamondElements.add(funcSignature);
   } else if (abiElement.type === 'fallback') {
     if (!fullyQualifiedName.match('ProxyDiamond.sol')) {
       return false;
@@ -121,8 +123,26 @@ function filterDuplicateFunctions(
   return true;
 }
 
-// You need to export an object to set up your config
-// Go to https://hardhat.org/config/ to learn more
+let geniusDiamondElements = new Set<string>();
+function filterDupeGeniusFunctions(
+  abiElement: any,
+  index: number,
+  fullAbiL: any[],
+  fullyQualifiedName: string,
+) {
+  if (['function', 'event'].includes(abiElement.type)) {
+    const funcSignature = genSignature(abiElement.name, abiElement.inputs, abiElement.type);
+    if (geniusDiamondElements.has(funcSignature)) {
+      return false;
+    }
+    geniusDiamondElements.add(funcSignature);
+  } else if (abiElement.type === 'fallback') {
+    if (!fullyQualifiedName.match('gnus-ai/GeniusDiamond.sol')) {
+      return false;
+     }
+  }
+  return true;
+}
 
 const config: HardhatUserConfig = {
   solidity: {
@@ -319,14 +339,40 @@ const config: HardhatUserConfig = {
     spacing: 2,
     pretty: true,
   },
-  diamondAbi: {
-    name: 'ProxyDiamond',
-    strict: false,
-    exclude: [
-      'hardhat-diamond-abi/.*',
-    ],
-    filter: filterDuplicateFunctions,
-  },
+  diamondAbi: [
+    {    
+      name: 'ProxyDiamond',
+      strict: false,
+      include: [
+        'ERC20ProxyStorage',
+        'ERC20ProxyFacet',
+        'ProxyDiamond',
+      ],
+      exclude: [
+        'gnus-ai/*',
+        'hardhat-diamond-abi/.*',
+      ],
+      filter: filterDupeProxyFunctions,
+    },
+    { 
+      name: 'GeniusDiamond',
+      strict: false,
+      include: [
+        'gnus-ai/*',
+        'GeniusDiamond',
+      ],
+      exclude: [
+        'ProxyDiamond',
+        'ERC20ProxyStorage',
+        'ERC20ProxyFacet',
+        'hardhat-diamond-abi/.*',
+        'Migrations',
+        'libEncryption',
+        'gnus-ai/mocks/.*',
+      ],
+      filter: filterDupeGeniusFunctions,
+    }
+  ],
 };
 
 export default config;

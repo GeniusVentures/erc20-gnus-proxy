@@ -107,7 +107,7 @@ export async function deployDiamond(networkDeployInfo: INetworkDeployInfo) {
   networkDeployInfo.DiamondAddress = diamond.address;
   // Attach the ProxyDiamond contract to the `dc` object using the ABI for interaction through `hardhat-diamond-abi`.
   dc.ProxyDiamond = (
-    await ethers.getContractFactory('hardhat-diamond-abi/ProxyDiamond.sol:ProxyDiamond')
+    await ethers.getContractFactory('hardhat-diamond-abi/HardhatDiamondABI.sol:ProxyDiamond')
   ).attach(diamond.address);
   
   // Update the deployment info for DiamondCutFacet, since the ProxyDiamond contract constructor already references it.

@@ -232,7 +232,7 @@ class TestDeployer {
         await this.ethersMultichain.getContractFactory('contracts/ProxyDiamond.sol:ProxyDiamond')
       ).attach(diamondAddress);
       dc.diamond = (
-        await this.ethersMultichain.getContractFactory('hardhat-diamond-abi/ProxyDiamond.sol:ProxyDiamond')
+        await this.ethersMultichain.getContractFactory('hardhat-diamond-abi/HardhatDiamondABI.sol:ProxyDiamond')
       ).attach(diamondAddress);
       
       this.diamond = dc.diamond as ProxyDiamond;

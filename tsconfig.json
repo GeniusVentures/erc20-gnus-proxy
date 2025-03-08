@@ -3,10 +3,15 @@
     "target": "es2018",
     "module": "commonjs",
     "strict": true,
+    "sourceMap": true,
+    "allowJs": true,
+    "checkJs": false,
+    "rootDirs": ["./scripts", "./test"],
     "esModuleInterop": true,
     "outDir": "dist",
     "resolveJsonModule": true
   },
-  "include": ["./scripts", "./test", "./typechain"],
+  "include": ["./scripts", "./typechain-types", "./types", "./utils", "./deploy", "./test", "src/**/*.ts"],
+  // "include": ["./scripts", "./test", "./typechain"],
   "files": ["./hardhat.config.ts"]
 }

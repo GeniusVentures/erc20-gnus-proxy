@@ -27,6 +27,7 @@ export const debuglog = global.debuglog;
 
 export const toBN = BigNumber.from;
 export const GNUS_TOKEN_ID = toBN(0);
+export const XMPL_TOKEN_ID = toBN(1234567890);
 
 export interface IFacetDeployedInfo {
   address?: string;

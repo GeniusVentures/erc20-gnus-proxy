@@ -7,9 +7,9 @@ import hre from 'hardhat';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { multichain } from 'hardhat-multichain';
-import MultiChainTestDeployer from '@gnus-ai/gnus-ai/test/setup/multichainTestDeployer';
-import { deployments } from '@gnus-ai/gnus-ai/scripts/deployments';
-import { GeniusDiamond } from '@gnus-ai/gnus-ai/typechain-types/GeniusDiamond';
+import MultiChainTestDeployer from '../gnus-ai/test/setup/multichainTestDeployer';
+import { deployments } from '../gnus-ai/scripts/deployments';
+import { GeniusDiamond } from '../../../typechain-types';
 
 // Deploys the GNUS Diamond contract to multiple chains
 export async function GNUSMultichainDeployer()  {
