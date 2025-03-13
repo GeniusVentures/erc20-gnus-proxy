@@ -7,3 +7,5 @@ artifacts
 .env
 logs/
 dist/
+packages
+flattened/
