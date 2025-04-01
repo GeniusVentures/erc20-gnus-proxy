@@ -1,0 +1,22 @@
+{
+  "DiamondCutFacet": {
+    "priority": 10,
+    "versions": {
+      "0.0": {}
+    }
+  },
+  "DiamondLoupeFacet": {
+    "priority": 20,
+    "versions": {
+      "0.0": {}
+    }
+  },
+  "ERC20ProxyFacet": {
+    "priority": 30,
+    "versions": {
+      "0.0": {
+        "callbacks": "callbackCreateXMPLToken"
+      }
+    }
+  }
+}

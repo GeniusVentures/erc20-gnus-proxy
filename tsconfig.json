@@ -6,12 +6,29 @@
     "sourceMap": true,
     "allowJs": true,
     "checkJs": false,
-    "rootDirs": ["./scripts", "./test"],
+    "rootDirs": [
+      "./scripts", 
+      "./test", 
+      "./typechain-types", 
+      "./packages/hardhat-diamonds/", 
+      "./packages/diamonds/"],
     "esModuleInterop": true,
     "outDir": "dist",
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "baseUrl": "./",
+    "paths": {
+      "@gnus.ai/diamonds/*": ["./packages/diamonds/src"],
+      "@gnus.ai/hardhat-diamonds/*": ["./packages/hardhat-diamonds/src"]
+    }
   },
-  "include": ["./scripts", "./typechain-types", "./types", "./utils", "./deploy", "./test", "src/**/*.ts"],
-  // "include": ["./scripts", "./test", "./typechain"],
-  "files": ["./hardhat.config.ts"]
+  "include": [
+    "./scripts", 
+    "./test", 
+    "./typechain-types", 
+    "./packages/hardhat-diamonds", 
+    "./packages/diamonds"
+, "packages/diamonds/notes-local/DiamondDeploymentManager.ts", "packages/diamonds/notes-local/diamondTypechainHelpers.ts", "packages/diamonds/notes-local/FacetSelectors.ts", "packages/diamonds/notes-local/common.ts", "notes/LoadFacetDeployments.ts"  ],
+  "exclude": ["node_modules", "dist"],
+  "files": ["./hardhat.config.ts"],
+  "workspaces": ["packages/*"]
 }

@@ -13,9 +13,10 @@
     "deploy": "npx hardhat run scripts/deploy.ts",
     "deploy:erc20proxy": "npx hardhat run scripts/deployERC20Proxy.ts",
     "verify": "npx hardhat run scripts/VerifyContracts.ts",
-    "exec": "cd zokrates; npm exec ts-node build.ts",
     "getgascost": "npx hardhat run scripts/getgascost.ts",
-    "getaccessinfo": "npx hardhat run scripts/getaccessinfo.ts"
+    "getaccessinfo": "npx hardhat run scripts/getaccessinfo.ts",
+    "build": "tsc",
+    "watch": "tsc -w"
   },
   "authors": [
     "SuperGenius",
@@ -54,22 +55,30 @@
     "eslint-plugin-promise": "^5.2.0",
     "ethereum-waffle": "^3.4.0",
     "ethers": "^5.5.4",
+    "fs-extra": "^11.3.0",
     "hardhat": "^2.9.0",
     "hardhat-abi-exporter": "^2.8.0",
     "hardhat-diamond-abi": "git+https://github.com/Am0rfu5/hardhat-diamond-abi.git",
     "hardhat-gas-reporter": "^1.0.8",
     "hardhat-multichain": "git+https://github.com/GeniusVentures/hardhat-multchain.git#",
-    "prettier": "^2.5.1",
+    "prettier": "^3.5.3",
     "prettier-plugin-solidity": "^1.0.0-beta.19",
     "solhint": "^3.3.7",
     "solidity-coverage": "^0.8.14",
     "typechain": "^7.0.0",
     "typescript": "^4.5.5",
-    "uint32": "^0.2.1"
+    "uint32": "^0.2.1",
+    "zod": "^3.24.2"
   },
   "dependencies": {
+    "@ethersproject/abi": "^5.0.0",
+    "@ethersproject/bytes": "^5.0.0",
+    "@ethersproject/providers": "^5.0.0",
     "@nomiclabs/hardhat-web3": "^2.0.0",
+    "@types/sinon-chai": "^3.2.3",
+    "lodash": "^4.17.15",
     "ts-node": "^10.9.1",
+    "web3": "^1.0.0-beta.36",
     "winston": "^3.17.0"
   }
 }

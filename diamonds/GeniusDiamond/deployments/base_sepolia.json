@@ -1,0 +1,177 @@
+{
+  "base_sepolia": {
+    "DiamondAddress": "0xeC20bDf2f9f77dc37Ee8313f719A3cbCFA0CD1eB",
+    "DeployerAddress": "0x910bAa33DeB0D614Aa9d80e38b7f0BF87549c2fC",
+    "FacetDeployedInfo": {
+      "DiamondCutFacet": {
+        "address": "0x5e5443C23Fa2B5A69F6B1A174A2D9E67AbA2117a",
+        "tx_hash": "0x18c1dfef794115a4a94d75f1c6883b157b52b50bf845585f282387229b7212f9",
+        "version": 0,
+        "funcSelectors": [
+          "0x1f931c1c"
+        ],
+        "verified": true
+      },
+      "DiamondLoupeFacet": {
+        "address": "0x9af8050220D8C355CA3c6dC00a78B474cd3e3c70",
+        "tx_hash": "0xb888fe7231524d50ba17c0d606c861e8cb7ceeee0949f4fceb7fdd14c04777f5",
+        "version": 0,
+        "funcSelectors": [
+          "0xcdffacc6",
+          "0x52ef6b2c",
+          "0xadfca15e",
+          "0x7a0ed627",
+          "0x01ffc9a7"
+        ],
+        "verified": true
+      },
+      "GeniusOwnershipFacet": {
+        "address": "0x948423D1292F693BA0Aa8E394743099765e50b7A",
+        "tx_hash": "0x928f74cecf81174b774791e54a047140e83bde6511c9d90648f9c382ebf97bd8",
+        "version": 0,
+        "funcSelectors": [
+          "0xa217fddf",
+          "0xf72c0d8b",
+          "0x248a9ca3",
+          "0x9010d07c",
+          "0xca15c873",
+          "0x2f2ff15d",
+          "0x91d14854",
+          "0x8da5cb5b",
+          "0x36568abe",
+          "0xd547741f",
+          "0xf2fde38b"
+        ],
+        "verified": true
+      },
+      "ERC1155ProxyOperator": {
+        "address": "0x55206d3647c045fA28B14C2E1713a8E8a0F465Ff",
+        "tx_hash": "0x4e21c388cc295bc9c3c1596495491d61c578dad2d908e2f737995b14fecfba75",
+        "version": 0,
+        "funcSelectors": [
+          "0xa2dd2453",
+          "0xcd53d08e"
+        ],
+        "verified": true
+      },
+      "GNUSNFTFactory": {
+        "address": "0x5a32F04D7cF359bf28742C38E3ef1B017E195F47",
+        "tx_hash": "0x4f0f14bf59fa7dd6c68d740e5bd2199ee64ffae1ab6d220571a5e60d7d4ee62c",
+        "version": 2.3,
+        "funcSelectors": [
+          "0x8aeda25a",
+          "0x101521f8",
+          "0x52dbff7a",
+          "0x00fdd58e",
+          "0x4e1273f4",
+          "0xf5298aca",
+          "0x6b20c454",
+          "0xf667ab7c",
+          "0x1a9d2360",
+          "0x4f558e79",
+          "0xd188929f",
+          "0xe985e9c5",
+          "0x731133e9",
+          "0x1f7fdffa",
+          "0x8456cb59",
+          "0x5c975abb",
+          "0x2eb2c2d6",
+          "0xf242432a",
+          "0xa22cb465",
+          "0x02fe5305",
+          "0x862440e2",
+          "0xbd85b039",
+          "0x3f4ba83a",
+          "0x0e89341c"
+        ],
+        "verified": true
+      },
+      "GNUSBridge": {
+        "address": "0x1D7389C37c3DD5E6dA7Df715B164E40EFBc7F397",
+        "tx_hash": "0xc649f58257c0dc0c56e8e49750af51d6b62bfa695eebf99ee1ff36c91834d67f",
+        "version": 2.4,
+        "funcSelectors": [
+          "0xd5391393",
+          "0xdd62ed3e",
+          "0x095ea7b3",
+          "0x70a08231",
+          "0xe26d65a6",
+          "0x9dc29fac",
+          "0x313ce567",
+          "0xa457c2d7",
+          "0x39509351",
+          "0x156e29f6",
+          "0x40c10f19",
+          "0x95d89b41",
+          "0x18160ddd",
+          "0xa9059cbb",
+          "0x23b872dd",
+          "0x441a3e70"
+        ],
+        "verified": true
+      },
+      "GeniusAI": {
+        "address": "0x182b78dDfd52199ec6582EbD2987E0aBe1C1bDF7",
+        "tx_hash": "0x44d98fd2f819e1100ebcec493aac763c30a33f587f6c889718591b932ae38b46",
+        "version": 0,
+        "funcSelectors": [
+          "0x6ea9fd36",
+          "0x31d6388d"
+        ],
+        "verified": true
+      },
+      "GNUSNFTCollectionName": {
+        "address": "0x8f9698b6d5edc5975576a7f880c03Ac836d4b981",
+        "tx_hash": "0xfd025e65b043cacb4b85b1e078e4827a4c5a69e1b0b98b87db0d3d8c0fd24f52",
+        "version": 0,
+        "funcSelectors": [
+          "0x06fdde03"
+        ],
+        "verified": true
+      },
+      "ERC20TransferBatch": {
+        "address": "0x34Aa1c9f996BaDC688dF2149F72cC6e6B842575e",
+        "tx_hash": "0xfce21bc0fd5f9ec7faed6170e4da1f3b5388a5f8bfeca502124e2a67df1254c7",
+        "version": 2,
+        "funcSelectors": [
+          "0x7c88e3d9",
+          "0x3b3e672f",
+          "0x1bdc02ba"
+        ],
+        "verified": true
+      },
+      "GNUSControl": {
+        "address": "0xeb0aac06A5DF0a9d5e942ce1e560C8Aa428A31C5",
+        "tx_hash": "0x421fe47a9dbfeddda857019f23a25f9c28cc82607c7f0bdebc3fd833c82f66f4",
+        "version": 2.4,
+        "funcSelectors": [
+          "0x72f6ac43",
+          "0x9e8e7134",
+          "0x9ceb1593",
+          "0x19a8b28a",
+          "0x1307a4be",
+          "0x93420cf4",
+          "0xed8d47e6",
+          "0xceba5598",
+          "0x5a1c0366"
+        ],
+        "verified": true
+      },
+      "GNUSContractAssets": {
+        "address": "0xB76042F7edF3Ee7AECc3143cA46A2f357491EBC0",
+        "tx_hash": "0xa517d1e82264d949c23b84b92b99c74b39863a59d82117b4292954a7357ddd60",
+        "version": 0,
+        "funcSelectors": [
+          "0x01e33667"
+        ],
+        "verified": true
+      }
+    },
+    "ExternalLibraries": {
+      "BurnVerifier": "0xC28B43882F86634B20C48fABCa1479523Eb43CD8",
+      "ZetherVerifier": "0xE6f6CCF5D5b0c0a508861DD14BB38bDEA5286195",
+      "libEncryption": "0x4b5C09EF668Be32907034ad26226df317C503442"
+    },
+    "protocolVersion": 2.4
+  }
+}

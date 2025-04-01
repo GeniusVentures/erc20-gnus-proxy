@@ -111,7 +111,7 @@ class TestDeployer {
         FacetDeployedInfo: {},
       };
       
-      
+      // Checks for Diamond deployment for New Deployments
       if (this.deployInfo!.DiamondAddress) {
         console.log('Diamond Deployment Found. No need for new deployment.');
         this.deployInfo!.provider = this.provider;
@@ -122,7 +122,7 @@ class TestDeployer {
         await deployDiamond(this.deployInfo);
         return;
       } else {
-      // Retrieve the signers for the chain, set hardhat default signer[0] as Deployer
+      // This should have defaulted to the hardhat default signer[0] as Deployer
         this.deployInfo.DeployerAddress = await this.deployer.getAddress();
       }
       
@@ -130,7 +130,7 @@ class TestDeployer {
       let diamondAddress;
       let diamondCutAddress;
       // Deploy and Load ProxyDiamond instance
-    //   [diamondAddress, diamondCutAddress] =  
+      //   [diamondAddress, diamondCutAddress] =  
       await deployDiamond(this.deployInfo);
       
       // Attach ProxyDiamond instance

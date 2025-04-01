@@ -1,0 +1,182 @@
+{
+  "polygon": {
+    "DiamondAddress": "0x127e47aba094a9a87d084a3a93732909ff031419",
+    "DeployerAddress": "0x55f36651B5B61B8286305740fA86AD996FC8bDc9",
+    "FacetDeployedInfo": {
+      "DiamondCutFacet": {
+        "address": "0xe30526ba2128f8cc4d05b013c65a623478b2ad80",
+        "tx_hash": "0x4153cc3bb95bfde6bd21482b2ac9b31e1e830c2106378e3a281314fe515aec40",
+        "version": 0,
+        "funcSelectors": [
+          "0x1f931c1c"
+        ],
+        "verified": true
+      },
+      "DiamondLoupeFacet": {
+        "address": "0x60d14bf965f3ea6392845183cd73304f4de6acbf",
+        "tx_hash": "0xdcf051c3f8f75bdece01fef0e5bf4d297c069382ed6447bed5057afd2e177bb9",
+        "version": 0,
+        "funcSelectors": [
+          "0xcdffacc6",
+          "0x52ef6b2c",
+          "0xadfca15e",
+          "0x7a0ed627",
+          "0x01ffc9a7"
+        ],
+        "verified": true
+      },
+      "OwnershipFacet": {
+        "address": "0x4dF74a6D5312B8EE1a7c30C3Ff0Fd68719477481",
+        "tx_hash": "0xae73a778f5e6cb95cf9aa86670c11712e3e3a379610cc6a0ab2a50c34f1c977c",
+        "version": 0,
+        "funcSelectors": [
+          "0x8da5cb5b",
+          "0xf2fde38b"
+        ],
+        "verified": true
+      },
+      "GNUSNFTFactory": {
+        "address": "0xac39973D002b51dd63BDd12c1918E7b79145C3A9",
+        "tx_hash": "0x507067fc68e714cc3e8af9de2ba129a0d7779d942c08e46181965968f9448116",
+        "version": 0,
+        "funcSelectors": [
+          "0x8aeda25a",
+          "0xa217fddf",
+          "0x101521f8",
+          "0xf72c0d8b",
+          "0x00fdd58e",
+          "0x4e1273f4",
+          "0xf5298aca",
+          "0x6b20c454",
+          "0xf667ab7c",
+          "0x1a9d2360",
+          "0x4f558e79",
+          "0xd188929f",
+          "0x248a9ca3",
+          "0x9010d07c",
+          "0xca15c873",
+          "0x2f2ff15d",
+          "0x91d14854",
+          "0x731133e9",
+          "0x1f7fdffa",
+          "0x8456cb59",
+          "0x5c975abb",
+          "0x36568abe",
+          "0xd547741f",
+          "0xf2fde38b"
+        ],
+        "verified": true
+      },
+      "EscrowAIJob": {
+        "address": "0x303A1Fc237629b65FB723aF3c0A9aC415e46C125",
+        "tx_hash": "0xd85a7d119507620c3ae703a8881896fba60cb74f32a616e0e98ea79d24af5976",
+        "version": 0,
+        "funcSelectors": [
+          "0x0dbc00c7",
+          "0xf340fa01",
+          "0xe3a9db1a",
+          "0x8129fc1c",
+          "0x715018a6",
+          "0x51cff8d9",
+          "0x685ca194"
+        ],
+        "verified": true
+      },
+      "GeniusAI": {
+        "address": "0x807fDd7410129393F517c5ECf57f009071be28Cb",
+        "tx_hash": "0xd0a4e1431993a05432355f3999af84bc91585b765ce5c60da74ed2c73bf8f149",
+        "version": 0,
+        "funcSelectors": [
+          "0x6ea9fd36",
+          "0x31d6388d"
+        ],
+        "verified": true
+      },
+      "GNUSNFTCollectionName": {
+        "address": "0x8Bb02782B10293BD29410240E3781bad41Bdd588",
+        "tx_hash": "0x8387c61727ea18abc575f8fa507a6b64f62c284e4eb5ec787e5326e3dcdef85f",
+        "version": 0,
+        "verified": true
+      },
+      "ERC1155ProxyOperator": {
+        "address": "0x9FBF65a9306Ef953967bd0b40dA58BB6B8cCb77D",
+        "tx_hash": "0xfa0f9525f30a180c8a854fa6b7e896382eea4c7cebc65a60380473557eaf2b50",
+        "version": 0,
+        "funcSelectors": [
+          "0xe985e9c5",
+          "0xbd85b039",
+          "0xcd53d08e",
+          "0xa2dd2453"
+        ],
+        "verified": true
+      }
+    },
+    "gasReporter": {
+      "enabled": true,
+      "currency": "USD"
+    },
+    "etherscan": {
+      "apiKey": {
+        "goerli": "0xYourApiKey",
+        "polygonMumbai": "0xYourApiKey",
+        "polygon": "0xYourApiKey",
+        "polygon_amoy": "0xYourApiKey",
+        "sepolia": "0xYourApiKey",
+        "mainnet": "0xYourApiKey",
+        "bsc": "0xYourApiKey",
+        "bsc_testnet": "0xYourApiKey",
+        "arbitrum_sepolia": "0xYourApiKey",
+        "base_sepolia": "0xYourApiKey",
+        "base": "0xYourApiKey"
+      },
+      "customChains": [
+        {
+          "network": "arbitrum_sepolia",
+          "chainId": 421614,
+          "urls": {
+            "apiURL": "https://api-sepolia.arbiscan.io/api",
+            "browserURL": "https://sepolia.arbiscan.io/"
+          }
+        },
+        {
+          "network": "base_sepolia",
+          "chainId": 84532,
+          "urls": {
+            "apiURL": "https://api-sepolia.basescan.org/api",
+            "browserURL": "https://sepolia.basescan.org/"
+          }
+        },
+        {
+          "network": "bsc_testnet",
+          "chainId": 97,
+          "urls": {
+            "apiURL": "https://api-testnet.bscscan.com/api",
+            "browserURL": "https://testnet.bscscan.com"
+          }
+        },
+        {
+          "network": "base",
+          "chainId": 8453,
+          "urls": {
+            "apiURL": "https://api.basescan.org/api",
+            "browserURL": "https://basescan.org"
+          }
+        },
+        {
+          "network": "polygon_amoy",
+          "chainId": 80002,
+          "urls": {
+            "apiURL": "https://api-amoy.polygonscan.com/api",
+            "browserURL": "https://amoy.polygonscan.com/"
+          }
+        }
+      ]
+    },
+    "abiExporter": {
+      "flat": true,
+      "spacing": 2,
+      "pretty": true
+    },
+    "protocolVersion": 2.4
+  }
+}

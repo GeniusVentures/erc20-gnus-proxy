@@ -1,5 +1,5 @@
-import { GeniusDiamond } from "../../typechain-types/GeniusDiamond";
-import { dc, IFacetDeployedInfo, debuglog, INetworkDeployInfo, AfterDeployInit, getSighash } from "../common";
+import { GeniusDiamond } from "../../../typechain-types/GeniusDiamond";
+import { dc, IFacetDeployedInfo, debuglog, INetworkDeployInfo, AfterDeployInit, getSighash } from "../../../scripts/common";
 import { Facets } from "../facets";
 import hre from "hardhat";
 

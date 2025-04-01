@@ -3,7 +3,7 @@ import { BaseContract } from 'ethers';
 import hre, { ethers, network } from 'hardhat';
 import { AdminClient } from '@openzeppelin/defender-admin-client';
 import { Network } from '@openzeppelin/defender-base-client';
-import { FacetInfo, getSelectors, getDeployedFuncSelectors, getSelector } 
+import { FacetInfo, getSelectors, getDeployedFuncSelectors, getSelector }
   from "../scripts/FacetSelectors";
 import {
   dc,
@@ -12,7 +12,7 @@ import {
   AfterDeployInit,
   writeDeployedInfo,
   diamondCutFuncAbi,
-  getSighash, 
+  getSighash,
   PreviousVersionRecord
 } from "../scripts/common";
 import { DiamondCutFacet } from '../typechain-types/DiamondCutFacet';
@@ -46,25 +46,24 @@ let client: AdminClient;
  * @returns The address of the deployed ProxyDiamond contract.
  */
 export async function deployDiamond(networkDeployInfo: INetworkDeployInfo) {
-  
+
   let provider;
   let contractOwner;
   // If the Multichain testing scaffold has created a spawned process with a JSON-RPC URL
   // this (and the chainID and name) should have been added to the networkDeployInfo object.
   if (networkDeployInfo.provider?.connection.url.startsWith('http')) {
     provider = networkDeployInfo.provider;
-    ethers.provider = provider;  
+    ethers.provider = provider;
     contractOwner = await ethers.provider.getSigner(networkDeployInfo.DeployerAddress);
-  } else 
-  {
+  } else {
     // Retrieve the list of available accounts on the network.
     const accounts = await ethers.getSigners();
     contractOwner = accounts[0]; // Use the first account as the contract owner.
   }
-  
+
   const networkInfo = await ethers.provider.getNetwork();
   log(`Chain ID: ${networkInfo.chainId}`);
-  
+
   let diamondCutFacet;
   // Check if DiamondCutFacet is already deployed by looking up its address in the deployment info.
   if (networkDeployInfo.FacetDeployedInfo['DiamondCutFacet']?.address) {
@@ -103,24 +102,24 @@ export async function deployDiamond(networkDeployInfo: INetworkDeployInfo) {
 
   // Save the ProxyDiamond instance in the `dc` object for future reference within the deployment process.
   dc._ProxyDiamond = diamond;
-  
+
   networkDeployInfo.DiamondAddress = diamond.address;
   // Attach the ProxyDiamond contract to the `dc` object using the ABI for interaction through `hardhat-diamond-abi`.
   dc.ProxyDiamond = (
     await ethers.getContractFactory('hardhat-diamond-abi/HardhatDiamondABI.sol:ProxyDiamond')
   ).attach(diamond.address);
-  
+
   // Update the deployment info for DiamondCutFacet, since the ProxyDiamond contract constructor already references it.
   const funcSelectors = getSelectors(dc.DiamondCutFacet); // Retrieve the function selectors for DiamondCutFacet.
   networkDeployInfo.FacetDeployedInfo.DiamondCutFacet = {
     address: dc.DiamondCutFacet.address,
     tx_hash:
-    dc.DiamondCutFacet.deployTransaction?.hash ||
-    networkDeployInfo.FacetDeployedInfo['DiamondCutFacet'].tx_hash,
+      dc.DiamondCutFacet.deployTransaction?.hash ||
+      networkDeployInfo.FacetDeployedInfo['DiamondCutFacet'].tx_hash,
     version: 0.0,
     funcSelectors: funcSelectors.values, // Store all function selectors for this facet.
   };
-  
+
   log(`Diamond deployed ${diamond.address}`); // Log the address of the deployed ProxyDiamond contract.
   return [diamond.address, dc.DiamondCutFacet.address]; // Return the address of the deployed ProxyDiamond contract.`
 }
@@ -131,14 +130,14 @@ export async function deployFuncSelectors(
   facetsToDeploy: FacetToDeployInfo = Facets,
   protocolVersion: number = 0,
 ) {
-  
+
   let provider;
   let contractOwner;
   if (networkDeployInfo.provider?.connection.url?.startsWith('http')) {
     provider = networkDeployInfo.provider;
     ethers.provider = networkDeployInfo.provider;
     contractOwner = await ethers.provider.getSigner(networkDeployInfo.DeployerAddress);
-  } 
+  }
   // Array to store facet cut operations (add, replace, remove selectors)
   const cut: FacetInfo[] = [];
   // Retrieve deployed facet information from network deployment data
@@ -210,11 +209,11 @@ export async function deployFuncSelectors(
       name,
       facetDeployVersionInfo.libraries
         ? {
-            libraries: networkDeployInfo.ExternalLibraries,
-          }
+          libraries: networkDeployInfo.ExternalLibraries,
+        }
         : undefined,
     );
-    // TODO investigate: Duplicate definition of TransferBatch (TransferBatch(address,address,address[],uint256[]), TransferBatch(address,address,address,uint256[],uint256[]))
+    // attach the facet contract to the deployed address
     const facet = FacetContract.attach(deployedFacets[name].address!);
 
     // Determine if the facet needs an upgrade based on version comparison or missing selectors
@@ -246,7 +245,7 @@ export async function deployFuncSelectors(
         name: name,
       });
       numFuncSelectorsCut++;
-    }    if (newFuncSelectors.length) {
+    } if (newFuncSelectors.length) {
       let initFunc: string | undefined; // Variable to store the name of the initialization function (if any)
       let initFuncSelector: string | null = null; // Variable to store the selector for the initialization function
 
@@ -260,13 +259,13 @@ export async function deployFuncSelectors(
           initFunc = facetDeployInfo.deployInit;
         }
       } else {
-         // If no upgrade is needed, use the deploy initialization function (if defined)
-         initFunc = facetDeployInfo.deployInit;
+        // If no upgrade is needed, use the deploy initialization function (if defined)
+        initFunc = facetDeployInfo.deployInit;
       }
 
       // Retrieve the selector for the initialization function (if defined)
       if (initFunc) {
-        initFuncSelector = getSelector(facet, initFunc); 
+        initFuncSelector = getSelector(facet, initFunc);
         log(`InitFunc for contract: ${facet.address}, initFuncSelector: ${initFuncSelector}`); // Log the initialization function selector
       }
       // get the current chainID and print it to the console.
@@ -336,17 +335,17 @@ export async function deployFuncSelectors(
 
   networkDeployInfo.protocolVersion = protocolUpgradeVersion;
 
-  // Upgrade the diamond contract with the new facets and function selectors
+  // Connect the diamondCut contract to the contract owner
   const diamondCut = dc.ProxyDiamond as IDiamondCut;
   if (contractOwner) {
     diamondCut.connect(contractOwner);
   } else {
     diamondCut.connect(ethers.provider.getSigner(0));
   }
-  
+
   // If Defender deployment is enabled and a signer is configured for the current network
   if (process.env.DEFENDER_DEPLOY_ON &&
-      defenderSigners[network.name]) {
+    defenderSigners[network.name]) {
     log('Deploying contract on defender');
 
     // Initialize the AdminClient for OpenZeppelin Defender
@@ -417,7 +416,8 @@ export async function deployFuncSelectors(
 
   let functionCall: any = []; // Placeholder for initialization function call
   let initAddress = ethers.constants.AddressZero; // Default initialization address
-  
+
+  // 
   try {
     let totalSelectors = 0; // Count the total number of function selectors being modified
     upgradeCut.forEach((e) => {
@@ -425,8 +425,7 @@ export async function deployFuncSelectors(
     });
 
     // If Defender deployment is enabled, create a proposal for the diamond upgrade
-    if (process.env.DEFENDER_DEPLOY_ON &&
-        defenderSigners[network.name]) {
+    if (process.env.DEFENDER_DEPLOY_ON && defenderSigners[network.name]) {
       const upgradeFunctionInputs: (string | boolean | (string | string[])[])[] = [];
 
       // Format the inputs for the diamond cut operation
@@ -463,19 +462,21 @@ export async function deployFuncSelectors(
       let tx;
       if (!contractOwner) {
         tx = await diamondCut.diamondCut(
-          upgradeCut, 
-          initAddress, 
-          functionCall, 
-          {gasLimit: GAS_LIMIT_CUT_BASE + totalSelectors * GAS_LIMIT_PER_FACET, // Calculate gas limit
-        });
+          upgradeCut,
+          initAddress,
+          functionCall,
+          {
+            gasLimit: GAS_LIMIT_CUT_BASE + totalSelectors * GAS_LIMIT_PER_FACET, // Calculate gas limit
+          });
       } else {
         tx = await diamondCut.connect(contractOwner).diamondCut(
-          upgradeCut, 
-          initAddress, 
-          functionCall, 
-          {gasLimit: GAS_LIMIT_CUT_BASE + totalSelectors * GAS_LIMIT_PER_FACET, // Calculate gas limit
-            });
-    }
+          upgradeCut,
+          initAddress,
+          functionCall,
+          {
+            gasLimit: GAS_LIMIT_CUT_BASE + totalSelectors * GAS_LIMIT_PER_FACET, // Calculate gas limit
+          });
+      }
       log(`Diamond cut: tx hash: ${tx.hash}`); // Log the transaction hash
       // Wait for the transaction to be confirmed
       const receipt = await tx.wait();
@@ -488,6 +489,8 @@ export async function deployFuncSelectors(
   }
 
   // Update the deployment information with the results of the diamond cut
+  // Write this info to the deployment file if this is not a localhost deployment
+  // TODO: this is not yet completed
   for (const facetCutInfo of upgradeCut) {
     for (const facetModified of facetCutInfo.functionSelectors) {
       switch (facetCutInfo.action) {
@@ -502,7 +505,7 @@ export async function deployFuncSelectors(
     }
   }
 
-  log('Diamond Facets cuts completed'); // Log completion of the diamond cut operations
+
 }
 
 export async function afterDeployCallbacks(
@@ -514,7 +517,7 @@ export async function afterDeployCallbacks(
   let owner;
   if (networkDeployInfo.provider?.connection.url.startsWith('http')) {
     provider = networkDeployInfo.provider
-    ethers.provider = provider;  
+    ethers.provider = provider;
     owner = await ethers.provider.getSigner(networkDeployInfo.DeployerAddress);
   } else {
     // Retrieve the list of signers and assign the first signer as the owner
@@ -525,7 +528,7 @@ export async function afterDeployCallbacks(
   const diamond = dc.ProxyDiamond as ProxyDiamond;
   // Load facet deployment data
   await LoadFacetDeployments();
-  
+
   // Sort facets by deployment priority to ensure proper initialization order
   const facetsPriority = Object.keys(facetsToDeploy).sort(
     (a, b) => facetsToDeploy[a].priority - facetsToDeploy[b].priority,
@@ -552,8 +555,6 @@ export async function afterDeployCallbacks(
 
     // Determine the initialization function to call based on the version change
     let initFunction: keyof ProxyDiamond | undefined = undefined;
-
-    // Determine the initialization function to call based on the version change
     if (facetDeployInfo.upgradeInit && (facetDeployInfo.fromVersions?.includes(previousVersion || -1))) {
       initFunction = facetDeployInfo.upgradeInit as keyof ProxyDiamond; // Use the upgrade initialization function
     } else if (previousVersion != deployedVersion) {
@@ -571,7 +572,7 @@ export async function afterDeployCallbacks(
       }
 
       log(`initFunction being called from ${name} is ${initFunction.toString()}`);
-      
+
       // Create a transaction object for the initialization call
       const tx = {
         to: diamond.address, // Address of the ProxyDiamond contract
@@ -657,10 +658,10 @@ export async function deployDiamondFacets(
   let contractOwner;
   if (networkDeployInfo.provider?.connection.url.startsWith('http')) {
     provider = networkDeployInfo.provider;
-    ethers.provider = provider;  
+    ethers.provider = provider;
     contractOwner = await provider.getSigner(networkDeployInfo.DeployerAddress);
   }
-  
+
   // Retrieve the facets that have already been deployed from the network deployment info
   const deployedFacets = networkDeployInfo.FacetDeployedInfo;
 
@@ -680,6 +681,7 @@ export async function deployDiamondFacets(
       facetVersions = Object.keys(facetDeployVersionInfo.versions).sort((a, b) => +b - +a);
     }
 
+    // TODO This seems wonky way to check the upgrade Version
     const upgradeVersion = +facetVersions[0]; // Most recent version to deploy
 
     // Determine the deployed version or mark as undeployed (-1.0)
@@ -702,7 +704,7 @@ export async function deployDiamondFacets(
 
     // log the ethers.provider url and chainID
     log(`Ethers provider url: ${ethers.provider.connection.url}`);
-    
+
     // Create the facet contract factory with the required libraries (if any)
     let FacetContract;
     if (contractOwner) {
@@ -744,8 +746,8 @@ export async function deployDiamondFacets(
       deployedFacets[name] = {
         address: facet.address, // Deployed contract address
         tx_hash: facet.deployTransaction.hash, // Transaction hash for deployment
-          version: deployedVersion, // Version of the deployed facet
-          // TODO Cleanup if all testing works out.
+        version: deployedVersion, // Version of the deployed facet
+        // TODO Cleanup if all testing works out.
         // version: upgradeVersion, // Version of the deployed facet
       };
 
@@ -758,7 +760,7 @@ export async function deployDiamondFacets(
 
 export async function deployExternalLibraries(networkDeployedInfo: INetworkDeployInfo) {
 
-  networkDeployedInfo.ExternalLibraries = {}; 
+  networkDeployedInfo.ExternalLibraries = {};
 }
 
 async function main() {
@@ -827,8 +829,7 @@ async function main() {
 
     // Log the details of deployed facets for debugging
     log(
-      `Facets deployed to: ${
-        (util.inspect(networkDeployedInfo.FacetDeployedInfo, { depth: null }))
+      `Facets deployed to: ${(util.inspect(networkDeployedInfo.FacetDeployedInfo, { depth: null }))
       }`,
     );
 

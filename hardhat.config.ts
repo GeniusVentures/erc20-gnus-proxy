@@ -5,6 +5,7 @@ import '@nomiclabs/hardhat-etherscan';
 import '@nomiclabs/hardhat-waffle';
 import 'hardhat-diamond-abi';
 import 'hardhat-abi-exporter';
+import '@gnus.ai/hardhat-diamonds';
 import '@typechain/hardhat';
 import 'hardhat-gas-reporter';
 import 'solidity-coverage';
@@ -338,6 +339,33 @@ const config: HardhatUserConfig = {
     flat: true,
     spacing: 2,
     pretty: true,
+  },
+  diamonds: {
+    'ProxyDiamond': {
+      path: 'contracts/erc20-gnus-proxy',
+      deployments_path: 'diamonds/',
+      facets_path: 'contracts/erc20-gnus-proxy',
+      include: [
+        'ERC20ProxyFacet',
+      ],
+      exclude: [],
+    },
+    'GeniusDiamond': {
+      path: 'contracts/gnus-ai-contracts',
+      deployments_path: 'diamonds/',
+      facets_path: 'contracts/gnus-ai/',
+      include: [
+        'ERC20TransferBatch',
+        'ERC1155ProxyOperator',
+        'GeniusOwnershipFacet',
+        'GNUSNFTFactory',
+        'GNUSBridge',
+        'GeniusAI',
+        'GNUSNFTCollectionName',
+        'GNUSContractAssets'
+      ],
+      exclude: [],
+    },
   },
   diamondAbi: [
     {    

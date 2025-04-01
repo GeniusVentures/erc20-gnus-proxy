@@ -32,5 +32,19 @@
     "priority": 90,
     "versions": { "2.0": {} }
   },
-  "GNUSContractAssets": { "priority": 100 }
+  "GNUSContractAssets": { "priority": 100 },
+  "ERC1155ProxyOperator": {
+    "priority": 45,
+    "versions": {
+      "0.0": {
+        "callbacks": ["callbackPostDeploy"],
+        "deployInclude":
+              [ "isApprovedForAll(address,address)')",
+                "getSighash('function totalSupply(uint256)')",
+                "getSighash('function creators(uint256)')",
+                "getSighash('function NFT_PROXY_OPERATOR_ROLE()')"
+              ]
+      }
+    }
+  }
 }

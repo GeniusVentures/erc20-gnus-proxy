@@ -16,27 +16,6 @@ const afterDeploy: AfterDeployInit = async (networkDeployInfo: INetworkDeployInf
   let GNUSAIContractAddress;
   if (networkDeployInfo.networkName == 'hardhat') {
     networkName = 'localhost';
-    // let chains = multichain.getProviders() || new Map<string, JsonRpcProvider>();
-    // if (process.argv.includes('test-multichain')) {
-    //   const chainNames = process.argv[process.argv.indexOf('--chains') + 1].split(',');
-    //   if (chainNames.includes('hardhat')) {
-    //     chains = chains.set('hardhat', ethers.provider);
-    //   }
-    // } else if (process.argv.includes('test') || process.argv.includes('coverage')) {
-    //   chains = chains.set('hardhat', ethers.provider);
-    // }
-    // const chainInfo = {
-    //   chainName: 'hardhat',
-    //   provider: ethers.provider,
-    // };
-    // const { default: MultiChainTestDeployer } = await import("@gnus-ai/gnus-ai/test/setup/multichainTestDeployer");
-    // const gnusDeployer = await MultiChainTestDeployer.getInstance(chainInfo);
-    // GNUSAIContractAddresses[networkName] = gnusDeployer.getDiamond().address;
-  //   } else {
-    // const { deployments: gnusDeployments } = await import("@gnus-ai/gnus-ai/scripts/deployments");
-    // const gnusDeployment = gnusDeployments;
-    // const GNUSAIContractAddress = gnusDeployment[networkName].DiamondAddress;
-    // GNUSAIContractAddresses[networkName] = GNUSAIContractAddress;
     }
     GNUSAIContractAddress = GNUSAIContractAddresses[networkName];
 
