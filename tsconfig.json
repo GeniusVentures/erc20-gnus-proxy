@@ -4,6 +4,8 @@
     "module": "commonjs",
     "strict": true,
     "sourceMap": true,
+    "declaration": true,
+    "declarationMap": true,
     "allowJs": true,
     "checkJs": false,
     "rootDirs": [
@@ -11,7 +13,8 @@
       "./test", 
       "./typechain-types", 
       "./packages/hardhat-diamonds/", 
-      "./packages/diamonds/"],
+      "./packages/diamonds/"
+    ],
     "esModuleInterop": true,
     "outDir": "dist",
     "resolveJsonModule": true,
@@ -25,9 +28,9 @@
     "./scripts", 
     "./test", 
     "./typechain-types", 
-    "./packages/hardhat-diamonds", 
-    "./packages/diamonds"
-, "packages/diamonds/notes-local/DiamondDeploymentManager.ts", "packages/diamonds/notes-local/diamondTypechainHelpers.ts", "packages/diamonds/notes-local/FacetSelectors.ts", "packages/diamonds/notes-local/common.ts", "notes/LoadFacetDeployments.ts"  ],
+    "./packages/hardhat-diamonds/**/*.ts", 
+    "./packages/diamonds/**/*.ts"
+  ],
   "exclude": ["node_modules", "dist"],
   "files": ["./hardhat.config.ts"],
   "workspaces": ["packages/*"]

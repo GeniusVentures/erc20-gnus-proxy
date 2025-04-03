@@ -2,7 +2,8 @@
   "name": "@gnus-ai/erc20-proxy-gnus-ai",
   "version": "1.0.0",
   "description": "ERC20 Proxy for GNUS.ai Diamond NFT system",
-  "main": "index.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "test": "npx hardhat test",
     "test-multichain": "npx hardhat test-multichain",
@@ -80,5 +81,6 @@
     "ts-node": "^10.9.1",
     "web3": "^1.0.0-beta.36",
     "winston": "^3.17.0"
-  }
+  },
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }

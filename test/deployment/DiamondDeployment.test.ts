@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import { ethers } from 'hardhat';
+import hre from 'hardhat';
 
 import {
   Diamond,
@@ -21,16 +22,18 @@ describe("Local Diamond Deployment", function () {
 
   before(async () => {
     const [signer] = await ethers.getSigners();
+    const diamondsConfig = hre.config.diamonds! || undefined;
+    let config: DiamondConfig = diamondsConfig["ProxyDiamond"]
+      ? { ...diamondsConfig["ProxyDiamond"] }
+      : {
+        deploymentsPath: "diamonds",  // These are the default values
+        contractsPath: "contracts",  // default contractsPath 
+      };
 
-    const config: DiamondConfig = {
-      diamondName: "ProxyDiamond",
-      networkName: "sepolia",
-      // networkName: "localhost",git 
-      chainId: 31337,
-      deploymentsPath: "diamonds",
-      contractsPath: "contracts/erc20-gnus-proxy",
-    };
-
+    // Set the network on config
+    config.diamondName = "ProxyDiamond";
+    config.networkName = hre.network.name;
+    config.chainId = hre.network.config.chainId! || 31337;
     const repository = new FileDeploymentRepository();
     diamond = new Diamond(config, repository);
     diamond.provider = ethers.provider;

@@ -1,11 +1,11 @@
+// import 'dist/packages/hardhat-diamonds/src/type-extensions';
+import 'packages/hardhat-diamonds/dist/src/type-extensions';
 import * as dotenv from 'dotenv';
-
 import { HardhatUserConfig, task } from 'hardhat/config';
 import '@nomiclabs/hardhat-etherscan';
 import '@nomiclabs/hardhat-waffle';
 import 'hardhat-diamond-abi';
 import 'hardhat-abi-exporter';
-import '@gnus.ai/hardhat-diamonds';
 import '@typechain/hardhat';
 import 'hardhat-gas-reporter';
 import 'solidity-coverage';
@@ -13,7 +13,6 @@ import '@nomiclabs/hardhat-ethers';
 import '@nomiclabs/hardhat-web3';
 import 'solidity-coverage';
 import 'hardhat-multichain';
-// import './test/integration/setup/compileGNUSAI';
 
 dotenv.config();
 
@@ -31,13 +30,13 @@ dotenv.config();
  * - AMOY_BLOCK: Block number for the Amoy network.
  * - SEPOLIA_BLOCK: Block number for the Sepolia network.
  */
-const { 
+const {
   HH_CHAIN_ID,
-  DEPLOYER_PRIVATE_KEY, 
-  SEPOLIA_RPC, 
+  DEPLOYER_PRIVATE_KEY,
+  SEPOLIA_RPC,
   MAINNET_RPC,
   POLYGON_RPC,
-  POLYGON_AMOY_RPC, 
+  POLYGON_AMOY_RPC,
   MAINNET_BLOCK,
   POLYGON_BLOCK,
   POLYGON_AMOY_BLOCK,
@@ -140,7 +139,7 @@ function filterDupeGeniusFunctions(
   } else if (abiElement.type === 'fallback') {
     if (!fullyQualifiedName.match('gnus-ai/GeniusDiamond.sol')) {
       return false;
-     }
+    }
   }
   return true;
 }
@@ -160,22 +159,22 @@ const config: HardhatUserConfig = {
       mainnet: {
         rpcUrl: mainnetUrl,
         blockNumber: mainnetBlock,
-      }, 
+      },
       polygon: {
         rpcUrl: polyUrl,
         blockNumber: polyBlock,
-      }, 
+      },
       sepolia: {
         rpcUrl: sepoliaUrl,
         blockNumber: sepoliaBlock,
         chainId: 11155111
-      }, 
+      },
       polygon_amoy: {
         rpcUrl: amoyUrl,
         blockNumber: amoyBlock,
         chainId: 80002
       },
-      hardhat: { 
+      hardhat: {
         rpcUrl: multichainHardhat,
       },
       base: {
@@ -199,13 +198,13 @@ const config: HardhatUserConfig = {
   networks: {
     hardhat: {
       forking: process.env.FORK_URL
-          ? {
-            url: process.env.FORK_URL,
-            blockNumber: process.env.FORK_BLOCK_NUMBER
-                ? parseInt(process.env.FORK_BLOCK_NUMBER)
-                : undefined,
-          }
-          : undefined,
+        ? {
+          url: process.env.FORK_URL,
+          blockNumber: process.env.FORK_BLOCK_NUMBER
+            ? parseInt(process.env.FORK_BLOCK_NUMBER)
+            : undefined,
+        }
+        : undefined,
     },
     polygon: {
       url: `https://lb.drpc.org/ogrpc?network=polygon&dkey=${process.env.DRPC_API_KEY}`,
@@ -269,19 +268,19 @@ const config: HardhatUserConfig = {
   etherscan: {
     apiKey: {
       goerli:
-          process.env.ETHERSCAN_API_KEY !== undefined ? process.env.ETHERSCAN_API_KEY : '',
+        process.env.ETHERSCAN_API_KEY !== undefined ? process.env.ETHERSCAN_API_KEY : '',
       polygonMumbai:
-          process.env.POLYGONSCAN_API_KEY !== undefined
-              ? process.env.POLYGONSCAN_API_KEY
-              : '',
+        process.env.POLYGONSCAN_API_KEY !== undefined
+          ? process.env.POLYGONSCAN_API_KEY
+          : '',
       polygon:
-          process.env.POLYGONSCAN_API_KEY !== undefined
-              ? process.env.POLYGONSCAN_API_KEY
-              : '',
+        process.env.POLYGONSCAN_API_KEY !== undefined
+          ? process.env.POLYGONSCAN_API_KEY
+          : '',
       polygon_amoy:
-          process.env.POLYGONSCAN_API_KEY !== undefined
-              ? process.env.POLYGONSCAN_API_KEY
-              : '',
+        process.env.POLYGONSCAN_API_KEY !== undefined
+          ? process.env.POLYGONSCAN_API_KEY
+          : '',
       sepolia: process.env.ETHERSCAN_API_KEY || '',
       mainnet: process.env.ETHERSCAN_API_KEY || '',
       bsc: process.env.BSCSCAN_API_KEY || '',
@@ -341,39 +340,23 @@ const config: HardhatUserConfig = {
     pretty: true,
   },
   diamonds: {
-    'ProxyDiamond': {
-      path: 'contracts/erc20-gnus-proxy',
-      deployments_path: 'diamonds/',
-      facets_path: 'contracts/erc20-gnus-proxy',
-      include: [
-        'ERC20ProxyFacet',
-      ],
-      exclude: [],
-    },
-    'GeniusDiamond': {
-      path: 'contracts/gnus-ai-contracts',
-      deployments_path: 'diamonds/',
-      facets_path: 'contracts/gnus-ai/',
-      include: [
-        'ERC20TransferBatch',
-        'ERC1155ProxyOperator',
-        'GeniusOwnershipFacet',
-        'GNUSNFTFactory',
-        'GNUSBridge',
-        'GeniusAI',
-        'GNUSNFTCollectionName',
-        'GNUSContractAssets'
-      ],
-      exclude: [],
+    paths: {
+      'ProxyDiamond': {
+        deploymentsPath: 'diamonds',
+        contractsPath: 'contracts/erc20-gnus-proxy',
+      },
+      'GeniusDiamond': {
+        deploymentsPath: 'diamonds',
+        contractsPath: 'contracts/gnus-ai',
+      },
     },
   },
   diamondAbi: [
-    {    
+    {
       name: 'ProxyDiamond',
       strict: false,
       include: [
-        'ERC20ProxyStorage',
-        'ERC20ProxyFacet',
+        'erc20-gnus-proxy/*',
         'ProxyDiamond',
       ],
       exclude: [
@@ -382,7 +365,7 @@ const config: HardhatUserConfig = {
       ],
       filter: filterDupeProxyFunctions,
     },
-    { 
+    {
       name: 'GeniusDiamond',
       strict: false,
       include: [
