@@ -4,3 +4,9 @@
 [submodule "packages/hardhat-diamond-abi"]
 	path = packages/hardhat-diamond-abi
 	url = https://github.com/Am0rfu5/hardhat-diamond-abi
+[submodule "contracts/gnus-ai"]
+	path = contracts/gnus-ai
+	url = git@github.com:GeniusVentures/gnus-ai-contracts.git
+[submodule "diamonds/GeniusDiamond"]
+	path = diamonds/GeniusDiamond
+	url = git@github.com:GeniusVentures/GeniusDiamond.git

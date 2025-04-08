@@ -30,7 +30,7 @@
     "./typechain-types", 
     "./packages/hardhat-diamonds/**/*.ts", 
     "./packages/diamonds/**/*.ts"
-  ],
+, "notes/ProxyDiamondDeployment.test.ts", "notes/GeniusDiamondDeployment.test.ts"  ],
   "exclude": ["node_modules", "dist"],
   "files": ["./hardhat.config.ts"],
   "workspaces": ["packages/*"]
