@@ -1,47 +1,36 @@
-import { GeniusDiamond } from "../../typechain-types/GeniusDiamond";
-import { dc, debuglog, INetworkDeployInfo, AfterDeployInit, getSighash } from "../common";
-import { Facets } from "../facets";
-import hre, { ethers } from "hardhat";
+import { GeniusDiamond } from "../../../typechain-types";
+import { debuglog, CallbackArgs } from "@gnus.ai/diamonds";
+import { INetworkDeployInfo } from "@gnus.ai/diamonds";
+import Diamond from "@gnus.ai/diamonds";
+import hre from "hardhat";
 import util from "util";
 
-const OpenSeaProxyAddresses: {[key: string]: string } = {
-    mumbai: "",
-    polygon: "0x207Fa8Df3a17D96Ca7EA4f2893fcdCb78a304101",
-    hardhat: "0x207Fa8Df3a17D96Ca7EA4f2893fcdCb78a304101" // for testing
-};
+/**
+ * 
+ * @param CallbackArgs 
+ */
+export async function registerProtocolVersionChainId(callbackArgs: CallbackArgs) {
 
-const afterDeploy: AfterDeployInit = async (networkDeployInfo: INetworkDeployInfo) => {
-    const chainID = hre.network.config.chainId || 1;
+  const { diamond } = callbackArgs;
 
-    debuglog(`In GNUSControl after Deploy function, chainID: ${chainID}`);
+  const chainID = diamond.chainId;
+  const diamondName = diamond.diamondName;
+  const networkName = diamond.networkName;
+  const deployInfo = diamond.getDeployInfo();
+  const deployer = diamond.deployer!;
 
-    const gnusDiamond = dc.GeniusDiamond as GeniusDiamond;
-    await gnusDiamond.setChainID(chainID);
+  debuglog(`In GNUSControl callback function for networkName: ${networkName}  chainID: ${chainID}`);
 
+  const diamondAddress = diamond.getDeployInfo().DiamondAddress!;
+  const diamondArtifactName = `hardhat-diamond-abi/HardhatDiamondABI.sol:${diamondName}`;
+  const diamondArtifact = hre.artifacts.readArtifactSync(diamondArtifactName);
+  const diamondContract = new hre.ethers.Contract(diamondAddress, diamondArtifact.abi, diamond.provider) as GeniusDiamond;
+  const deployerDiamondContract = diamondContract.connect(deployer);
 
-    const protocolVersion = networkDeployInfo.protocolVersion || 0.0;
-    await gnusDiamond.setProtocolVersion(Math.round(protocolVersion * 100));
+  deployerDiamondContract.setChainID(chainID);
+  const protocolVersion = deployInfo.protocolVersion || 0.0;
+  deployerDiamondContract.setProtocolVersion(Math.round(protocolVersion * 100));
 
-    const info = await gnusDiamond.protocolInfo();
-    debuglog(`protocol info: \n${util.inspect(info)}`)
-
-    // simulate orevious bad deployments
-    //const signers = await ethers.getSigners();
-    //const owner = signers[0];
-    //await gnusDiamond.transferOwnership(owner.address);
+  const info = diamondContract.protocolInfo();
+  debuglog(`protocol info: \n${util.inspect(info)}`)
 }
-
-Facets.GNUSControl = {
-    priority: 110,
-    versions: {
-        0.0: {
-            callback: afterDeploy
-        },
-        2.3: {
-             deployInit: "GNUSControl_Initialize230()",
-        },
-        2.4: {
-            callback: afterDeploy, fromVersions: [0.0, 2.3]
-        },
-    }
-};

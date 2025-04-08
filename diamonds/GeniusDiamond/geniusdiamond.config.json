@@ -1,0 +1,104 @@
+{
+  "DiamondCutFacet": {
+    "priority": 10,
+    "versions": {
+      "0.0": {}
+    }
+  },
+  "DiamondLoupeFacet": {
+    "priority": 20,
+    "versions": {
+      "0.0": {}
+    }
+  },
+  "GeniusOwnershipFacet": {
+    "priority": 30,
+    "versions": {
+      "0.0": {}
+    }
+  },
+  "GNUSNFTFactory": {
+    "priority": 40,
+    "versions": {
+      "0.0": {
+        "deployInit": "GNUSNFTFactory_Initialize()"
+      },
+      "2.3": {
+        "upgradeInit": "GNUSNFTFactory_Initialize230()",
+        "fromVersions": [
+          0.0,
+          2.0
+        ]
+      }
+    }
+  },
+  "GNUSBridge": {
+    "priority": 110,
+    "versions": {
+      "0.0": {},
+      "2.1": {},
+      "2.2": {
+        "deployInit": "GNUSBridge_Initialize220"
+      },
+      "2.4": {},
+      "2.5": {
+        "deployInit": "GNUSBridge_Initialize250()"
+      }
+    }
+  },
+  "GeniusAI": {
+    "priority": 70,
+    "versions": {
+      "0.0": {
+        "deployInit": "GeniusAI_Initialize()"
+      }
+    }
+  },
+  "ERC20TransferBatch": {
+    "priority": 90,
+    "versions": {
+      "2.0": {}
+    }
+  },
+  "GNUSContractAssets": {
+    "priority": 100,
+    "versions": {
+      "0.0": {}
+    }
+  },
+  "ERC1155ProxyOperator": {
+    "priority": 45,
+    "versions": {
+      "0.0": {
+        "callbacks": [
+          "setNFTProxyRoleForOpenSea"
+        ],
+        "deployInclude": [
+          "isApprovedForAll(address,address)')",
+          "getSighash('function totalSupply(uint256)')",
+          "getSighash('function creators(uint256)')",
+          "getSighash('function NFT_PROXY_OPERATOR_ROLE()')"
+        ]
+      }
+    }
+  },
+  "GNUSControl": {
+    "priority": 110,
+    "versions": {
+      "0.0": {
+        "callbacks":[ 
+          "registerProtocolVersionChainId" 
+        ]
+      },
+      "2.3": {
+        "deployInit": "GNUSControl_Initialize230()"
+      },
+      "2.4": {
+        "fromVersions": [
+          0.0,
+          2.3
+        ]
+      }
+    }
+  }
+}

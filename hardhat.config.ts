@@ -1,5 +1,4 @@
-// import 'dist/packages/hardhat-diamonds/src/type-extensions';
-import 'packages/hardhat-diamonds/dist/src/type-extensions';
+import '@gnus.ai/hardhat-diamonds';
 import * as dotenv from 'dotenv';
 import { HardhatUserConfig, task } from 'hardhat/config';
 import '@nomiclabs/hardhat-etherscan';

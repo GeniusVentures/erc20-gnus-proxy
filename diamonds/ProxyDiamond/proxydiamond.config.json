@@ -15,7 +15,9 @@
     "priority": 30,
     "versions": {
       "0.0": {
-        "callbacks": "callbackCreateXMPLToken"
+        "callbacks": [
+         "createXMPLToken"
+        ]
       }
     }
   }

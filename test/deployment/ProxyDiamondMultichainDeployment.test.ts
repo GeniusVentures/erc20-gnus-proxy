@@ -1,20 +1,20 @@
 import { debug } from 'debug';
+import { pathExistsSync } from "fs-extra";
 import { expect, assert } from 'chai';
 import { ethers } from 'hardhat';
 import hre from 'hardhat';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { multichain } from 'hardhat-multichain';
-import { IERC20Upgradeable__factory } from '../../typechain-types';
-import { getInterfaceID } from '../../scripts/FacetSelectors';
-import { ProxyDiamond } from '../../typechain-types/';
+import { getInterfaceID } from '../utils/helpers';
 import { getOrDeployDiamond } from '../setup/DiamondsMultichainTestDeployer';
-import { Diamond } from '@gnus.ai/diamonds/src/types';
-import { join } from 'path';
+import { Diamond, deleteDeployInfo } from '@gnus.ai/diamonds';
+import { ProxyDiamond, IERC20Upgradeable__factory } from '../../typechain-types/';
 
 describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () {
-  const log: debug.Debugger = debug('GNUSDeploy:log');
-  this.timeout(0); // Extended for diamond deployment time
+  const diamondName = 'ProxyDiamond';
+  const log: debug.Debugger = debug('GNUSDeploy:log:${diamondName}');
+  this.timeout(0); // Extended indefinitely for diamond deployment time
 
   let chains = multichain.getProviders() || new Map<string, JsonRpcProvider>();
 
@@ -28,27 +28,24 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
   }
 
   for (const [chainName, provider] of chains.entries()) {
-    describe(`🔗 Chain: ${chainName}`, function () {
+    describe(`🔗 Chain: ${chainName} 🔷 Diamond: ${diamondName}`, function () {
       let diamond: Diamond;
-      let proxyDiamond: ProxyDiamond;
-      let upgrade: boolean | void;
       let signers: SignerWithAddress[];
       let signer0: string;
       let signer1: string;
       let signer2: string;
+      let owner: string;
+      let ownerSigner: SignerWithAddress;
+      let proxyDiamond: ProxyDiamond;
       let signer0Diamond: ProxyDiamond;
       let signer1Diamond: ProxyDiamond;
       let signer2Diamond: ProxyDiamond;
-      // get the signer for the owner
-      let owner: string;
-      let ownerSigner: SignerWithAddress;
       let ownerDiamond: ProxyDiamond;
 
       let ethersMultichain: typeof ethers;
       let snapshotId: string;
 
       before(async function () {
-        const diamondName = 'ProxyDiamond';
         const manager = await getOrDeployDiamond(chainName, diamondName, provider);
         diamond = manager['diamond'];
         const deployInfo = diamond.getDeployInfo();
@@ -83,6 +80,12 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
         await provider.send('evm_revert', [snapshotId]);
       });
 
+      after(async () => {
+        if (chainName == 'hardhat' && pathExistsSync(diamond.deployInfoFilePath)) {
+          deleteDeployInfo(diamond.deployInfoFilePath)
+        }
+      });
+
       it(`should ensure that ${chainName} chain object can be retrieved and reused`, async function () {
 
         expect(provider).to.not.be.undefined;
@@ -90,10 +93,6 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
 
         const { chainId } = await provider.getNetwork();
         expect(chainId).to.be.a('number');
-
-        // For some reason connection.url test has an error with hardhat chain when running 
-        // tests with `yarn test-multichain`. This does work with `npx test-multichain ...`
-        // expect(provider.connection.url).to.satisfy((url: string) => url.startsWith('http://'));
       });
 
       it(`should verify that ${chainName} diamond is deployed and we can get hardhat signers on ${chainName}`, async function () {

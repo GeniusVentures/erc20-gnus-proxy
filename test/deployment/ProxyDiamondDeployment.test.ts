@@ -1,4 +1,6 @@
+import { pathExistsSync } from "fs-extra";
 import { expect } from 'chai';
+
 import { ethers } from 'hardhat';
 import hre from 'hardhat';
 
@@ -7,11 +9,11 @@ import {
   DiamondDeployer,
   DeploymentManager,
   FacetCallbackManager,
-  LocalDeploymentStrategy,
-  FileDeploymentRepository
+  LocalRPCDeploymentStrategy,
+  FileDeploymentRepository,
+  deleteDeployInfo
 } from '@gnus.ai/diamonds';
 import { DiamondConfig } from '@gnus.ai/diamonds/src/types';
-import path from 'path';
 
 
 describe("Local Diamond Deployment", function () {
@@ -19,10 +21,11 @@ describe("Local Diamond Deployment", function () {
   let diamond: Diamond;
   let deployer: DiamondDeployer;
   let deploymentManager: DeploymentManager;
+  const networkName = hre.network.name;
 
   before(async () => {
     const [signer] = await ethers.getSigners();
-    const diamondsConfig = hre.config.diamonds! || undefined;
+    const diamondsConfig = hre.config.diamonds!.paths! || undefined;
     let config: DiamondConfig = diamondsConfig["ProxyDiamond"]
       ? { ...diamondsConfig["ProxyDiamond"] }
       : {
@@ -32,28 +35,35 @@ describe("Local Diamond Deployment", function () {
 
     // Set the network on config
     config.diamondName = "ProxyDiamond";
-    config.networkName = hre.network.name;
+    config.networkName = networkName;
     config.chainId = hre.network.config.chainId! || 31337;
     const repository = new FileDeploymentRepository();
     diamond = new Diamond(config, repository);
     diamond.provider = ethers.provider;
     diamond.deployer = signer;
 
-    const strategy = new LocalDeploymentStrategy();
+    const strategy = new LocalRPCDeploymentStrategy();
     deployer = new DiamondDeployer(diamond, strategy);
 
-    const callbackManager = FacetCallbackManager.getInstance(
-      diamond.diamondName,
-      path.join(diamond.deploymentsPath, diamond.diamondName, "facetCallbacks")
-    );
+    deploymentManager = new DeploymentManager(diamond, deployer);
+  });
 
-    deploymentManager = new DeploymentManager(diamond, deployer, callbackManager);
+  after(async () => {
+    if (networkName == 'hardhat' && pathExistsSync(diamond.deployInfoFilePath)) {
+      deleteDeployInfo(diamond.deployInfoFilePath)
+    }
   });
 
   it("should deploy Diamond and facets correctly on the current chain", async () => {
-    await deploymentManager.deployAll();
-
     const deployInfo = diamond.getDeployInfo();
+    if (deployInfo.DiamondAddress) {
+      console.log(`Diamond already deployed at ${deployInfo.DiamondAddress}. Performing upgrade...`);
+      await deploymentManager.upgradeAll();
+    } else {
+      console.log(`Diamond not deployed. Performing initial deployment...`);
+      await deploymentManager.deployAll();
+    }
+
     expect(deployInfo.DiamondAddress).to.match(/^0x[a-fA-F0-9]{40}$/);
 
     expect(deployInfo.FacetDeployedInfo).to.be.an('object').and.not.empty;
@@ -69,9 +79,7 @@ describe("Local Diamond Deployment", function () {
 
   it("should have correctly initialized the callback manager", async () => {
     const callbackManager = FacetCallbackManager.getInstance(
-      diamond.diamondName,
-      path.join(diamond.deploymentsPath, diamond.diamondName, "facetCallbacks")
-    );
+      diamond.diamondName, diamond.deploymentsPath);
 
     expect(callbackManager).to.exist;
   });
