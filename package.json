@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "test": "npx hardhat test",
+    "test": "HARDHAT_VERBOSE=true npx hardhat test",
     "test-multichain": "npx hardhat test-multichain",
     "coverage": "npx hardhat coverage",
     "compile": "npx hardhat compile",
@@ -46,6 +46,7 @@
     "abi2oas": "^0.1.4",
     "chai": "^4.3.6",
     "chai-as-promised": "^7.1.1",
+    "chalk": "^5.4.1",
     "contracts-starter": "git+https://github.com/mudgen/diamond-2-hardhat.git",
     "dotenv": "^10.0.0",
     "eslint": "^7.32.0",

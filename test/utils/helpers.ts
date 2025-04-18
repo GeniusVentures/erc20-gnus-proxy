@@ -11,6 +11,20 @@ export function getInterfaceID(contractInterface: utils.Interface) {
   return interfaceID;
 }
 
+// export function getInterfaceID(iface: utils.Interface): string {
+//   const selectors = Object.keys(iface.functions).map(fn =>
+//     iface.getSighash(fn)
+//   );
+
+//   let interfaceId = ethers.BigNumber.from(0);
+
+//   for (const selector of selectors) {
+//     interfaceId = interfaceId.xor(ethers.BigNumber.from(selector));
+//   }
+
+//   return interfaceId.toHexString();
+// }
+
 export function toWei(value: number | string): BigNumber {
   return ethers.utils.parseEther(value.toString());
 }
