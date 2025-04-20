@@ -124,7 +124,10 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
       });
 
       it('🧪 Should compare the deployed facet initializer setup with the config', async function () {
-        const protocolFacetOk = await isProtocolInitRegistered(deployedDiamondData, "DiamondInitFacet", "Diamond_initialize()");
+        const facetInit = diamond.getDeployConfig().protocolInitFacet;
+        const protocolVersion = diamond.getDeployConfig().protocolVersion;
+        const initFunctionName = diamond.getDeployConfig().facets[facetInit!].versions?.[protocolVersion]?.deployInit;
+        const protocolFacetOk = await isProtocolInitRegistered(deployedDiamondData, facetInit!, initFunctionName!);
         console.log(protocolFacetOk ? "✅ Protocol initializer present." : "❌ Protocol initializer missing.");
         expect(protocolFacetOk).to.be.true;
       });

@@ -74,7 +74,7 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
 
         // get the signer for the owner
         // owner = deployedDiamondData.DeployerAddress;  //  this will be = signer0 for hardhat;
-        owner = diamond.getDeployedDiamondData().DiamondAddress!;  //  this will be = signer0 for hardhat;
+        owner = diamond.getDeployedDiamondData().DeployerAddress!;  //  this will be = signer0 for hardhat;
         ownerSigner = await ethersMultichain.getSigner(owner);
         ownerDiamond = geniusDiamond.connect(ownerSigner);
       });
@@ -149,7 +149,6 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
       });
 
       it(`should verify that the owner has MINTER_ROLE on ${networkName}`, async function () {
-
         const MINTER_ROLE = await ownerDiamond.MINTER_ROLE();
         console.log(`MINTER_ROLE: ${MINTER_ROLE}`);
         const hasMinterRole = await ownerDiamond.hasRole(MINTER_ROLE, owner);

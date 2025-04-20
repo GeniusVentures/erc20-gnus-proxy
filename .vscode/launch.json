@@ -13,8 +13,8 @@
       "args": [
         "test-multichain",
         // "${workspaceFolder}/test/deployment/ProxyDiamondDeployment.test.ts",
-        // "${workspaceFolder}/test/deployment/GeniusDiamondDeploymentSuite.test.ts",
-        "${workspaceFolder}/test/deployment/GeniusDiamondDeployment.test.ts",
+        "${workspaceFolder}/test/deployment/GeniusDiamondDeploymentSuite.test.ts",
+        // "${workspaceFolder}/test/deployment/GeniusDiamondDeployment.test.ts",
         // "${workspaceFolder}/test/deployment/GeniusDiamondDeploymentComparison.test.ts",
         "--chains", 
         "hardhat",
