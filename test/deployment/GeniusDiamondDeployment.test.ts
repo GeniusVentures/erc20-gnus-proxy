@@ -52,9 +52,9 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
 
       before(async function () {
         const diamondDeployer = await LocalDiamondDeployer.getInstance(diamondName, networkName, provider);
-        // diamondDeployer.deployDiamond();
-        diamond = await diamondDeployer.getDiamond();
-        const deployedDiamondData = diamond.getDeployedDiamondData();
+        await diamondDeployer.setVerbose(true);
+        diamond = await diamondDeployer.getDiamondDeployed();
+        let deployedDiamondData = diamond.getDeployedDiamondData();
 
         const hardhatDiamondAbiPath = 'hardhat-diamond-abi/HardhatDiamondABI.sol:';
         const diamondArtifactName = `${hardhatDiamondAbiPath}${diamond.diamondName}`;
@@ -73,7 +73,8 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
         signer2Diamond = geniusDiamond.connect(signers[2]);
 
         // get the signer for the owner
-        owner = deployedDiamondData.DeployerAddress;  //  this will be = signer0 for hardhat;
+        // owner = deployedDiamondData.DeployerAddress;  //  this will be = signer0 for hardhat;
+        owner = diamond.getDeployedDiamondData().DiamondAddress!;  //  this will be = signer0 for hardhat;
         ownerSigner = await ethersMultichain.getSigner(owner);
         ownerDiamond = geniusDiamond.connect(ownerSigner);
       });
@@ -133,6 +134,7 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
 
       it(`should verify that the owner has DEFAULT_ADMIN_ROLE on ${networkName}`, async function () {
         const DEFAULT_ADMIN_ROLE = await ownerDiamond.DEFAULT_ADMIN_ROLE();
+        console.log(`DEFAULT_ADMIN_ROLE: ${DEFAULT_ADMIN_ROLE}`);
         const hasAdminRole = await ownerDiamond.hasRole(DEFAULT_ADMIN_ROLE, owner);
         expect(hasAdminRole).to.be.true;
         log(`Owner has DEFAULT_ADMIN_ROLE on ${networkName}`);
@@ -140,6 +142,7 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
 
       it(`should verify that the owner has UPGRADER_ROLE on ${networkName}`, async function () {
         const UPGRADER_ROLE = await ownerDiamond.UPGRADER_ROLE();
+        console.log(`UPGRADER_ROLE: ${UPGRADER_ROLE}`);
         const hasUpgraderRole = await ownerDiamond.hasRole(UPGRADER_ROLE, owner);
         expect(hasUpgraderRole).to.be.true;
         log(`Owner has UPGRADER_ROLE on ${networkName}`);
@@ -148,6 +151,7 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
       it(`should verify that the owner has MINTER_ROLE on ${networkName}`, async function () {
 
         const MINTER_ROLE = await ownerDiamond.MINTER_ROLE();
+        console.log(`MINTER_ROLE: ${MINTER_ROLE}`);
         const hasMinterRole = await ownerDiamond.hasRole(MINTER_ROLE, owner);
         expect(hasMinterRole).to.be.true;
         log(`Owner has MINTER_ROLE on ${networkName}`);

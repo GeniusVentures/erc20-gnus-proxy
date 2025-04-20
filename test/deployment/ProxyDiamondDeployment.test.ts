@@ -52,7 +52,7 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
 
       before(async function () {
         const diamondDeployer = await LocalDiamondDeployer.getInstance(diamondName, networkName, provider);
-        diamond = await diamondDeployer.getDiamond();
+        diamond = await diamondDeployer.getDiamondDeployed();
         const deployInfo = diamond.getDeployedDiamondData();
 
         const hardhatDiamondAbiPath = 'hardhat-diamond-abi/HardhatDiamondABI.sol:';
