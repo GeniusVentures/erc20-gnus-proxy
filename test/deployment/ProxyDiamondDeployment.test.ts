@@ -7,7 +7,7 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { multichain } from 'hardhat-multichain';
 import { getInterfaceID } from '../utils/helpers';
-import { LocalDiamondDeployer } from '../setup/LocalDiamondDeployer';
+import { LocalDiamondDeployer, LocalDiamondDeployerConfig } from '../setup/LocalDiamondDeployer';
 import { Diamond, deleteDeployInfo } from '@gnus.ai/diamonds';
 import {
   ProxyDiamond,
@@ -51,7 +51,15 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
       let snapshotId: string;
 
       before(async function () {
-        const diamondDeployer = await LocalDiamondDeployer.getInstance(diamondName, networkName, provider);
+        const config = {
+          diamondName: diamondName,
+          networkName: networkName,
+          provider: provider,
+          // chainId: (await provider.getNetwork()).chainId,
+          // writeDeployedDiamondData: false,
+          // configFilePath: `diamonds/GeniusDiamond/proxydiamond.config.json`,
+        } as LocalDiamondDeployerConfig;
+        const diamondDeployer = await LocalDiamondDeployer.getInstance(config);
         diamond = await diamondDeployer.getDiamondDeployed();
         const deployInfo = diamond.getDeployedDiamondData();
 

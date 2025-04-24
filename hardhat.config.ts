@@ -143,6 +143,9 @@ function filterDupeGeniusFunctions(
   return true;
 }
 
+const MOCK_CHAIN_ID = HH_CHAIN_ID ? parseInt(HH_CHAIN_ID) : 31337;
+console.log(`Using chain ID: ${MOCK_CHAIN_ID}`);
+
 const config: HardhatUserConfig = {
   solidity: {
     version: '0.8.9',
@@ -166,12 +169,12 @@ const config: HardhatUserConfig = {
       sepolia: {
         rpcUrl: sepoliaUrl,
         blockNumber: sepoliaBlock,
-        chainId: 11155111
+        chainId: 11155112
       },
       polygon_amoy: {
         rpcUrl: amoyUrl,
         blockNumber: amoyBlock,
-        chainId: 80002
+        chainId: 800002
       },
       hardhat: {
         rpcUrl: multichainHardhat,
@@ -204,6 +207,49 @@ const config: HardhatUserConfig = {
             : undefined,
         }
         : undefined,
+      chainId: MOCK_CHAIN_ID, // Sets the chain ID for the Hardhat network
+      // Chains without Hardhat built in definitions
+      chains: {
+        80002: {
+          hardforkHistory: {
+            london: 10000000,
+          }
+        },
+        800002: {
+          hardforkHistory: {
+            london: 10000000,
+          },
+        },
+        137: {
+          hardforkHistory: {
+            london: 10000000,
+          },
+        },
+        // BNB (BSC) chain
+        56: {
+          hardforkHistory: {
+            london: 10000000,
+          },
+        },
+        // BNB Smart Chain Testnet chain
+        97: {
+          hardforkHistory: {
+            london: 100000000,
+          }
+        },
+        // Base chain
+        8453: {
+          hardforkHistory: {
+            london: 10000000,
+          },
+        },
+        // Base Testnet chain
+        84532: {
+          hardforkHistory: {
+            london: 10000000,
+          },
+        },
+      },
     },
     polygon: {
       url: `https://lb.drpc.org/ogrpc?network=polygon&dkey=${process.env.DRPC_API_KEY}`,

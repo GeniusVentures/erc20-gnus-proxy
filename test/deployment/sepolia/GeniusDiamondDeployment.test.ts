@@ -6,15 +6,15 @@ import hre from 'hardhat';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { multichain } from 'hardhat-multichain';
-import { getInterfaceID } from '../utils/helpers';
-import { LocalDiamondDeployer, LocalDiamondDeployerConfig } from '../setup/LocalDiamondDeployer';
+import { getInterfaceID } from '../../utils/helpers';
+import { LocalDiamondDeployer, LocalDiamondDeployerConfig } from '../../setup/LocalDiamondDeployer';
 import { Diamond, deleteDeployInfo } from '@gnus.ai/diamonds';
 import {
   GeniusDiamond,
   IERC20Upgradeable__factory,
   IDiamondCut__factory,
   IDiamondLoupe__factory
-} from '../../typechain-types';
+} from '../../../typechain-types';
 import { config } from 'dotenv';
 
 describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () {
@@ -36,6 +36,7 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
   for (const [networkName, provider] of networkProviders.entries()) {
     describe(`🔗 Chain: ${networkName}  Diamond: ${diamondName}`, function () {
       let diamond: Diamond;
+      let diamond1: Diamond;
       let signers: SignerWithAddress[];
       let signer0: string;
       let signer1: string;
@@ -52,6 +53,21 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
       let snapshotId: string;
 
       before(async function () {
+        const config1 = {
+          diamondName: diamondName,
+          networkName: networkName,
+          provider: provider,
+          chainId: (await provider.getNetwork()).chainId,
+          writeDeployedDiamondData: true,
+          configFilePath: `diamonds/GeniusDiamond/geniusdiamond-sepolia-v2.5-step1.config.json`,
+          deployedDiamondDataFilePath: `diamonds/GeniusDiamond/deployments/geniusdiamond-v2.4-sepolia-31337.json`,
+          localDiamondDeployerKey: 'geniusdiamond-sepolia-v2.5-step1',
+        } as LocalDiamondDeployerConfig;
+        const diamondDeployer1 = await LocalDiamondDeployer.getInstance(config1);
+        await diamondDeployer1.setVerbose(true);
+        diamond1 = await diamondDeployer1.getDiamondDeployed();
+        let deployedDiamondData1 = diamond1.getDeployedDiamondData();
+
         const config = {
           diamondName: diamondName,
           networkName: networkName,
@@ -59,6 +75,7 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
           chainId: (await provider.getNetwork()).chainId,
           writeDeployedDiamondData: false,
           configFilePath: `diamonds/GeniusDiamond/geniusdiamond.config.json`,
+          deployedDiamondDataFilePath: `diamonds/GeniusDiamond/deployments/geniusdiamond-v2.4-sepolia-31337.json`,
         } as LocalDiamondDeployerConfig;
         const diamondDeployer = await LocalDiamondDeployer.getInstance(config);
         await diamondDeployer.setVerbose(true);
@@ -82,7 +99,6 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
         signer2Diamond = geniusDiamond.connect(signers[2]);
 
         // get the signer for the owner
-
         owner = diamond.getDeployedDiamondData().DeployerAddress;
         if (!owner) {
           diamond.setSigner(signers[0]);

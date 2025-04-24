@@ -5,7 +5,8 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "test": "HARDHAT_VERBOSE=true npx hardhat test",
+    "test": "npx hardhat test-multichain",
+    "test-verbose": "HARDHAT_VERBOSE=true npx hardhat test",
     "test-multichain": "npx hardhat test-multichain",
     "coverage": "npx hardhat coverage",
     "compile": "npx hardhat compile",
