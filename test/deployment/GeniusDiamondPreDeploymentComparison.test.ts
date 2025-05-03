@@ -112,9 +112,8 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
             return;
           }
           const passFail = await diffDeployedFacets(
-            deployedDiamondData?.DiamondAddress!,
-            diamond.provider!,
             deployedDiamondData,
+            diamond.provider!,
           );
           expect(passFail).to.be.true;
         });
@@ -131,7 +130,7 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
           // true  // uncheck for console list of deployedContracts
         );
 
-        const comparison = compareFacetSelectors(deployedDiamondData.FacetDeployedInfo!, onChainFacets);
+        const comparison = compareFacetSelectors(deployedDiamondData.DeployedFacets!, onChainFacets);
         let passFail: boolean = true;;
         for (const [facetName, diff] of Object.entries(comparison)) {
           if (diff.extraOnChain.length || diff.missingOnChain.length) {

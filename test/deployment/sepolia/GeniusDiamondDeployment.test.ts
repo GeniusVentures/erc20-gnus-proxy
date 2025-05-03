@@ -17,7 +17,7 @@ import {
 } from '../../../typechain-types';
 import { config } from 'dotenv';
 
-describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () {
+describe('🧪 Sepolia Upgrade v2.4 to v2.5 Tests', async function () {
   const diamondName = 'GeniusDiamond';
   const log: debug.Debugger = debug('GNUSDeploy:log:${diamondName}');
   this.timeout(0); // Extended indefinitely for diamond deployment time
@@ -53,6 +53,8 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
       let snapshotId: string;
 
       before(async function () {
+
+        // Step 1: Remove Missing Facet data
         const config1 = {
           diamondName: diamondName,
           networkName: networkName,
@@ -66,16 +68,17 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
         const diamondDeployer1 = await LocalDiamondDeployer.getInstance(config1);
         await diamondDeployer1.setVerbose(true);
         diamond1 = await diamondDeployer1.getDiamondDeployed();
-        let deployedDiamondData1 = diamond1.getDeployedDiamondData();
+        // let deployedDiamondData1 = diamond1.getDeployedDiamondData();
 
+        // Step 2: Run upgrade with corrected Diamond
         const config = {
           diamondName: diamondName,
           networkName: networkName,
           provider: provider,
           chainId: (await provider.getNetwork()).chainId,
-          writeDeployedDiamondData: false,
+          writeDeployedDiamondData: true,
           configFilePath: `diamonds/GeniusDiamond/geniusdiamond.config.json`,
-          deployedDiamondDataFilePath: `diamonds/GeniusDiamond/deployments/geniusdiamond-v2.4-sepolia-31337.json`,
+          deployedDiamondDataFilePath: `diamonds/GeniusDiamond/deployments/geniusdiamond-sepolia-11155112.json`,
         } as LocalDiamondDeployerConfig;
         const diamondDeployer = await LocalDiamondDeployer.getInstance(config);
         await diamondDeployer.setVerbose(true);
@@ -99,12 +102,7 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
         signer2Diamond = geniusDiamond.connect(signers[2]);
 
         // get the signer for the owner
-        owner = diamond.getDeployedDiamondData().DeployerAddress;
-        if (!owner) {
-          diamond.setSigner(signers[0]);
-          owner = signer0;
-          ownerSigner
-        }
+        owner = await diamond.getSigner()?.getAddress()!;
         ownerSigner = await ethersMultichain.getSigner(owner);
 
         ownerDiamond = geniusDiamond.connect(ownerSigner);

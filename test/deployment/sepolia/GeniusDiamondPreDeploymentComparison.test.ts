@@ -21,7 +21,7 @@ import {
 } from '../../../typechain-types';
 import { DeployedDiamondData } from '@gnus.ai/diamonds/src';
 
-describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () {
+describe('🧪 Diamond Pre-Deployment Comparison Tests', async function () {
   const diamondName = 'GeniusDiamond';
   const log: debug.Debugger = debug('GNUSDeploy:log:${diamondName}');
   this.timeout(0); // Extended indefinitely for diamond deployment time
@@ -62,8 +62,10 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
           networkName: networkName,
           provider: provider,
           chainId: (await provider.getNetwork()).chainId,
-          writeDeployedDiamondData: false,
-          configFilePath: `diamonds/GeniusDiamond/geniusdiamond.config.json`,
+          writeDeployedDiamondData: true,
+          deployedDiamondDataFilePath: `diamonds/GeniusDiamond/deployments/geniusdiamond-v2.4-sepolia-31337.json`,
+          configFilePath: `diamonds/GeniusDiamond/geniusdiamond-sepolia-v2.5-step1.config.json`,
+          localDiamondDeployerKey: 'geniusdiamond-sepolia-v2.5-step1',
         } as LocalDiamondDeployerConfig;
         const diamondDeployer = await LocalDiamondDeployer.getInstance(config);
         // diamondDeployer.deployDiamond();
@@ -87,12 +89,7 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
         signer2Diamond = geniusDiamond.connect(signers[2]);
 
         // get the signer for the owner
-        owner = diamond.getDeployedDiamondData().DeployerAddress;
-        if (!owner) {
-          diamond.setSigner(signers[0]);
-          owner = signer0;
-          ownerSigner
-        }
+        owner = await diamond.getSigner()?.getAddress()!;
         ownerSigner = await ethersMultichain.getSigner(owner);
 
         ownerDiamond = geniusDiamond.connect(ownerSigner);
@@ -106,12 +103,24 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
         await provider.send('evm_revert', [snapshotId]);
       });
 
+      it(`🧪 Should validate that the Diamond Address and Deployer Address are correct`, async function () {
+        const diamondAddress = deployedDiamondData.DiamondAddress;
+        const deployerAddress = deployedDiamondData.DeployerAddress;
+
+        // Retrieve the deployed diamond address from the contract
+        const diamondAddressFromContract = await ownerDiamond.address as string;
+        expect(diamondAddressFromContract).to.equal(diamondAddress);
+        // Retrieve the deployer address from the contract
+        const deployerAddressFromContract = await geniusDiamond.owner() as string;
+        expect(deployerAddressFromContract).to.equal(deployerAddress);
+      });
+
       it('🧪 Should report any issues with deployed function selectors matching previously deployed diamond data',
         async function () {
+          // const deployedDiamondData = diamond.getDeployedDiamondData();
           const passFail = await diffDeployedFacets(
-            deployedDiamondData?.DiamondAddress!,
-            diamond.provider!,
             deployedDiamondData,
+            diamond.provider!,
           );
           expect(passFail).to.be.true;
         });
@@ -124,7 +133,7 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
           // true  // uncheck for console list of deployedContracts
         );
 
-        const comparison = compareFacetSelectors(deployedDiamondData.FacetDeployedInfo!, onChainFacets);
+        const comparison = compareFacetSelectors(deployedDiamondData.DeployedFacets!, onChainFacets);
         let passFail: boolean = true;;
         for (const [facetName, diff] of Object.entries(comparison)) {
           if (diff.extraOnChain.length || diff.missingOnChain.length) {

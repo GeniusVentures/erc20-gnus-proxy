@@ -8,7 +8,8 @@ import {
   impersonateSigner,
   setEtherBalance,
   DiamondConfig,
-  cutKey
+  cutKey,
+  impersonateAndFundSigner
 } from '@gnus.ai/diamonds';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { ethers } from 'hardhat';
@@ -54,17 +55,21 @@ export class LocalDiamondDeployer {
       this.chainId = config.chainId;
     }
     this.signer = config.signer!;
+    // this.config.signer = this.signer;
     this.repository = repository!;
 
     // TODO make provider signer and repository optional
     this.diamond = new Diamond(this.config, repository);
-    // this.diamond.setProvider(this.provider);
+    this.diamond.setProvider(this.provider);
+    this.diamond.setSigner(this.signer);
 
   }
 
   public static async getInstance(config: LocalDiamondDeployerConfig): Promise<LocalDiamondDeployer> {
     if (!config.provider) {
       config.provider = ethers.provider;
+    } else {
+      ethers.provider = config.provider;
     }
     if (!config.networkName) {
       const networkName = (await config.provider?.getNetwork()).name || 'hardhat';
@@ -107,13 +112,13 @@ export class LocalDiamondDeployer {
       repository.setWriteDeployedDiamondData(config.writeDeployedDiamondData || hardhatDiamonds?.writeDeployedDiamondData || false);
       const deployedDiamondData = repository.loadDeployedDiamondData();
 
-      const [signer] = await ethers.getSigners();
+      const [signer0] = await ethers.getSigners();
+      // ethers.provider = config.provider;
       if (!deployedDiamondData.DeployerAddress) {
-        config.signer = signer;
+        config.signer = signer0;
       } else {
         config.signer = await ethers.getSigner(deployedDiamondData.DeployerAddress);
-        await impersonateSigner(deployedDiamondData.DeployerAddress);
-        await setEtherBalance(deployedDiamondData.DeployerAddress, ethers.utils.parseEther('100'));
+        await impersonateAndFundSigner(deployedDiamondData.DeployerAddress, config.provider);
       }
 
       const instance = new LocalDiamondDeployer(config, repository);
