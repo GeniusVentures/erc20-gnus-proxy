@@ -8,6 +8,7 @@ import {
   impersonateSigner,
   setEtherBalance,
   DiamondConfig,
+  DiamondPathsConfig,
   cutKey,
   impersonateAndFundSigner
 } from '@gnus.ai/diamonds';
@@ -58,11 +59,10 @@ export class LocalDiamondDeployer {
     // this.config.signer = this.signer;
     this.repository = repository!;
 
-    // TODO make provider signer and repository optional
+    // TODO make provider signer and repository optional (this may be handled in diamond constructor already)
     this.diamond = new Diamond(this.config, repository);
     this.diamond.setProvider(this.provider);
     this.diamond.setSigner(this.signer);
-
   }
 
   public static async getInstance(config: LocalDiamondDeployerConfig): Promise<LocalDiamondDeployer> {
@@ -82,7 +82,7 @@ export class LocalDiamondDeployer {
     const key = config.localDiamondDeployerKey || await (cutKey(config.diamondName, config.networkName, config.chainId.toString()));
 
     if (!this.instances.has(key)) {
-      const hardhatDiamonds: DiamondConfig = hre.diamonds?.getDiamondConfig(config.diamondName);
+      const hardhatDiamonds: DiamondPathsConfig = hre.diamonds?.getDiamondConfig(config.diamondName);
       const deployedDiamondDataFileName = `${config.diamondName.toLowerCase()}-${config.networkName.toLowerCase()}-${config.chainId.toString()}.json`;
       const defaultDeployedDiamondDataFilePath = join(
         'diamonds',
