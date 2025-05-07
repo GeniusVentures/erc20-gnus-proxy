@@ -27,11 +27,9 @@
   "include": [
     "./scripts", 
     "./test", 
-    "./typechain-types", 
-    "./packages/hardhat-diamonds/**/*.ts", 
-    "./packages/diamonds/**/*.ts"
-, "notes/ProxyDiamondDeployment.test.ts", "notes/GeniusDiamondDeployment.test.ts", "notes/DiamondsMultichainTestDeployer copy.ts"  ],
-  "exclude": ["node_modules", "dist"],
+    "./typechain-types",
+    "./packages/diamonds/**/*.ts"  ],
+  "exclude": ["node_modules", "dist", "notes"],
   "files": ["./hardhat.config.ts"],
   "workspaces": ["packages/*"]
 }
