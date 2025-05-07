@@ -108,9 +108,9 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
       it('🧪 Should report any issues with facets and selectors that do not match',
         async function () {
           const passFail = await diffDeployedFacets(
-            deployedDiamondData?.DiamondAddress!,
-            diamond.provider!,
             deployedDiamondData,
+            diamond.provider!,
+            true,
           );
           expect(passFail).to.be.true;
         });
@@ -123,7 +123,7 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
           // true  // uncheck for console list of deployedContracts
         );
 
-        const comparison = compareFacetSelectors(deployedDiamondData.FacetDeployedInfo!, onChainFacets);
+        const comparison = compareFacetSelectors(deployedDiamondData.DeployedFacets!, onChainFacets);
         let passFail: boolean = true;;
         for (const [facetName, diff] of Object.entries(comparison)) {
           if (diff.extraOnChain.length || diff.missingOnChain.length) {
@@ -146,7 +146,7 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
 
       it('🧪 Should compare the deployed facet initializer setup with the config', async function () {
         if (!diamond.getDeployConfig().protocolInitFacet) {
-          console.log("No ProtocolInitFacet defined: Skipping post-deployement validation.");
+          console.log("No ProtocolInitFacet defined: Skipping post-deployment validation.");
           return;
         }
         const facetInit = diamond.getDeployConfig().protocolInitFacet;
