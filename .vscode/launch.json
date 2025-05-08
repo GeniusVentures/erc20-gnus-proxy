@@ -54,11 +54,13 @@
         "${workspaceFolder}/src/**/*.ts",
         "${workspaceFolder}/scripts/**/*.ts",
         "${workspaceFolder}/test/**/*.ts",
-        "${workspaceFolder}/packages/diamonds/dist/**/*.ts",
+        // "${workspaceFolder}/packages/diamonds/**/*.ts",
         "${workspaceFolder}/node_modules/@gnus.ai/diamonds/dist/**/*.ts",
-        // "${workspaceFolder}/node_modules/@gnus.ai/diamonds/dist/**/*.js",
         "${workspaceFolder}/hardhat.config.ts",
       ],
+      "sourceMapPathOverrides": {
+        "${workspaceFolder}/node_modules/@gnus.ai/diamonds/src/*": "${workspaceFolder}/packages/diamonds/src/*"
+      },
       "sourceMaps": true,
       "smartStep": true,
       "console": "integratedTerminal",
