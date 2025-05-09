@@ -7,7 +7,7 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { multichain } from 'hardhat-multichain';
 import { getInterfaceID } from '../utils/helpers';
-import { LocalDiamondDeployer, LocalDiamondDeployerConfig } from '../setup/LocalDiamondDeployer';
+import { LocalDiamondDeployer, LocalDiamondDeployerConfig } from 'scripts/setup/LocalDiamondDeployer';
 import {
   Diamond,
   getDeployedFacetInterfaces,
