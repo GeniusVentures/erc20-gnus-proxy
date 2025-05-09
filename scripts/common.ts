@@ -98,10 +98,10 @@ export function writeDeployedInfo(deployments: { [key: string]: INetworkDeployIn
   fs.writeFileSync(
     'scripts/deployments.ts',
     `\nimport { INetworkDeployInfo } from "../scripts/common";\n` +
-      `export const deployments: { [key: string]: INetworkDeployInfo } = ${util.inspect(
-        deployments,
-        { depth: null },
-      )};\n`,
+    `export const deployments: { [key: string]: INetworkDeployInfo } = ${util.inspect(
+      deployments,
+      { depth: null },
+    )};\n`,
     'utf8',
   );
 }
