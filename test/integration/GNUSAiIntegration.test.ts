@@ -5,8 +5,8 @@ import { utils, BigNumber } from 'ethers';
 
 
 import { ProxyDiamond } from '../../typechain-types/';
-import { toWei, GNUS_TOKEN_ID, XMPL_TOKEN_ID, toBN } from "../common";
-import { logEvents } from "../utils/logEvents";
+import { toWei, GNUS_TOKEN_ID, XMPL_TOKEN_ID, toBN } from "../../scripts/common";
+import { logEvents } from "../../scripts/utils/logEvents";
 
 import { debug } from 'debug';
 import { pathExistsSync } from "fs-extra";
@@ -28,7 +28,7 @@ import {
   ERC20ProxyFacet,
   IDiamondLoupe__factory
 } from '../../typechain-types';
-import { iObjToString } from 'scripts/utils/iObjToString';
+import { iObjToString } from '../../scripts/utils/iObjToString';
 
 describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () {
   const diamondName = 'GeniusDiamond';
