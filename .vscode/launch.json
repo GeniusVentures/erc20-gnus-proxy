@@ -167,7 +167,7 @@
       "name": "Unit Tests",
       "type": "node",
       "request": "launch",
-      "preLaunchTask": "tsc: build - tsconfig.json",
+      // "preLaunchTask": "tsc: build - tsconfig.json",
       "program": "${workspaceFolder}/node_modules/hardhat/internal/cli/cli.js",
       "args": [
         "test",
