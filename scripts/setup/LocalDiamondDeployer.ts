@@ -20,6 +20,10 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { join } from 'path';
 import '@gnus.ai/hardhat-diamonds';
 
+// Import types to ensure they are available
+import type { HardhatRuntimeEnvironment } from 'hardhat/types';
+import type { DiamondsConfig } from '@gnus.ai/hardhat-diamonds';
+
 export interface LocalDiamondDeployerConfig extends DiamondConfig {
   provider?: JsonRpcProvider;
   signer?: SignerWithAddress;

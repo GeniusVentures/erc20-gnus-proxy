@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "test": "npx hardhat test-multichain",
+    "test": "npx hardhat test-multichain --chains hardhat",
     "test-verbose": "HARDHAT_VERBOSE=true npx hardhat test",
     "test-multichain": "npx hardhat test-multichain",
     "coverage": "npx hardhat coverage",
@@ -78,6 +78,8 @@
     "@ethersproject/abi": "^5.0.0",
     "@ethersproject/bytes": "^5.0.0",
     "@ethersproject/providers": "^5.0.0",
+    "@gnus.ai/diamonds": "file:./packages/diamonds",
+    "@gnus.ai/hardhat-diamonds": "file:./packages/hardhat-diamonds",
     "@nomiclabs/hardhat-web3": "^2.0.0",
     "@types/sinon-chai": "^3.2.3",
     "lodash": "^4.17.15",

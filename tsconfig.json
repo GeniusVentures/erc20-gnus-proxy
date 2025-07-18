@@ -11,9 +11,7 @@
     "rootDirs": [
       "./scripts", 
       "./test", 
-      "./typechain-types", 
-      "./packages/hardhat-diamonds/", 
-      "./packages/diamonds/"
+      "./typechain-types"
     ],
     "esModuleInterop": true,
     "outDir": "dist",
@@ -33,15 +31,17 @@
       "@nomiclabs/hardhat-waffle",
       "@nomiclabs/hardhat-web3",
       "@typechain/ethers-v5",
-      "@typechain/hardhat"
+      "@typechain/hardhat",
+      "@gnus.ai/hardhat-diamonds"
     ],
   },
   "include": [
     "./scripts", 
     "./test", 
     "./typechain-types",
-    "./packages/diamonds/**/*.ts",
-    "./packages/hardhat-diamonds/**/*.ts",],
+    "test/integration/GNUSAiIntegration.test.ts", 
+    "test-suites/GeniusDiamondDeployment.test.ts", 
+    "test-suites/ERC20ProxyTokenCreation.test.ts"],
   "exclude": ["node_modules", "dist", "notes", "packages/**/notes"],
   "files": ["./hardhat.config.ts"],
   "workspaces": ["packages/*"]

@@ -568,6 +568,14 @@
   resolved "https://registry.yarnpkg.com/@gnus.ai/contracts-upgradeable-diamond/-/contracts-upgradeable-diamond-4.5.0.tgz#64fc64d88a3594ee02a36027c6fe942989084651"
   integrity sha512-HZm+pnmgNEPkXubfz5y4Gz9dJnxA+ztRDgMNdZ8fBcXYnQuO9eZqzePhHh6fleEIX2DJIBF6qEyxA1Ysq+87zQ==
 
+"@gnus.ai/diamonds@file:./packages/diamonds", "@gnus.ai/diamonds@file:packages/diamonds":
+  version "0.0.1"
+
+"@gnus.ai/hardhat-diamonds@file:./packages/hardhat-diamonds":
+  version "0.0.1"
+  dependencies:
+    "@gnus.ai/diamonds" "file:../../../.cache/yarn/v6/npm-@gnus-ai-hardhat-diamonds-0.0.1-ad8cbd5c-3033-48ea-8acd-31d7014c6091-1752846518725/node_modules/@gnus.ai/diamonds"
+
 "@humanwhocodes/config-array@^0.5.0":
   version "0.5.0"
   resolved "https://registry.yarnpkg.com/@humanwhocodes/config-array/-/config-array-0.5.0.tgz#1407967d4c6eecd7388f83acf1eaf4d0c6e58ef9"

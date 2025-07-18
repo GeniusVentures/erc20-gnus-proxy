@@ -1,18 +1,13 @@
 
 
 import { utils, BigNumber } from 'ethers';
-;
-
-
-import { ProxyDiamond } from '../../typechain-types/';
+import { ProxyDiamond } from '../../typechain-types';
 import { toWei, GNUS_TOKEN_ID, XMPL_TOKEN_ID, toBN } from "../../scripts/common";
 import { logEvents } from "../../scripts/utils/logEvents";
-
 import { debug } from 'debug';
 import { pathExistsSync } from "fs-extra";
 import { expect, assert } from 'chai';
 import { ethers } from 'hardhat';
-import hre from 'hardhat';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { multichain } from 'hardhat-multichain';
@@ -61,14 +56,19 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
       let signer2Diamond: GeniusDiamond;
       let ownerGeniusDiamond: GeniusDiamond;
 
-      let ethersMultichain: typeof ethers;
-      let outerSnapshotId: string;
-      let innerSnapshotId: string;
-      let deployedDiamondData: DeployedDiamondData;
-      // Used for NFTFactory tests
-      const ParentNFTID: BigNumber = toBN(1);
-
-      before(async function () {
+  let ethersMultichain: typeof ethers;
+  let outerSnapshotId: string;
+  let innerSnapshotId: string;
+  let deployedDiamondData: DeployedDiamondData;
+  // Used for NFTFactory tests
+  let ParentNFTID: BigNumber;
+  
+  // Debug logging function
+  const debuglog = (message: string) => {
+    if (process.env.DEBUG) {
+      console.log(message);
+    }
+  };      before(async function () {
         const config = {
           diamondName: diamondName,
           networkName: networkName,
@@ -203,6 +203,40 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
       });
 
       describe('NFTFactory Tests', async function () {
+        beforeEach(async function () {
+          // Grant the `CREATOR_ROLE` to the second signer for NFT creation
+          await ownerGeniusDiamond.grantRole(utils.id('CREATOR_ROLE'), signer1);
+
+          // Mint sufficient GNUS tokens for testing
+          await ownerGeniusDiamond['mint(address,uint256)'](signer1, toWei(1000));
+
+          // Retrieve information about the GNUS NFT
+          const GNUSNFTInfo = await signer1Diamond.getNFTInfo(GNUS_TOKEN_ID);
+
+          // Generate a new parent NFT ID and store it for subsequent tests
+          ParentNFTID = GNUSNFTInfo.childCurIndex;
+
+          // Create a new NFT with a specified exchange rate
+          await signer1Diamond.createNFT(
+            GNUS_TOKEN_ID,
+            'TEST GAME',
+            'TESTGAME',
+            toBN(2.0), // Exchange rate: 2.0 tokens for 1 GNUS token
+            toWei(50000000 * 2),
+            '',
+          );
+
+          // Create multiple child NFTs with valid parameters
+          await signer1Diamond.createNFTs(
+            ParentNFTID,
+            ['TESTGAME:NFT1', 'TESTGAME:NFT2', 'TESTGAME:NFT3'],
+            ['', '', ''], // Metadata URIs
+            [1, 1, 1], // Exchange rates
+            [100, 1, 1], // Supply limits
+            ['https://www.gnus.ai', '', ''], // URLs
+          );
+        });
+
         // Test case to validate the burning of Tokens for NFT creation
         it('Testing NFT Factory that Example Tokens will burn for address 1', async () => {
           // Mint GNUS tokens to the second signer by the GNUS Contract Owner
@@ -234,9 +268,10 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
             signer1,
             GNUS_TOKEN_ID,
           );
+          // Should have 2000 remaining: 1000 from beforeEach + 2000 from this test - 1000 burned = 2000
           assert(
-            amount.eq(toWei(1000)),
-            `Address one should equal 1000, but equals ${utils.formatEther(amount)}`,
+            amount.eq(toWei(2000)),
+            `Address one should equal 2000, but equals ${utils.formatEther(amount)}`,
           );
         });
 
@@ -253,9 +288,9 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
 
         // Test case to validate restrictions on NFT creation for unauthorized users
         it('Testing NFT Factory to create new token for non-creator nor admin', async () => {
-          // Attempt to create an NFT as an unauthorized user, expecting rejection
+          // Attempt to create an NFT as an unauthorized user (signer2), expecting rejection
           await expect(
-            signer1Diamond.createNFT(
+            signer2Diamond.createNFT(
               GNUS_TOKEN_ID,
               'Addr1Token',
               'ADDR1',
@@ -271,34 +306,19 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
 
         // Test case to validate NFT creation functionality for authorized creators
         it('Testing NFT Factory to create new NFT & child NFTs for creator', async () => {
-          // Grant the `CREATOR_ROLE` to the second signer
-          await ownerGeniusDiamond.grantRole(utils.id('CREATOR_ROLE'), signer1);
-
-          // Retrieve information about the GNUS NFT
-          const GNUSNFTInfo = await signer1Diamond.getNFTInfo(GNUS_TOKEN_ID);
-
-          // Generate a new parent NFT ID
-          const newParentNFTID = GNUSNFTInfo.childCurIndex;
-
-          // Create a new NFT with a specified exchange rate
-          await signer1Diamond.createNFT(
-            GNUS_TOKEN_ID,
-            'TEST GAME',
-            'TESTGAME',
-            toBN(2.0), // Exchange rate: 2.0 tokens for 1 GNUS token
-            toWei(50000000 * 2),
-            '',
+          // Verify that the NFT was created in beforeEach
+          let newNFTInfo = await signer1Diamond.getNFTInfo(ParentNFTID);
+          assert(
+            newNFTInfo.childCurIndex.eq(3),
+            `Should have created 3 NFT's, but created ${newNFTInfo.childCurIndex.toString()}`,
           );
-
-          // Retrieve information about the newly created NFT
-          let newNFTInfo = await signer1Diamond.getNFTInfo(newParentNFTID);
           debuglog(`NfTInfo ${iObjToString(newNFTInfo)}`);
 
           // Attempt to create multiple child NFTs with mismatched array lengths, expecting rejection
           await expect(
             signer1Diamond.createNFTs(
-              newParentNFTID,
-              ['TESTGAME:NFT1', 'TESTGAME:NFT2', 'TESTGAME:NFT3'],
+              ParentNFTID,
+              ['TESTGAME:NFT4', 'TESTGAME:NFT5', 'TESTGAME:NFT6'],
               [],
               [],
               [100],
@@ -309,28 +329,10 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
             /NFT creation array lengths, should be the same/,
           );
 
-          // Create multiple child NFTs with valid parameters
-          await signer1Diamond.createNFTs(
-            newParentNFTID,
-            ['TESTGAME:NFT1', 'TESTGAME:NFT2', 'TESTGAME:NFT3'],
-            ['', '', ''], // Metadata URIs
-            [1, 1, 1], // Exchange rates
-            [100, 1, 1], // Supply limits
-            ['https://www.gnus.ai', '', ''], // URLs
-          );
-
-          // Retrieve updated information about the parent NFT
-          newNFTInfo = await signer1Diamond.getNFTInfo(newParentNFTID);
-          assert(
-            newNFTInfo.childCurIndex.eq(3),
-            `Should have created 3 NFT's, but created ${newNFTInfo.childCurIndex.toString()}`,
-          );
-          debuglog(`NfTInfo ${iObjToString(newNFTInfo)}`);
-
           // Iterate through the created child NFTs and log their details
           // This is really just for debugging, could be removed.
           for (let i = 0; i < 3; i++) {
-            const nftID = newParentNFTID.shl(128).or(i);
+            const nftID = ParentNFTID.shl(128).or(i);
             const nftInfo = await signer1Diamond.getNFTInfo(nftID);
             debuglog(`nftInfo${i.toString()} ${iObjToString(nftInfo)}}`);
           }
