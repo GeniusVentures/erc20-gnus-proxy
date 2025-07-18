@@ -8,6 +8,8 @@
     "sourceMap": true,
     "allowJs": true,
     "checkJs": false,
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
     "rootDirs": [
       "./scripts", 
       "./test", 
@@ -18,8 +20,6 @@
     "resolveJsonModule": true,
     "baseUrl": "./",
     "paths": {
-      "@gnus.ai/diamonds": ["./packages/diamonds/src/index.ts"],
-      "@gnus.ai/hardhat-diamonds": ["./packages/hardhat-diamonds/src/index.ts"],
       "scripts/*": ["./scripts/*"],
       "test/*": ["./test/*"],
       "typechain-types/*": ["./typechain-types/*"],
@@ -32,7 +32,9 @@
       "@nomiclabs/hardhat-web3",
       "@typechain/ethers-v5",
       "@typechain/hardhat",
-      "@gnus.ai/hardhat-diamonds"
+      "@gnus.ai/hardhat-diamonds",
+      "./types/hardhat",
+      "./types/ethereum-waffle-fix"
     ],
   },
   "include": [
@@ -42,7 +44,7 @@
     "test/integration/GNUSAiIntegration.test.ts", 
     "test-suites/GeniusDiamondDeployment.test.ts", 
     "test-suites/ERC20ProxyTokenCreation.test.ts"],
-  "exclude": ["node_modules", "dist", "notes", "packages/**/notes"],
+  "exclude": ["node_modules", "dist", "notes", "packages", "packages/**/*"],
   "files": ["./hardhat.config.ts"],
   "workspaces": ["packages/*"]
 }

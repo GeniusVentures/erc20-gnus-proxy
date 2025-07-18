@@ -30,10 +30,10 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
   if (process.argv.includes('test-multichain')) {
     const networkNames = process.argv[process.argv.indexOf('--chains') + 1].split(',');
     if (networkNames.includes('hardhat')) {
-      networkProviders.set('hardhat', ethers.provider);
+      networkProviders.set('hardhat', hre.ethers.provider);
     }
   } else if (process.argv.includes('test') || process.argv.includes('coverage')) {
-    networkProviders.set('hardhat', ethers.provider);
+    networkProviders.set('hardhat', hre.ethers.provider);
   }
 
   for (const [networkName, provider] of networkProviders.entries()) {
@@ -69,7 +69,7 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
 
         const hardhatDiamondAbiPath = 'hardhat-diamond-abi/HardhatDiamondABI.sol:';
         const diamondArtifactName = `${hardhatDiamondAbiPath}${diamond.diamondName}`;
-        proxyDiamond = await ethers.getContractAt(diamondArtifactName, deployInfo.DiamondAddress!) as ProxyDiamond;
+        proxyDiamond = await hre.ethers.getContractAt(diamondArtifactName, deployInfo.DiamondAddress!) as ProxyDiamond;
 
         ethersMultichain = ethers;
         ethersMultichain.provider = provider;

@@ -1,4 +1,6 @@
 import * as dotenv from 'dotenv';
+// import './types/hardhat';
+import '@gnus.ai/hardhat-diamonds';
 import { HardhatUserConfig, task } from 'hardhat/config';
 import '@nomiclabs/hardhat-etherscan';
 import '@nomiclabs/hardhat-waffle';
@@ -11,7 +13,6 @@ import '@nomiclabs/hardhat-ethers';
 import '@nomiclabs/hardhat-web3';
 import 'solidity-coverage';
 import 'hardhat-multichain';
-import '@gnus.ai/hardhat-diamonds';
 
 dotenv.config();
 
