@@ -10,12 +10,12 @@ import { getInterfaceID } from '../../scripts/utils/helpers';
 import { LocalDiamondDeployer, LocalDiamondDeployerConfig } from '../../scripts/setup/LocalDiamondDeployer';
 import { Diamond } from 'diamonds';
 import {
-  ProxyDiamond,
   IERC20Upgradeable__factory,
   IDiamondCut__factory,
   IDiamondLoupe__factory
 } from '../../typechain-types/';
 import { loadDiamondContract } from '../../scripts/utils/loadDiamondArtifact';
+import { ProxyDiamond } from '../../diamond-typechain-types/ProxyDiamond'
 
 describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () {
   const diamondName = 'ProxyDiamond';
@@ -62,7 +62,7 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
         } as LocalDiamondDeployerConfig;
         const diamondDeployer = await LocalDiamondDeployer.getInstance(config);
         diamond = await diamondDeployer.getDiamondDeployed();
-        const deployInfo = diamond.getDeployedDiamondData();
+        const deployedDiamondData = diamond.getDeployedDiamondData();
 
         const hardhatDiamondAbiPath = 'hardhat-diamond-abi/HardhatDiamondABI.sol:';
         const diamondArtifactName = `${hardhatDiamondAbiPath}${diamond.diamondName}`;
@@ -81,7 +81,7 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
         signer2Diamond = proxyDiamond.connect(signers[2]);
 
         // get the signer for the owner
-        owner = deployInfo.DeployerAddress;  //  this will be = signer0 for hardhat;
+        owner = deployedDiamondData.DeployerAddress!;  //  this will be = signer0 for hardhat;
         ownerSigner = await ethersMultichain.getSigner(owner);
         ownerDiamond = proxyDiamond.connect(ownerSigner);
       });
@@ -140,7 +140,7 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
       });
 
       // it(`should verify ERC173 contract ownership on ${networkName}`, async function () {
-      //   // check if the owner is the deployer and transfer ownership to the deployer
+      // check if the owner is the deployer and transfer ownership to the deployer
       //   const currentContractOwner = await ownerDiamond.owner();
       //   expect(currentContractOwner.toLowerCase()).to.be.eq(await owner.toLowerCase());
       // });
@@ -159,7 +159,7 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
         // Generate the IDiamondCut interface ID by XORing with the base interface ID.
         const iDiamondCutInterfaceID = getInterfaceID(iDiamonCutInterface);
         // const supportsIDiamondCut = await proxyDiamond.supportsInterface('0x1f931c1c');
-        const supportsERC165 = await proxyDiamond.supportsInterface(iDiamondCutInterfaceID._hex);
+        const supportsERC165 = await proxyDiamond.supportsInterface(iDiamondCutInterfaceID.toString());
         expect(supportsERC165).to.be.true;
 
         log(`DiamondCut Facet interface support validated on ${networkName}`);
@@ -171,7 +171,7 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
         // Generate the IDiamondLoupe interface ID by XORing with the base interface ID.
         const iDiamondLoupeInterfaceID = getInterfaceID(iDiamondLoupeInterface);
         // const supportsIDiamondLoupe = await proxyDiamond.supportsInterface('0x48e3885f');
-        const supportsERC165 = await proxyDiamond.supportsInterface(iDiamondLoupeInterfaceID._hex);
+        const supportsERC165 = await proxyDiamond.supportsInterface(iDiamondLoupeInterfaceID.toString());
         expect(supportsERC165).to.be.true;
         log(`DiamondLoupe Facet interface support validated on ${networkName}`);
       });

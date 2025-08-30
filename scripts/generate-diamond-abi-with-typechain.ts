@@ -1,6 +1,7 @@
 import { generateDiamondAbi, DiamondAbiGenerationOptions } from './diamond-abi-generator';
 import { spawn } from 'child_process';
 import chalk from 'chalk';
+import { join } from 'path';
 
 /**
  * Generate diamond ABI and regenerate TypeChain types
@@ -18,11 +19,13 @@ async function generateDiamondAbiWithTypechain(options: DiamondAbiGenerationOpti
 
     // Generate TypeScript types directly using TypeChain
     console.log(chalk.blue('🔧 Regenerating TypeChain types for Diamond...'));
+
+    const outDir = join('diamond-typechain-types', options.diamondName);
     
     await runCommand('npx', [
       'typechain',
       '--target', 'ethers-v6',
-      '--out-dir', 'diamond-typechain-types',
+      '--out-dir', outDir,
       result.outputPath!
     ], {
       stdio: options.verbose ? 'inherit' : 'pipe'
@@ -78,7 +81,7 @@ function runCommand(command: string, args: string[], options: any = {}): Promise
 
 // CLI support
 if (require.main === module) {
-  const diamondName = process.argv[2] || 'GeniusDiamond';
+  const diamondName = process.argv[2] || 'ProxyDiamond';
   const verbose = process.argv.includes('--verbose');
   
   const options: DiamondAbiGenerationOptions = {

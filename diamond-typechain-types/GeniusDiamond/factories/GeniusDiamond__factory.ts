@@ -134,49 +134,6 @@ const _abi = [
     anonymous: false,
     inputs: [
       {
-        components: [
-          {
-            internalType: "address",
-            name: "facetAddress",
-            type: "address",
-          },
-          {
-            internalType: "enum IDiamondCut.FacetCutAction",
-            name: "action",
-            type: "uint8",
-          },
-          {
-            internalType: "bytes4[]",
-            name: "functionSelectors",
-            type: "bytes4[]",
-          },
-        ],
-        indexed: false,
-        internalType: "struct IDiamondCut.FacetCut[]",
-        name: "_diamondCut",
-        type: "tuple[]",
-      },
-      {
-        indexed: false,
-        internalType: "address",
-        name: "_init",
-        type: "address",
-      },
-      {
-        indexed: false,
-        internalType: "bytes",
-        name: "_calldata",
-        type: "bytes",
-      },
-    ],
-    name: "DiamondCut",
-    type: "event",
-    _diamondFacet: "DiamondCutFacet",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
         indexed: true,
         internalType: "address",
         name: "sender",
@@ -558,23 +515,6 @@ const _abi = [
     name: "ErrorWithdrawingEther",
     type: "error",
     _diamondFacet: "GNUSContractAssets",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "_initializationContractAddress",
-        type: "address",
-      },
-      {
-        internalType: "bytes",
-        name: "_calldata",
-        type: "bytes",
-      },
-    ],
-    name: "InitializationFunctionReverted",
-    type: "error",
-    _diamondFacet: "DiamondCutFacet",
   },
   {
     inputs: [
@@ -1039,48 +979,6 @@ const _abi = [
     _diamondSelector: "0xa217fddf",
   },
   {
-    inputs: [
-      {
-        components: [
-          {
-            internalType: "address",
-            name: "facetAddress",
-            type: "address",
-          },
-          {
-            internalType: "enum IDiamondCut.FacetCutAction",
-            name: "action",
-            type: "uint8",
-          },
-          {
-            internalType: "bytes4[]",
-            name: "functionSelectors",
-            type: "bytes4[]",
-          },
-        ],
-        internalType: "struct IDiamondCut.FacetCut[]",
-        name: "_diamondCut",
-        type: "tuple[]",
-      },
-      {
-        internalType: "address",
-        name: "_init",
-        type: "address",
-      },
-      {
-        internalType: "bytes",
-        name: "_calldata",
-        type: "bytes",
-      },
-    ],
-    name: "diamondCut",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-    _diamondFacet: "DiamondCutFacet",
-    _diamondSelector: "0x1f931c1c",
-  },
-  {
     inputs: [],
     name: "diamondInitialize250",
     outputs: [],
@@ -1109,90 +1007,6 @@ const _abi = [
     type: "function",
     _diamondFacet: "GNUSNFTFactory",
     _diamondSelector: "0x4f558e79",
-  },
-  {
-    inputs: [
-      {
-        internalType: "bytes4",
-        name: "_functionSelector",
-        type: "bytes4",
-      },
-    ],
-    name: "facetAddress",
-    outputs: [
-      {
-        internalType: "address",
-        name: "facetAddress_",
-        type: "address",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-    _diamondFacet: "DiamondLoupeFacet",
-    _diamondSelector: "0xcdffacc6",
-  },
-  {
-    inputs: [],
-    name: "facetAddresses",
-    outputs: [
-      {
-        internalType: "address[]",
-        name: "facetAddresses_",
-        type: "address[]",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-    _diamondFacet: "DiamondLoupeFacet",
-    _diamondSelector: "0x52ef6b2c",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "_facet",
-        type: "address",
-      },
-    ],
-    name: "facetFunctionSelectors",
-    outputs: [
-      {
-        internalType: "bytes4[]",
-        name: "_facetFunctionSelectors",
-        type: "bytes4[]",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-    _diamondFacet: "DiamondLoupeFacet",
-    _diamondSelector: "0xadfca15e",
-  },
-  {
-    inputs: [],
-    name: "facets",
-    outputs: [
-      {
-        components: [
-          {
-            internalType: "address",
-            name: "facetAddress",
-            type: "address",
-          },
-          {
-            internalType: "bytes4[]",
-            name: "functionSelectors",
-            type: "bytes4[]",
-          },
-        ],
-        internalType: "struct IDiamondLoupe.Facet[]",
-        name: "facets_",
-        type: "tuple[]",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-    _diamondFacet: "DiamondLoupeFacet",
-    _diamondSelector: "0x7a0ed627",
   },
   {
     inputs: [],
@@ -1916,7 +1730,7 @@ const _abi = [
     inputs: [
       {
         internalType: "bytes4",
-        name: "_interfaceId",
+        name: "interfaceId",
         type: "bytes4",
       },
     ],
@@ -1930,7 +1744,7 @@ const _abi = [
     ],
     stateMutability: "view",
     type: "function",
-    _diamondFacet: "DiamondLoupeFacet",
+    _diamondFacet: "GeniusOwnershipFacet",
     _diamondSelector: "0x01ffc9a7",
   },
   {

@@ -9,16 +9,16 @@ import { getInterfaceID } from '../../scripts/utils/helpers';
 import { LocalDiamondDeployer, LocalDiamondDeployerConfig } from '../../scripts/setup/LocalDiamondDeployer';
 import { Diamond } from 'diamonds';
 import {
-  GeniusDiamond,
   IERC20Upgradeable__factory,
   IDiamondCut__factory,
   IDiamondLoupe__factory
 } from '../../typechain-types';
 import { loadDiamondContract } from '../../scripts/utils/loadDiamondArtifact';
+import { GeniusDiamond } from '../../diamond-typechain-types/GeniusDiamond';
 
 describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () {
   const diamondName = 'GeniusDiamond';
-  const log: debug.Debugger = debug('GNUSDeploy:log:${diamondName}');
+  const log: debug.Debugger = debug(`GNUSDeploy:log:${diamondName}`);
   this.timeout(0); // Extended indefinitely for diamond deployment time
 
   let networkProviders = multichain.getProviders() || new Map<string, JsonRpcProvider>();
@@ -182,7 +182,7 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
         // Generate the IDiamondCut interface ID by XORing with the base interface ID.
         const iDiamondCutInterfaceID = getInterfaceID(iDiamondCutInterface);
         // const supportsIDiamondCut = await proxyDiamond.supportsInterface('0x1f931c1c');
-        const supportsERC165 = await ownerDiamond.supportsInterface(iDiamondCutInterfaceID._hex);
+        const supportsERC165 = await ownerDiamond.supportsInterface(iDiamondCutInterfaceID.toString());
         expect(supportsERC165).to.be.true;
 
         log(`DiamondCut Facet interface support validated on ${networkName}`);
@@ -194,7 +194,7 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
         // Generate the IDiamondLoupe interface ID by XORing with the base interface ID.
         const iDiamondLoupeInterfaceID = getInterfaceID(iDiamondLoupeInterface);
         // const supportsIDiamondLoupe = await proxyDiamond.supportsInterface('0x48e3885f');
-        const supportsERC165 = await ownerDiamond.supportsInterface(iDiamondLoupeInterfaceID._hex);
+        const supportsERC165 = await ownerDiamond.supportsInterface(iDiamondLoupeInterfaceID.toString());
         expect(supportsERC165).to.be.true;
         log(`DiamondLoupe Facet interface support validated on ${networkName}`);
       });

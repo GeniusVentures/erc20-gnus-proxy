@@ -17,7 +17,7 @@
     "verify": "npx hardhat run scripts/VerifyContracts.ts",
     "getgascost": "npx hardhat run scripts/getgascost.ts",
     "getaccessinfo": "npx hardhat run scripts/getaccessinfo.ts",
-    "build": "npx hardhat compile && npx ts-node scripts/generate-diamond-abi-with-typechain.ts && npx ts-node scripts/generate-diamond-abi-with-typechain.ts ProxyDiamond",
+    "build": "npx hardhat compile && npx ts-node scripts/generate-diamond-abi-with-typechain.ts GeniusDiamond && npx ts-node scripts/generate-diamond-abi-with-typechain.ts ProxyDiamond && npx tsc",
     "generate-diamond-abi": "npx ts-node scripts/diamond-abi-generator.ts",
     "generate-diamond-abi-typechain": "npx ts-node scripts/generate-diamond-abi-with-typechain.ts",
     "watch": "tsc -w"

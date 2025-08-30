@@ -1,78 +1,82 @@
-import { ethers, network } from 'hardhat';
-import { parseEther, formatEther } from 'ethers';
-import { ProxyDiamond } from '../../diamond-typechain-types'; // Update the path to your typechain types
-import { INetworkDeployInfo } from '../common'; // Update the path to your common types
+/**
+ * The ProxyDiamond does not implement ERC173 so no ownership transfer is possible.  This is here for reference.
+ */
 
-async function main(networkDeployInfo: INetworkDeployInfo) {
-  const { DiamondAddress, DeployerAddress } = networkDeployInfo;
+// import { ethers, network } from 'hardhat';
+// import { parseEther, formatEther } from 'ethers';
+// import { ProxyDiamond } from '../../diamond-typechain-types/ProxyDiamond'; // Update the path to your typechain types
+// import { INetworkDeployInfo } from '../common'; // Update the path to your common types
 
-  if (!DiamondAddress || !DeployerAddress) {
-    throw new Error('DiamondAddress or DeployerAddress is missing in networkDeployInfo');
-  }
+// async function main(networkDeployInfo: INetworkDeployInfo) {
+//   const { DiamondAddress, DeployerAddress } = networkDeployInfo;
 
-  console.log(`Network: ${network.name}`);
-  console.log(`Diamond Address: ${DiamondAddress}`);
-  console.log(`Deployer Address: ${DeployerAddress}`);
+//   if (!DiamondAddress || !DeployerAddress) {
+//     throw new Error('DiamondAddress or DeployerAddress is missing in networkDeployInfo');
+//   }
 
-  // Impersonate the deployer account
-  console.log(`Impersonating deployer account: ${DeployerAddress}`);
-  await network.provider.request({
-    method: 'hardhat_impersonateAccount',
-    params: [DeployerAddress],
-  });
+//   console.log(`Network: ${network.name}`);
+//   console.log(`Diamond Address: ${DiamondAddress}`);
+//   console.log(`Deployer Address: ${DeployerAddress}`);
 
-  // Get the deployer signer
-  const deployerSigner = await ethers.getSigner(DeployerAddress);
+//   // Impersonate the deployer account
+//   console.log(`Impersonating deployer account: ${DeployerAddress}`);
+//   await network.provider.request({
+//     method: 'hardhat_impersonateAccount',
+//     params: [DeployerAddress],
+//   });
 
-  // Fund the impersonated deployer account
-  const fundAmount = parseEther('10'); // Adjust as needed
-  const [funder] = await ethers.getSigners();
-  console.log(`Funding deployer account with ${formatEther(fundAmount)} ETH`);
-  await funder.sendTransaction({
-    to: DeployerAddress,
-    value: fundAmount,
-  });
+//   // Get the deployer signer
+//   const deployerSigner = await ethers.getSigner(DeployerAddress);
 
-  // Connect to the ExampleDiamond (ownership functions are part of the diamond)
-  console.log(`Connecting to ProxyDiamond at: ${DiamondAddress}`);
-  const ownershipFacet = (await ethers.getContractAt(
-    'GeniusOwnershipFacet',
-    DiamondAddress,
-    deployerSigner,
-  )) as unknown as ProxyDiamond;
+//   // Fund the impersonated deployer account
+//   const fundAmount = parseEther('10'); // Adjust as needed
+//   const [funder] = await ethers.getSigners();
+//   console.log(`Funding deployer account with ${formatEther(fundAmount)} ETH`);
+//   await funder.sendTransaction({
+//     to: DeployerAddress,
+//     value: fundAmount,
+//   });
 
-  // Transfer ownership to the deployer address
-  console.log(`Transferring contract ownership to: ${DeployerAddress}`);
-  const tx = await ownershipFacet.transferOwnership(DeployerAddress);
-  console.log('Transaction sent. Waiting for confirmation...');
-  await tx.wait();
+//   // Connect to the ExampleDiamond (ownership functions are part of the diamond)
+//   console.log(`Connecting to ProxyDiamond at: ${DiamondAddress}`);
+//   const ownershipFacet = (await ethers.getContractAt(
+//     'GeniusOwnershipFacet',
+//     DiamondAddress,
+//     deployerSigner,
+//   )) as unknown as ProxyDiamond;
 
-  // Verify the ownership transfer
-  const currentOwner = await ownershipFacet.owner();
-  if (currentOwner.toLowerCase() === DeployerAddress.toLowerCase()) {
-    console.log(`Ownership successfully transferred to ${currentOwner}`);
-  } else {
-    throw new Error(`Ownership transfer failed. Current owner: ${currentOwner}`);
-  }
+//   // Transfer ownership to the deployer address
+//   console.log(`Transferring contract ownership to: ${DeployerAddress}`);
+//   const tx = await ownershipFacet.transferOwnership(DeployerAddress);
+//   console.log('Transaction sent. Waiting for confirmation...');
+//   await tx.wait();
 
-  // Stop impersonating the deployer
-  console.log(`Stopping impersonation of deployer account: ${DeployerAddress}`);
-  await network.provider.request({
-    method: 'hardhat_stopImpersonatingAccount',
-    params: [DeployerAddress],
-  });
-}
+//   // Verify the ownership transfer
+//   const currentOwner = await ownershipFacet.owner();
+//   if (currentOwner.toLowerCase() === DeployerAddress.toLowerCase()) {
+//     console.log(`Ownership successfully transferred to ${currentOwner}`);
+//   } else {
+//     throw new Error(`Ownership transfer failed. Current owner: ${currentOwner}`);
+//   }
 
-// Replace `networkDeployInfo` with actual data when calling the script
-const networkDeployInfo: INetworkDeployInfo = {
-  DiamondAddress: '0xYourDiamondProxyAddress', // Replace with the actual diamond address
-  DeployerAddress: '', // Replace with the actual deployer address
-  FacetDeployedInfo: {}, // Add empty facet deployed info
-};
+//   // Stop impersonating the deployer
+//   console.log(`Stopping impersonation of deployer account: ${DeployerAddress}`);
+//   await network.provider.request({
+//     method: 'hardhat_stopImpersonatingAccount',
+//     params: [DeployerAddress],
+//   });
+// }
 
-main(networkDeployInfo)
-  .then(() => process.exit(0))
-  .catch((error) => {
-    console.error('Error:', error);
-    process.exit(1);
-  });
+// // Replace `networkDeployInfo` with actual data when calling the script
+// const networkDeployInfo: INetworkDeployInfo = {
+//   DiamondAddress: '0xYourDiamondProxyAddress', // Replace with the actual diamond address
+//   DeployerAddress: '', // Replace with the actual deployer address
+//   FacetDeployedInfo: {}, // Add empty facet deployed info
+// };
+
+// main(networkDeployInfo)
+//   .then(() => process.exit(0))
+//   .catch((error) => {
+//     console.error('Error:', error);
+//     process.exit(1);
+//   });

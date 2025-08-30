@@ -1,4 +1,4 @@
-import { Diamond, FileDeploymentRepository, DiamondAbiGenerator} from 'diamonds';
+import { Diamond, FileDeploymentRepository, DiamondAbiGenerator, generateDiamondAbi as generateDiamondAbiCore, DiamondAbiGenerationOptions as CoreDiamondAbiGenerationOptions, DiamondAbiGenerationResult as CoreDiamondAbiGenerationResult } from 'diamonds';
 import { join } from 'path';
 import { writeFileSync, existsSync, mkdirSync, readFileSync } from 'fs';
 import chalk from 'chalk';
@@ -309,11 +309,8 @@ export class ProjectDiamondAbiGenerator {
           const artifactPaths = [
             `./artifacts/contracts/${facetName}.sol/${facetName}.json`,
             `./artifacts/contracts/gnus-ai/${facetName}.sol/${facetName}.json`,
-            `./artifacts/contracts/${this.options.diamondName.toLowerCase()}/${facetName}.sol/${facetName}.json`,
-            `./artifacts/contracts/${this.diamond!.contractsPath}/${facetName}.sol/${facetName}.json`,
-            `./artifacts/contracts-starter/contracts/facets/${facetName}.sol/${facetName}.json`,
-            `./artifacts/@gnus.ai/contracts-upgradeable-diamond/contracts/${facetName}.sol/${facetName}.json`,
-            `./artifacts/contracts/erc20-gnus-proxy/${facetName}.sol/${facetName}.json`
+            `./artifacts/contracts/erc20-gnus-proxy/${facetName}.sol/${facetName}.json`,
+            `./artifacts/@gnus.ai/contracts-upgradeable-diamond/contracts/${facetName}.sol/${facetName}.json`
           ];
 
           let artifact = null;
@@ -511,7 +508,7 @@ export async function generateDiamondAbi(
 
 // CLI support
 if (require.main === module) {
-  const diamondName = process.argv[2] || 'GeniusDiamond';
+  const diamondName = process.argv[2] || 'ProxyDiamond';
   const verbose = process.argv.includes('--verbose');
   
   const options: DiamondAbiGenerationOptions = {

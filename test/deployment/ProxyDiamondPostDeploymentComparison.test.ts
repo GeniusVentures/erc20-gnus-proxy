@@ -18,7 +18,7 @@ import {
 } from 'diamonds';
 import {
   ProxyDiamond,
-} from '../../typechain-types';
+} from '../../diamond-typechain-types/ProxyDiamond';
 import { DeployedDiamondData } from 'diamonds/src';
 import { loadDiamondContract } from '../../scripts/utils/loadDiamondArtifact';
 
@@ -32,10 +32,10 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
   if (process.argv.includes('test-multichain')) {
     const networkNames = process.argv[process.argv.indexOf('--chains') + 1].split(',');
     if (networkNames.includes('hardhat')) {
-      networkProviders.set('hardhat', hre.ethers.provider);
+      networkProviders.set('hardhat', hre.ethers.provider as any);
     }
   } else if (process.argv.includes('test') || process.argv.includes('coverage')) {
-    networkProviders.set('hardhat', hre.ethers.provider);
+    networkProviders.set('hardhat', hre.ethers.provider as any);
   }
 
   for (const [networkName, provider] of networkProviders.entries()) {
@@ -72,10 +72,10 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
 
         const hardhatDiamondAbiPath = 'hardhat-diamond-abi/HardhatDiamondABI.sol:';
         const diamondArtifactName = `${hardhatDiamondAbiPath}${diamond.diamondName}`;
-        proxyDiamond = await hre.ethers.getContractAt(diamondArtifactName, deployedDiamondData.DiamondAddress!) as ProxyDiamond;
+        proxyDiamond = await loadDiamondContract<ProxyDiamond>(diamond, deployedDiamondData.DiamondAddress!);
 
         ethersMultichain = hre.ethers;
-        ethersMultichain.provider = provider;
+        ethersMultichain.provider = provider as any;
 
         // Retrieve the signers for the chain
         signers = await ethersMultichain.getSigners();
@@ -86,7 +86,7 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
         signer1Diamond = proxyDiamond.connect(signers[1]);
         signer2Diamond = proxyDiamond.connect(signers[2]);
 
-        owner = diamond.getDeployedDiamondData().DeployerAddress;
+        owner = diamond.getDeployedDiamondData().DeployerAddress!;
         if (!owner) {
           diamond.setSigner(signers[0]);
           owner = signer0;
@@ -108,9 +108,10 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
 
       it('🧪 Should report any issues with facets and selectors that do not match',
         async function () {
+          const diamondProvider = diamond.provider! as any;
           const passFail = await diffDeployedFacets(
             deployedDiamondData,
-            diamond.provider!,
+            diamondProvider,
             true,
           );
           expect(passFail).to.be.true;

@@ -14,12 +14,12 @@ import { getInterfaceID } from '../../scripts/utils/helpers';
 import { LocalDiamondDeployer, LocalDiamondDeployerConfig } from '../../scripts/setup/LocalDiamondDeployer';
 import { Diamond } from 'diamonds';
 import {
-  ProxyDiamond,
   IERC20Upgradeable__factory,
   IDiamondCut__factory,
   IDiamondLoupe__factory
 } from '../../typechain-types/';
 import { loadDiamondContract } from '../../scripts/utils/loadDiamondArtifact';
+import { ProxyDiamond } from '../../diamond-typechain-types/ProxyDiamond';
 
 describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () {
   const diamondName = 'ProxyDiamond';
@@ -31,10 +31,10 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
   if (process.argv.includes('test-multichain')) {
     const networkNames = process.argv[process.argv.indexOf('--chains') + 1].split(',');
     if (networkNames.includes('hardhat')) {
-      networkProviders.set('hardhat', hre.ethers.provider);
+      networkProviders.set('hardhat', ethers.provider as any);
     }
   } else if (process.argv.includes('test') || process.argv.includes('coverage')) {
-    networkProviders.set('hardhat', hre.ethers.provider);
+    networkProviders.set('hardhat', ethers.provider as any);
   }
 
   for (const [networkName, provider] of networkProviders.entries()) {
@@ -70,10 +70,10 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
 
         const hardhatDiamondAbiPath = 'hardhat-diamond-abi/HardhatDiamondABI.sol:';
         const diamondArtifactName = `${hardhatDiamondAbiPath}${diamond.diamondName}`;
-        proxyDiamond = await hre.ethers.getContractAt(diamondArtifactName, deployInfo.DiamondAddress!) as ProxyDiamond;
+        proxyDiamond = await loadDiamondContract<ProxyDiamond>(diamond, deployInfo.DiamondAddress!);
 
         ethersMultichain = ethers;
-        ethersMultichain.provider = provider;
+        ethersMultichain.provider = provider as any;
 
         // Retrieve the signers for the chain
         signers = await ethersMultichain.getSigners();
@@ -85,7 +85,7 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
         signer2Diamond = proxyDiamond.connect(signers[2]);
 
         // get the signer for the owner
-        owner = deployInfo.DeployerAddress;
+        owner = deployInfo.DeployerAddress!;
         if (!owner) {
           owner = signer0;
           ownerSigner = signers[0];
@@ -108,7 +108,7 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
         // interface ID does not include base contract(s) functions.
         const IERC20InterfaceID = getInterfaceID(IERC20UpgradeableInterface);
         assert(
-          await proxyDiamond.supportsInterface(IERC20InterfaceID._hex),
+          await proxyDiamond.supportsInterface(IERC20InterfaceID.toString()),
           "Doesn't support IERC20Upgradeable",
         );
       });
@@ -119,8 +119,8 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
         // For now, we verify that the ERC20 functions are properly deployed and accessible
         
         // Use ERC20 interface directly instead of ProxyDiamond interface
-        const erc20Contract = await ethersMultichain.getContractAt('IERC20Upgradeable', proxyDiamond.address);
-        
+        const erc20Contract = await ethersMultichain.getContractAt('IERC20Upgradeable', await proxyDiamond.getAddress());
+
         try {
           // This will fail because the proxy isn't properly initialized yet
           // but we can verify the function exists
@@ -136,7 +136,7 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
         
         for (const func of requiredFunctions) {
           assert(
-            contractInterface.getFunction(func),
+            contractInterface.getFunction(func as any),
             `Function ${func} should exist in the contract interface`
           );
         }
