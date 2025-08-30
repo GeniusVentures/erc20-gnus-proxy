@@ -1,11 +1,11 @@
 // import { Contract, BigNumber, EventFilter, ContractTransaction } from 'ethers';
 // import hre, { ethers } from 'hardhat';
-// import '@nomiclabs/hardhat-etherscan';
-// import '@nomiclabs/hardhat-waffle';
+// import '@nomicfoundation/hardhat-etherscan';
+// import '@nomicfoundation/hardhat-waffle';
 // import '@typechain/hardhat';
 // import 'hardhat-gas-reporter';
 // import 'solidity-coverage';
-// import '@nomiclabs/hardhat-ethers';
+// import '@nomicfoundation/hardhat-ethers';
 // import { getSelectors, Selectors, getInterfaceID } from '../scripts/FacetSelectors';
 // import {
 //   afterDeployCallbacks,

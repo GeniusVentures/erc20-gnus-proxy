@@ -1,17 +1,14 @@
-import { BaseContract, BigNumber, Contract, ContractTransaction } from 'ethers';
-import { ethers } from 'hardhat';
+import { BaseContract } from 'ethers';
+import { parseEther, Interface } from 'ethers';
 import { debug } from 'debug';
 import * as chai from 'chai';
-import { ERC1155SupplyUpgradeable } from "../typechain-types";
-
 
 export const assert = chai.assert;
 export const expect = chai.expect;
 import chaiAsPromised from 'chai-as-promised';
-import { Fragment } from '@ethersproject/abi';
+
 import fs from 'fs';
 import util from 'util';
-import { CreateProposalRequest } from "@openzeppelin/defender-admin-client";
 import { JsonRpcProvider } from '@ethersproject/providers';
 
 chai.use(chaiAsPromised);
@@ -24,10 +21,8 @@ global.debuglog = debug('UnitTest:log');
 global.debuglog.color = '158';
 
 export const debuglog = global.debuglog;
-
-export const toBN = BigNumber.from;
-export const GNUS_TOKEN_ID = toBN(0);
-export const XMPL_TOKEN_ID = toBN(1234567890);
+export const GNUS_TOKEN_ID = 0n;
+export const XMPL_TOKEN_ID = 1234567890n;
 
 export interface IFacetDeployedInfo {
   address?: string;
@@ -58,8 +53,7 @@ export interface INetworkDeployInfo {
   FacetDeployedInfo: FacetDeployedInfo;
   ExternalLibraries?: any;
   protocolVersion?: number;
-  provider?: JsonRpcProvider;
-  networkName?: string;
+  provider?: JsonRpcProvider | undefined;
 }
 
 export type AfterDeployInit = (
@@ -86,22 +80,25 @@ export type FacetToDeployInfo = Record<string, IFacetToDeployInfo>;
 
 export type PreviousVersionRecord = Record<string, number>;
 
-export function toWei(value: number | string): BigNumber {
-  return ethers.utils.parseEther(value.toString());
+export function toWei(value: number | string): bigint {
+  return parseEther(value.toString());
 }
 
 export function getSighash(funcSig: string): string {
-  return ethers.utils.Interface.getSighash(Fragment.fromString(funcSig));
+  const iface = new Interface([funcSig]);
+  const func = iface.getFunction(funcSig.split('(')[0]);
+  if (!func) throw new Error(`Function not found: ${funcSig}`);
+  return func.selector;
 }
 
 export function writeDeployedInfo(deployments: { [key: string]: INetworkDeployInfo }) {
   fs.writeFileSync(
     'scripts/deployments.ts',
     `\nimport { INetworkDeployInfo } from "../scripts/common";\n` +
-    `export const deployments: { [key: string]: INetworkDeployInfo } = ${util.inspect(
-      deployments,
-      { depth: null },
-    )};\n`,
+      `export const deployments: { [key: string]: INetworkDeployInfo } = ${util.inspect(
+        deployments,
+        { depth: null },
+      )};\n`,
     'utf8',
   );
 }
@@ -143,8 +140,8 @@ export const diamondCutFuncAbi = {
 };
 
 export interface IDefenderViaInfo {
-  via: CreateProposalRequest['via'],
-  viaType: CreateProposalRequest['viaType'];
+  via: any;
+  viaType: any;
 }
 
 export function createPreviousVersionRecordWithMap(facetInfo: FacetDeployedInfo): PreviousVersionRecord {
@@ -160,35 +157,4 @@ export function createPreviousVersionRecordWithMap(facetInfo: FacetDeployedInfo)
   });
 
   return previousVersionRecord;
-}
-
-
-export interface ERC20ProxyStorageLayout {
-  erc1155Contract: ERC1155SupplyUpgradeable;
-  childTokenId: BigNumber;
-  name: string;
-  symbol: string;
-}
-
-export interface ERC20ProxyStorage extends Contract {
-  layout(): Promise<ERC20ProxyStorageLayout>;
-  initializeERC20Proxy(
-    erc1155Address: string,
-    childTokenId: BigNumber,
-    name: string,
-    symbol: string
-  ): Promise<ContractTransaction>;
-  name(): Promise<string>;
-  symbol(): Promise<string>;
-  decimals(): Promise<number>;
-  totalSupply(): Promise<BigNumber>;
-  balanceOf(account: string): Promise<BigNumber>;
-  transfer(recipient: string, amount: BigNumber): Promise<ContractTransaction>;
-  approve(spender: string, amount: BigNumber): Promise<ContractTransaction>;
-  allowance(owner: string, spender: string): Promise<BigNumber>;
-  transferFrom(
-    sender: string,
-    recipient: string,
-    amount: BigNumber
-  ): Promise<ContractTransaction>;
 }

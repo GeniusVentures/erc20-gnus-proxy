@@ -3,18 +3,19 @@ import { pathExistsSync } from "fs-extra";
 import { expect, assert } from 'chai';
 import { ethers } from 'hardhat';
 import hre from 'hardhat';
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
+import { SignerWithAddress } from '@nomicfoundation/hardhat-ethers/signers';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { multichain } from 'hardhat-multichain';
 import { getInterfaceID } from '../../scripts/utils/helpers';
 import { LocalDiamondDeployer, LocalDiamondDeployerConfig } from '../../scripts/setup/LocalDiamondDeployer';
-import { Diamond, deleteDeployInfo } from '@gnus.ai/diamonds';
+import { Diamond } from 'diamonds';
 import {
   ProxyDiamond,
   IERC20Upgradeable__factory,
   IDiamondCut__factory,
   IDiamondLoupe__factory
 } from '../../typechain-types/';
+import { loadDiamondContract } from '../../scripts/utils/loadDiamondArtifact';
 
 describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () {
   const diamondName = 'ProxyDiamond';
@@ -26,10 +27,10 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
   if (process.argv.includes('test-multichain')) {
     const networkNames = process.argv[process.argv.indexOf('--chains') + 1].split(',');
     if (networkNames.includes('hardhat')) {
-      networkProviders.set('hardhat', ethers.provider);
+      networkProviders.set('hardhat', ethers.provider as unknown as JsonRpcProvider);
     }
   } else if (process.argv.includes('test') || process.argv.includes('coverage')) {
-    networkProviders.set('hardhat', ethers.provider);
+    networkProviders.set('hardhat', ethers.provider as unknown as JsonRpcProvider);
   }
 
   for (const [networkName, provider] of networkProviders.entries()) {
@@ -65,10 +66,10 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
 
         const hardhatDiamondAbiPath = 'hardhat-diamond-abi/HardhatDiamondABI.sol:';
         const diamondArtifactName = `${hardhatDiamondAbiPath}${diamond.diamondName}`;
-        proxyDiamond = await ethers.getContractAt(diamondArtifactName, deployInfo.DiamondAddress!) as ProxyDiamond;
+        proxyDiamond = await loadDiamondContract<ProxyDiamond>(diamond, deployedDiamondData.DiamondAddress!);
 
         ethersMultichain = ethers;
-        ethersMultichain.provider = provider;
+        ethersMultichain.provider = provider as any;
 
         // Retrieve the signers for the chain
         signers = await ethersMultichain.getSigners();

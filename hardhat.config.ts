@@ -1,18 +1,15 @@
 import * as dotenv from 'dotenv';
-// import './types/hardhat';
-import '@gnus.ai/hardhat-diamonds';
+
 import { HardhatUserConfig, task } from 'hardhat/config';
-import '@nomiclabs/hardhat-etherscan';
-import '@nomiclabs/hardhat-waffle';
-import 'hardhat-diamond-abi';
+
+import '@nomicfoundation/hardhat-toolbox';
 import 'hardhat-abi-exporter';
 import '@typechain/hardhat';
 import 'hardhat-gas-reporter';
 import 'solidity-coverage';
-import '@nomiclabs/hardhat-ethers';
-import '@nomiclabs/hardhat-web3';
-import 'solidity-coverage';
+import '@nomicfoundation/hardhat-web3-v4';
 import 'hardhat-multichain';
+import 'hardhat-diamonds';
 
 dotenv.config();
 
@@ -397,39 +394,6 @@ const config: HardhatUserConfig = {
       },
     },
   },
-  diamondAbi: [
-    {
-      name: 'ProxyDiamond',
-      strict: false,
-      include: [
-        'erc20-gnus-proxy/*',
-        'ProxyDiamond',
-      ],
-      exclude: [
-        'gnus-ai/*',
-        'hardhat-diamond-abi/.*',
-      ],
-      filter: filterDupeProxyFunctions,
-    },
-    {
-      name: 'GeniusDiamond',
-      strict: false,
-      include: [
-        'gnus-ai/*',
-        'GeniusDiamond',
-      ],
-      exclude: [
-        'ProxyDiamond',
-        'ERC20ProxyStorage',
-        'ERC20ProxyFacet',
-        'hardhat-diamond-abi/.*',
-        'Migrations',
-        'libEncryption',
-        'gnus-ai/mocks/.*',
-      ],
-      filter: filterDupeGeniusFunctions,
-    }
-  ],
 };
 
 export default config;

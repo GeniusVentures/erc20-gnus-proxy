@@ -2,8 +2,8 @@ import { debug } from 'debug';
 import { pathExistsSync } from "fs-extra";
 import { expect, assert } from 'chai';
 import hre from 'hardhat';
-import '@nomiclabs/hardhat-ethers';
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
+import '@nomicfoundation/hardhat-ethers';
+import { SignerWithAddress } from '@nomicfoundation/hardhat-ethers/signers';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { multichain } from 'hardhat-multichain';
 import { getInterfaceID } from '../../scripts/utils/helpers';
@@ -15,11 +15,12 @@ import {
   compareFacetSelectors,
   isProtocolInitRegistered,
   getDeployedFacets
-} from '@gnus.ai/diamonds';
+} from 'diamonds';
 import {
   ProxyDiamond,
 } from '../../typechain-types';
-import { DeployedDiamondData } from '@gnus.ai/diamonds/src';
+import { DeployedDiamondData } from 'diamonds/src';
+import { loadDiamondContract } from '../../scripts/utils/loadDiamondArtifact';
 
 describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () {
   const diamondName = 'ProxyDiamond';

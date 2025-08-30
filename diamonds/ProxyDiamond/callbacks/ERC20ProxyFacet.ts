@@ -1,7 +1,7 @@
 import { ProxyDiamond } from "../../../typechain-types";
 import {
   CallbackArgs,
-} from "@gnus.ai/diamonds";
+} from "diamonds";
 import hre from "hardhat";
 
 export async function createXMPLToken(CallbackArgs: CallbackArgs) {

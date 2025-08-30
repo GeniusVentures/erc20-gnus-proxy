@@ -1,0 +1,11 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "GeniusDiamondABI",
+  "sourceName": "diamond-abi/GeniusDiamondABI.sol",
+  "abi": [],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "linkReferences": {},
+  "deployedLinkReferences": {},
+  "metadata": "{\"compiler\":\"diamond-abi-generator-fallback\",\"generatedAt\":\"2025-08-30T00:09:35.497Z\",\"networkName\":\"hardhat\",\"chainId\":31337,\"error\":\"⨯ Unable to compile TypeScript:\\n\\u001b[96mdiamonds/GeniusDiamond/callbacks/ERC1155ProxyOperator.ts\\u001b[0m:\\u001b[93m4\\u001b[0m:\\u001b[93m10\\u001b[0m - \\u001b[91merror\\u001b[0m\\u001b[90m TS2305: \\u001b[0mModule '\\\"ethers\\\"' has no exported member 'utils'.\\n\\n\\u001b[7m4\\u001b[0m import { utils } from \\\"ethers\\\";\\n\\u001b[7m \\u001b[0m \\u001b[91m         ~~~~~\\u001b[0m\\n\"}"
+}

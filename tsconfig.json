@@ -1,50 +1,32 @@
 {
   "compilerOptions": {
-    "target": "es2018",
+    "target": "es2020",
     "module": "commonjs",
-    "strict": true,
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "allowJs": true,
-    "checkJs": false,
-    "skipLibCheck": true,
-    "skipDefaultLibCheck": true,
-    "rootDirs": [
-      "./scripts", 
-      "./test", 
-      "./typechain-types"
-    ],
     "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "rootDirs": ["./scripts", "./test", "./test-suites", "./typechain-types"],
     "outDir": "dist",
     "resolveJsonModule": true,
-    "baseUrl": "./",
-    "paths": {
-      "scripts/*": ["./scripts/*"],
-      "test/*": ["./test/*"],
-      "typechain-types/*": ["./typechain-types/*"],
-    },
-    "types": [
-      "node",
-      "hardhat",
-      "@nomiclabs/hardhat-ethers",
-      "@nomiclabs/hardhat-waffle",
-      "@nomiclabs/hardhat-web3",
-      "@typechain/ethers-v5",
-      "@typechain/hardhat",
-      "@gnus.ai/hardhat-diamonds",
-      "./types/hardhat",
-      "./types/ethereum-waffle-fix"
-    ],
+    "allowJs": true,
+    "checkJs": false,
+    "typeRoots": ["node_modules/@types", "./types"],
   },
   "include": [
     "./scripts", 
     "./test", 
     "./typechain-types",
-    "test/integration/GNUSAiIntegration.test.ts", 
-    "test-suites/GeniusDiamondDeployment.test.ts", 
-    "test-suites/ERC20ProxyTokenCreation.test.ts"],
-  "exclude": ["node_modules", "dist", "notes", "packages", "packages/**/*"],
+    "test-suites/"
+  ],
   "files": ["./hardhat.config.ts"],
-  "workspaces": ["packages/*"]
+  "exclude": [
+    "./notes/**/*", 
+    "./node_modules", 
+    "./dist", 
+    "./artifacts", 
+    "./coverage", 
+    "./cache", 
+    "./types"
+  ],
 }

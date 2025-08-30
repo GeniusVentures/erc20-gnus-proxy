@@ -3,12 +3,12 @@ import { pathExistsSync } from "fs-extra";
 import { expect, assert } from 'chai';
 import { ethers } from 'hardhat';
 import hre from 'hardhat';
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
+import { SignerWithAddress } from '@nomicfoundation/hardhat-ethers/signers';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { multichain } from 'hardhat-multichain';
 import { getInterfaceID } from '../../scripts/utils/helpers';
 import { LocalDiamondDeployer, LocalDiamondDeployerConfig } from '../../scripts/setup/LocalDiamondDeployer';
-import { Diamond, deleteDeployInfo } from '@gnus.ai/diamonds';
+import { Diamond, deleteDeployInfo } from 'diamonds';
 import {
   ProxyDiamond,
   IERC20Upgradeable__factory,

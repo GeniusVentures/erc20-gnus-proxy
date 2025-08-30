@@ -1,19 +1,18 @@
 
 
-import { utils, BigNumber } from 'ethers';
 import { ProxyDiamond } from '../../typechain-types';
-import { toWei, GNUS_TOKEN_ID, XMPL_TOKEN_ID, toBN } from "../../scripts/common";
+import { toWei, GNUS_TOKEN_ID, XMPL_TOKEN_ID } from "../../scripts/common";
 import { logEvents } from "../../scripts/utils/logEvents";
 import { debug } from 'debug';
 import { pathExistsSync } from "fs-extra";
 import { expect, assert } from 'chai';
 import { ethers } from 'hardhat';
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
+import { SignerWithAddress } from '@nomicfoundation/hardhat-ethers/signers';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { multichain } from 'hardhat-multichain';
 import { getInterfaceID } from '../../scripts/utils/helpers';
 import { LocalDiamondDeployer, LocalDiamondDeployerConfig } from '../../scripts/setup/LocalDiamondDeployer';
-import { Diamond, deleteDeployInfo, DeployedDiamondData } from '@gnus.ai/diamonds';
+import { Diamond, DeployedDiamondData } from 'diamonds';
 import {
   GeniusDiamond,
   IERC20Upgradeable__factory,
@@ -24,6 +23,7 @@ import {
   IDiamondLoupe__factory
 } from '../../typechain-types';
 import { iObjToString } from '../../scripts/utils/iObjToString';
+import { loadDiamondContract } from '../../scripts/utils/loadDiamondArtifact';
 
 describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () {
   const diamondName = 'GeniusDiamond';
@@ -35,10 +35,10 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
   if (process.argv.includes('test-multichain')) {
     const networkNames = process.argv[process.argv.indexOf('--chains') + 1].split(',');
     if (networkNames.includes('hardhat')) {
-      networkProviders.set('hardhat', ethers.provider);
+      networkProviders.set('hardhat', ethers.provider as any);
     }
   } else if (process.argv.includes('test') || process.argv.includes('coverage')) {
-    networkProviders.set('hardhat', ethers.provider);
+    networkProviders.set('hardhat', ethers.provider as any);
   }
 
   for (const [networkName, provider] of networkProviders.entries()) {
@@ -61,7 +61,7 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
   let innerSnapshotId: string;
   let deployedDiamondData: DeployedDiamondData;
   // Used for NFTFactory tests
-  let ParentNFTID: BigNumber;
+  let ParentNFTID: bigint;
   
   // Debug logging function
   const debuglog = (message: string) => {
@@ -221,7 +221,7 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
             GNUS_TOKEN_ID,
             'TEST GAME',
             'TESTGAME',
-            toBN(2.0), // Exchange rate: 2.0 tokens for 1 GNUS token
+            2.0, // Exchange rate: 2.0 tokens for 1 GNUS token
             toWei(50000000 * 2),
             '',
           );
