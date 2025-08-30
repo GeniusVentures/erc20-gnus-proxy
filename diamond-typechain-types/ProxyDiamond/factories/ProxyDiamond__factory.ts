@@ -62,6 +62,23 @@ const _abi = [
     inputs: [
       {
         internalType: "address",
+        name: "_initializationContractAddress",
+        type: "address",
+      },
+      {
+        internalType: "bytes",
+        name: "_calldata",
+        type: "bytes",
+      },
+    ],
+    name: "InitializationFunctionReverted",
+    type: "error",
+    _diamondFacet: "ProxyDiamond",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
         name: "owner",
         type: "address",
       },
@@ -190,6 +207,27 @@ const _abi = [
     type: "function",
     _diamondFacet: "ERC20ProxyFacet",
     _diamondSelector: "0x06fdde03",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bytes4",
+        name: "interfaceId",
+        type: "bytes4",
+      },
+    ],
+    name: "supportsInterface",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+    _diamondFacet: "ProxyDiamond",
+    _diamondSelector: "0x01ffc9a7",
   },
   {
     inputs: [],

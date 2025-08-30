@@ -252,7 +252,8 @@
       "program": "${workspaceFolder}/node_modules/hardhat/internal/cli/cli.js",
       "args": [
         "test-multichain",
-        "${workspaceFolder}/test/deployment/MultiChainForkDeploy.test.ts",
+        "${workspaceFolder}/test/deployment/GeniusDiamondDeployment.test.ts",
+        "${workspaceFolder}/test/deployment/ProxyDiamondDeployment.test.ts",
         "--chains",
         "hardhat",
         //  "sepolia",

@@ -520,6 +520,23 @@ const _abi = [
     inputs: [
       {
         internalType: "address",
+        name: "_initializationContractAddress",
+        type: "address",
+      },
+      {
+        internalType: "bytes",
+        name: "_calldata",
+        type: "bytes",
+      },
+    ],
+    name: "InitializationFunctionReverted",
+    type: "error",
+    _diamondFacet: "GeniusDiamond",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
         name: "owner",
         type: "address",
       },
@@ -1744,7 +1761,7 @@ const _abi = [
     ],
     stateMutability: "view",
     type: "function",
-    _diamondFacet: "GeniusOwnershipFacet",
+    _diamondFacet: "GeniusDiamond",
     _diamondSelector: "0x01ffc9a7",
   },
   {

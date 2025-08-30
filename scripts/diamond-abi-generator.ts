@@ -298,6 +298,106 @@ export class ProjectDiamondAbiGenerator {
       let totalEvents = 0;
       let totalErrors = 0;
 
+      // First, process the main Diamond contract itself
+      const diamondContractName = this.options.diamondName;
+      try {
+        if (this.options.verbose) {
+          console.log(chalk.cyan(`📄 Processing ${diamondContractName} (main Diamond contract) from configuration...`));
+        }
+
+        // Try to load the main Diamond contract artifact
+        const diamondArtifactPaths = [
+          `./artifacts/contracts/${diamondContractName}.sol/${diamondContractName}.json`,
+          `./artifacts/contracts/gnus-ai/${diamondContractName}.sol/${diamondContractName}.json`,
+          `./artifacts/contracts/erc20-gnus-proxy/${diamondContractName}.sol/${diamondContractName}.json`,
+          `./artifacts/@gnus.ai/contracts-upgradeable-diamond/contracts/${diamondContractName}.sol/${diamondContractName}.json`
+        ];
+
+        let diamondArtifact = null;
+        for (const artifactPath of diamondArtifactPaths) {
+          if (existsSync(artifactPath)) {
+            diamondArtifact = JSON.parse(readFileSync(artifactPath, 'utf-8'));
+            break;
+          }
+        }
+
+        if (diamondArtifact) {
+          // Process Diamond contract ABI items
+          for (const abiItem of diamondArtifact.abi || []) {
+            if (abiItem.type === 'function') {
+              const { Interface } = await import('ethers');
+              const iface = new Interface([abiItem]);
+              const func = iface.getFunction(abiItem.name);
+              if (func) {
+                const selector = func.selector;
+                
+                // Don't skip duplicates for the main Diamond contract - it takes precedence
+                if (selectorMap[selector]) {
+                  if (this.options.verbose) {
+                    console.log(chalk.blue(`🔄 Overriding function ${abiItem.name} with selector ${selector} from ${diamondContractName} (was from ${selectorMap[selector]})`));
+                  }
+                  // Remove the old function
+                  const oldIndex = combinedAbi.findIndex((item: any) => 
+                    item.type === 'function' && 
+                    item._diamondSelector === selector
+                  );
+                  if (oldIndex !== -1) {
+                    combinedAbi.splice(oldIndex, 1);
+                    totalFunctions--;
+                  }
+                }
+                
+                // Add source information if requested
+                if (this.options.includeSourceInfo) {
+                  abiItem._diamondFacet = diamondContractName;
+                  abiItem._diamondSelector = selector;
+                }
+
+                combinedAbi.push(abiItem);
+                selectorMap[selector] = diamondContractName;
+                totalFunctions++;
+              }
+            } else if (abiItem.type === 'event') {
+              // Create a signature for the event to deduplicate
+              const eventSignature = `${abiItem.name}(${(abiItem.inputs || []).map((input: any) => input.type).join(',')})`;
+              
+              if (!eventSignatures.has(eventSignature)) {
+                // Add source information if requested
+                if (this.options.includeSourceInfo) {
+                  abiItem._diamondFacet = diamondContractName;
+                }
+                
+                combinedAbi.push(abiItem);
+                eventSignatures.add(eventSignature);
+                totalEvents++;
+              }
+            } else if (abiItem.type === 'error') {
+              // Create a signature for the error to deduplicate
+              const errorSignature = `${abiItem.name}(${(abiItem.inputs || []).map((input: any) => input.type).join(',')})`;
+              
+              if (!errorSignatures.has(errorSignature)) {
+                // Add source information if requested
+                if (this.options.includeSourceInfo) {
+                  abiItem._diamondFacet = diamondContractName;
+                }
+                
+                combinedAbi.push(abiItem);
+                errorSignatures.add(errorSignature);
+                totalErrors++;
+              }
+            }
+          }
+        } else {
+          if (this.options.verbose) {
+            console.log(chalk.yellow(`⚠️  Diamond contract artifact not found for ${diamondContractName}`));
+          }
+        }
+      } catch (error) {
+        if (this.options.verbose) {
+          console.log(chalk.yellow(`⚠️  Error processing Diamond contract ${diamondContractName}: ${error}`));
+        }
+      }
+
       // Process each facet from configuration
       for (const [facetName, facetConfig] of Object.entries(config.facets || {})) {
         try {
@@ -411,6 +511,11 @@ export class ProjectDiamondAbiGenerator {
         return (a.name || '').localeCompare(b.name || '');
       });
 
+      // Calculate facet count (include Diamond contract if processed + facets)
+      const facetNames = Object.keys(config.facets || {});
+      const diamondProcessed = Object.values(selectorMap).includes(this.options.diamondName);
+      const totalFacetCount = facetNames.length + (diamondProcessed ? 1 : 0);
+
       // Generate output file with unique name
       const outputContractName = `${this.options.diamondName}`;
       const outputFileName = `${outputContractName}.json`;
@@ -435,7 +540,7 @@ export class ProjectDiamondAbiGenerator {
             "totalFunctions": totalFunctions,
             "totalEvents": totalEvents,
             "totalErrors": totalErrors,
-            "facetCount": Object.keys(config.facets || {}).length,
+            "facetCount": totalFacetCount,
             "duplicateSelectorsSkipped": 0
           }
         }
@@ -453,7 +558,7 @@ export class ProjectDiamondAbiGenerator {
             totalFunctions,
             totalEvents,
             totalErrors,
-            facetCount: Object.keys(config.facets || {}).length,
+            facetCount: totalFacetCount,
             duplicateSelectorsSkipped: 0
           }
         });
@@ -470,7 +575,7 @@ export class ProjectDiamondAbiGenerator {
           totalFunctions,
           totalEvents,
           totalErrors,
-          facetCount: Object.keys(config.facets || {}).length,
+          facetCount: totalFacetCount,
           duplicateSelectorsSkipped: 0
         }
       };

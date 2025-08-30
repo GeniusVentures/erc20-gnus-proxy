@@ -170,12 +170,16 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
           const IERC20InterfaceID = getInterfaceID(IERC20UpgradeableInterface);
           // Assert that the `GeniusDiamond` contract supports the ERC20 interface.
           assert(
-            await geniusDiamond?.supportsInterface(IERC20InterfaceID.toString()),
+            await geniusDiamond.supportsInterface(
+              '0x' + IERC20InterfaceID.toString(16).padStart(8, '0'),
+            ),
             "Doesn't support IERC20Upgradeable",
           );
 
           // Test ERC165 interface compatibility for ERC20 '0x37c8e2a0'
-          const supportsERC20 = await geniusDiamond?.supportsInterface(IERC20InterfaceID.toString());
+          const supportsERC20 = await geniusDiamond.supportsInterface(
+            '0x' + IERC20InterfaceID.toString(16).padStart(8, '0'),
+          );
           expect(supportsERC20).to.be.true;
 
           log(`ERC20 interface validated on ${networkName}`);

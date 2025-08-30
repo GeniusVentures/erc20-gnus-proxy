@@ -59,6 +59,23 @@
       "inputs": [
         {
           "internalType": "address",
+          "name": "_initializationContractAddress",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes",
+          "name": "_calldata",
+          "type": "bytes"
+        }
+      ],
+      "name": "InitializationFunctionReverted",
+      "type": "error",
+      "_diamondFacet": "ProxyDiamond"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
           "name": "owner",
           "type": "address"
         },
@@ -189,6 +206,27 @@
       "_diamondSelector": "0x06fdde03"
     },
     {
+      "inputs": [
+        {
+          "internalType": "bytes4",
+          "name": "interfaceId",
+          "type": "bytes4"
+        }
+      ],
+      "name": "supportsInterface",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function",
+      "_diamondFacet": "ProxyDiamond",
+      "_diamondSelector": "0x01ffc9a7"
+    },
+    {
       "inputs": [],
       "name": "symbol",
       "outputs": [
@@ -281,11 +319,12 @@
   "linkReferences": {},
   "deployedLinkReferences": {},
   "_diamondMetadata": {
-    "generatedAt": "2025-08-30T19:19:31.199Z",
+    "generatedAt": "2025-08-30T21:04:36.817Z",
     "diamondName": "ProxyDiamond",
     "networkName": "hardhat",
     "chainId": 31337,
     "selectorMap": {
+      "0x01ffc9a7": "ProxyDiamond",
       "0xdd62ed3e": "ERC20ProxyFacet",
       "0x095ea7b3": "ERC20ProxyFacet",
       "0x70a08231": "ERC20ProxyFacet",
@@ -298,12 +337,12 @@
       "0x23b872dd": "ERC20ProxyFacet"
     },
     "stats": {
-      "totalFunctions": 10,
+      "totalFunctions": 11,
       "totalEvents": 2,
-      "totalErrors": 0,
-      "facetCount": 3,
+      "totalErrors": 1,
+      "facetCount": 4,
       "duplicateSelectorsSkipped": 0
     }
   },
-  "metadata": "{\"compiler\":\"diamond-abi-generator\",\"generatedAt\":\"2025-08-30T19:19:31.199Z\",\"networkName\":\"hardhat\",\"chainId\":31337,\"selectorMap\":{\"0xdd62ed3e\":\"ERC20ProxyFacet\",\"0x095ea7b3\":\"ERC20ProxyFacet\",\"0x70a08231\":\"ERC20ProxyFacet\",\"0x313ce567\":\"ERC20ProxyFacet\",\"0x4887f13f\":\"ERC20ProxyFacet\",\"0x06fdde03\":\"ERC20ProxyFacet\",\"0x95d89b41\":\"ERC20ProxyFacet\",\"0x18160ddd\":\"ERC20ProxyFacet\",\"0xa9059cbb\":\"ERC20ProxyFacet\",\"0x23b872dd\":\"ERC20ProxyFacet\"},\"stats\":{\"totalFunctions\":10,\"totalEvents\":2,\"totalErrors\":0,\"facetCount\":3,\"duplicateSelectorsSkipped\":0}}"
+  "metadata": "{\"compiler\":\"diamond-abi-generator\",\"generatedAt\":\"2025-08-30T21:04:36.817Z\",\"networkName\":\"hardhat\",\"chainId\":31337,\"selectorMap\":{\"0x01ffc9a7\":\"ProxyDiamond\",\"0xdd62ed3e\":\"ERC20ProxyFacet\",\"0x095ea7b3\":\"ERC20ProxyFacet\",\"0x70a08231\":\"ERC20ProxyFacet\",\"0x313ce567\":\"ERC20ProxyFacet\",\"0x4887f13f\":\"ERC20ProxyFacet\",\"0x06fdde03\":\"ERC20ProxyFacet\",\"0x95d89b41\":\"ERC20ProxyFacet\",\"0x18160ddd\":\"ERC20ProxyFacet\",\"0xa9059cbb\":\"ERC20ProxyFacet\",\"0x23b872dd\":\"ERC20ProxyFacet\"},\"stats\":{\"totalFunctions\":11,\"totalEvents\":2,\"totalErrors\":1,\"facetCount\":4,\"duplicateSelectorsSkipped\":0}}"
 }

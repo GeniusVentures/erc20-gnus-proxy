@@ -64,10 +64,6 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
         diamond = await diamondDeployer.getDiamondDeployed();
         let deployedDiamondData = diamond.getDeployedDiamondData();
 
-        const hardhatDiamondAbiPath = 'hardhat-diamond-abi/HardhatDiamondABI.sol:';
-        const diamondArtifactName = `${hardhatDiamondAbiPath}${diamond.diamondName}`;
-        // geniusDiamond = await ethers.getContractAt(diamondArtifactName, deployedDiamondData.DiamondAddress!) as GeniusDiamond;
-
         geniusDiamond = await loadDiamondContract<GeniusDiamond>(diamond, deployedDiamondData.DiamondAddress!);
         ethersMultichain = ethers;
         ethersMultichain.provider = provider as any;
@@ -107,12 +103,11 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
         expect(provider).to.not.be.undefined;
         // expect(diamond).to.not.be.null;
 
-        const { chainId } = await provider.getNetwork();
-        expect(chainId).to.be.a('number');
+        const chainId = (await provider.getNetwork()).chainId;
+        expect(chainId).to.be.a('bigint');
       });
 
       it(`should verify that ${networkName} diamond is deployed and we can get hardhat signers on ${networkName}`, async function () {
-
         expect(signers).to.be.an('array');
         expect(signers).to.have.lengthOf(20);
         expect(signers[0]).to.be.instanceOf(SignerWithAddress);
@@ -182,7 +177,9 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
         // Generate the IDiamondCut interface ID by XORing with the base interface ID.
         const iDiamondCutInterfaceID = getInterfaceID(iDiamondCutInterface);
         // const supportsIDiamondCut = await proxyDiamond.supportsInterface('0x1f931c1c');
-        const supportsERC165 = await ownerDiamond.supportsInterface(iDiamondCutInterfaceID.toString());
+				const supportsERC165 = await ownerDiamond.supportsInterface(
+					'0x' + iDiamondCutInterfaceID.toString(16).padStart(8, '0'),
+				);
         expect(supportsERC165).to.be.true;
 
         log(`DiamondCut Facet interface support validated on ${networkName}`);
@@ -194,7 +191,9 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
         // Generate the IDiamondLoupe interface ID by XORing with the base interface ID.
         const iDiamondLoupeInterfaceID = getInterfaceID(iDiamondLoupeInterface);
         // const supportsIDiamondLoupe = await proxyDiamond.supportsInterface('0x48e3885f');
-        const supportsERC165 = await ownerDiamond.supportsInterface(iDiamondLoupeInterfaceID.toString());
+				const supportsERC165 = await ownerDiamond.supportsInterface(
+					'0x' + iDiamondLoupeInterfaceID.toString(16).padStart(8, '0'),
+				);
         expect(supportsERC165).to.be.true;
         log(`DiamondLoupe Facet interface support validated on ${networkName}`);
       });
@@ -212,7 +211,7 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
 
         // Test ERC165 interface compatibility for ERC20 '0x37c8e2a0'
         // Test ERC165 interface compatibility for ERC20Upgradeable '0x36372b07'
-        // const supportsERC20 = await proxyDiamond?.supportsInterface(IERC20InterfaceID._hex);
+        // const supportsERC20 = await proxyDiamond?.supportsInterface(IERC20InterfaceID.toString());
 
         const supportsERC20 = await ownerDiamond?.supportsInterface('0x36372b07');
 
