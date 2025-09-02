@@ -1,22 +1,27 @@
 {
   "compilerOptions": {
-    "target": "es2020",
+    "target": "ES2022",
+    "lib": ["ES2022", "dom"],
     "module": "commonjs",
     "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "skipLibCheck": true,
-    "rootDirs": ["./scripts", "./test", "./test-suites", "./typechain-types"],
+    "downlevelIteration": true,
+    "rootDirs": ["./scripts", "./test", "./test-suites", "./typechain-types", "./diamond-typechain-types"],
     "outDir": "dist",
     "resolveJsonModule": true,
     "allowJs": true,
     "checkJs": false,
     "typeRoots": ["node_modules/@types", "./types"],
+    "moduleResolution": "node"
   },
   "include": [
     "./scripts", 
     "./test", 
     "./typechain-types",
+    "./diamond-typechain-types",
     "test-suites/"
   ],
   "files": ["./hardhat.config.ts"],
@@ -28,5 +33,5 @@
     "./coverage", 
     "./cache", 
     "./types"
-  ],
+  ]
 }
