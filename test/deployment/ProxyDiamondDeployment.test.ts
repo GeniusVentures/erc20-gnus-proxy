@@ -154,9 +154,9 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
 
       it(`should validate IDiamondCut interface compatibility on ${networkName}`, async function () {
         // Test ERC165 interface compatibility
-        const iDiamonCutInterface = IDiamondCut__factory.createInterface();
+        const iDiamondCutInterface = IDiamondCut__factory.createInterface();
         // Generate the IDiamondCut interface ID by XORing with the base interface ID.
-        const iDiamondCutInterfaceID = getInterfaceID(iDiamonCutInterface);
+        const iDiamondCutInterfaceID = getInterfaceID(iDiamondCutInterface);
         // const supportsIDiamondCut = await proxyDiamond.supportsInterface('0x1f931c1c');
 				const supportsERC165 = await ownerDiamond.supportsInterface(
 					'0x' + iDiamondCutInterfaceID.toString(16).padStart(8, '0'),
