@@ -21,7 +21,7 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
   const log: debug.Debugger = debug(`GNUSDeploy:log:${diamondName}`);
   this.timeout(0); // Extended indefinitely for diamond deployment time
 
-  let networkProviders = multichain.getProviders() || new Map<string, JsonRpcProvider>();
+  const networkProviders = multichain.getProviders() || new Map<string, JsonRpcProvider>();
 
   if (process.argv.includes('test-multichain')) {
     const networkNames = process.argv[process.argv.indexOf('--chains') + 1].split(',');
@@ -62,7 +62,7 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
         const diamondDeployer = await LocalDiamondDeployer.getInstance(config);
         await diamondDeployer.setVerbose(true);
         diamond = await diamondDeployer.getDiamondDeployed();
-        let deployedDiamondData = diamond.getDeployedDiamondData();
+        const deployedDiamondData = diamond.getDeployedDiamondData();
 
         geniusDiamond = await loadDiamondContract<GeniusDiamond>(diamond, deployedDiamondData.DiamondAddress!);
         ethersMultichain = ethers;

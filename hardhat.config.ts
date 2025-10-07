@@ -1,15 +1,14 @@
 import * as dotenv from 'dotenv';
 
-import { HardhatUserConfig, task } from 'hardhat/config';
-
 import '@nomicfoundation/hardhat-toolbox';
-import 'hardhat-abi-exporter';
-import '@typechain/hardhat';
-import 'hardhat-gas-reporter';
-import 'solidity-coverage';
 import '@nomicfoundation/hardhat-web3-v4';
-import 'hardhat-multichain';
+import '@typechain/hardhat';
+import 'hardhat-abi-exporter';
 import 'hardhat-diamonds';
+import 'hardhat-gas-reporter';
+import 'hardhat-multichain';
+import { HardhatUserConfig, task } from 'hardhat/config';
+import 'solidity-coverage';
 
 dotenv.config();
 
@@ -88,58 +87,6 @@ task('accounts', 'Prints the list of accounts', async (taskArgs, hre) => {
     console.log(account.address);
   }
 });
-
-// filter out duplicate function signatures
-function genSignature(name: string, inputs: Array<any>, type: string): string {
-  return `${type} ${name}(${inputs.reduce((previous, key) => {
-    const comma = previous.length ? ',' : '';
-    return previous + comma + key.internalType;
-  }, '')})`;
-}
-
-// Custom filtering of duplicate function signatures for hardhat-diamond-abi 
-let proxyDiamondElements = new Set<string>();
-
-function filterDupeProxyFunctions(
-  abiElement: any,
-  index: number,
-  fullAbiL: any[],
-  fullyQualifiedName: string,
-) {
-  if (['function', 'event'].includes(abiElement.type)) {
-    const funcSignature = genSignature(abiElement.name, abiElement.inputs, abiElement.type);
-    if (proxyDiamondElements.has(funcSignature)) {
-      return false;
-    }
-    proxyDiamondElements.add(funcSignature);
-  } else if (abiElement.type === 'fallback') {
-    if (!fullyQualifiedName.match('ProxyDiamond.sol')) {
-      return false;
-    }
-  }
-  return true;
-}
-
-let geniusDiamondElements = new Set<string>();
-function filterDupeGeniusFunctions(
-  abiElement: any,
-  index: number,
-  fullAbiL: any[],
-  fullyQualifiedName: string,
-) {
-  if (['function', 'event'].includes(abiElement.type)) {
-    const funcSignature = genSignature(abiElement.name, abiElement.inputs, abiElement.type);
-    if (geniusDiamondElements.has(funcSignature)) {
-      return false;
-    }
-    geniusDiamondElements.add(funcSignature);
-  } else if (abiElement.type === 'fallback') {
-    if (!fullyQualifiedName.match('gnus-ai/GeniusDiamond.sol')) {
-      return false;
-    }
-  }
-  return true;
-}
 
 const MOCK_CHAIN_ID = HH_CHAIN_ID ? parseInt(HH_CHAIN_ID) : 31337;
 console.log(`Using chain ID: ${MOCK_CHAIN_ID}`);

@@ -1,0 +1,28 @@
+node_modules
+artifacts
+cache
+coverage*
+gasReporterOutput.json
+notes
+
+# Ignore build outputs
+dist/
+build/
+*.tsbuildinfo
+
+# Ignore generated files
+flat/
+diamond-abi/
+diamond-typechain-types/
+typechain-types/
+
+# Ignore test assets
+test-assets/
+
+# Ignore log files
+logs/
+*.log
+
+# For now, ignore Solidity files until prettier-plugin-solidity is properly configured
+*.sol
+contracts/

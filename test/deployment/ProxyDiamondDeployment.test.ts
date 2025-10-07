@@ -21,7 +21,7 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
   const log: debug.Debugger = debug('GNUSDeploy:log:${diamondName}');
   this.timeout(0); // Extended indefinitely for diamond deployment time
 
-  let networkProviders = multichain.getProviders() || new Map<string, JsonRpcProvider>();
+  const networkProviders = multichain.getProviders() || new Map<string, JsonRpcProvider>();
 
   if (process.argv.includes('test-multichain')) {
     const networkNames = process.argv[process.argv.indexOf('--chains') + 1].split(',');
