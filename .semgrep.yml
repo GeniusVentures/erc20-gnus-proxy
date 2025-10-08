@@ -97,13 +97,22 @@ rules:
 
   - id: diamond-storage-violation
     patterns:
-      - pattern: $STORAGE = $VALUE
+      - pattern-inside: |
+          contract $CONTRACT {
+              ...
+              $TYPE $STORAGE;
+              ...
+          }
       - pattern-not-inside: |
           library $LIB {
               ...
           }
-      - pattern-not: LibDiamond.DiamondStorage storage $DS
-    message: "Direct storage manipulation detected. Use diamond storage patterns to avoid storage collisions."
+      - pattern-not: bytes32 constant $NAME = $VALUE;
+      - pattern-not: bytes4 constant $NAME = $VALUE;
+      - pattern-not: uint256 constant $NAME = $VALUE;
+      - pattern-not: address constant $NAME = $VALUE;
+      - pattern-not: string constant $NAME = $VALUE;
+    message: "Direct state variable in contract detected. Use diamond storage library pattern to avoid storage collisions in diamond proxies."
     severity: ERROR
     languages: [solidity]
     

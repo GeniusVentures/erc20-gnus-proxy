@@ -1,6 +1,7 @@
 import { Diamond } from "diamonds";
 import * as fs from "fs";
 import { ethers } from "hardhat";
+import type { Signer, Provider } from "ethers";
 import * as path from "path";
 
 /**
@@ -86,7 +87,7 @@ export async function loadDiamondContract<T>(
 export async function createDiamondContract<T>(
   diamond: Diamond,
   contractAddress: string,
-  signerOrProvider?: any,
+  signerOrProvider?: Signer | Provider,
 ): Promise<T> {
   const diamondAbiFilePath = diamond.getDiamondAbiFilePath();
 

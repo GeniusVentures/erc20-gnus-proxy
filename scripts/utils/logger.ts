@@ -1,6 +1,6 @@
-import { createLogger, format, transports } from "winston";
+import { createLogger, format, transports, Logger } from "winston";
 
-export const createForkLogger = (forkName: string): any => {
+export const createForkLogger = (forkName: string): Logger => {
   return createLogger({
     level: "info",
     format: format.combine(
