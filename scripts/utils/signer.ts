@@ -1,7 +1,7 @@
-import hre, { ethers } from 'hardhat';
-import { toWei } from '../common';
-import { GeniusOwnershipFacet } from '../../typechain-types';
-import { debuglog } from 'util';
+import hre, { ethers } from "hardhat";
+import { debuglog } from "util";
+import { GeniusOwnershipFacet } from "../../typechain-types";
+import { toWei } from "../common";
 
 /**
  * Impersonates a signer account. This is primarily used in Hardhat's testing environment
@@ -10,9 +10,9 @@ import { debuglog } from 'util';
  * @param signerAddress - The address of the account to impersonate.
  * @returns The impersonated signer object.
  */
-export async function impersonateSigner(signerAddress: string) {
+export async function impersonateSigner(signerAddress: string): Promise<any> {
   await hre.network.provider.request({
-    method: 'hardhat_impersonateAccount',
+    method: "hardhat_impersonateAccount",
     params: [signerAddress], // Address of the account to impersonate
   });
   return await ethers.getSigner(signerAddress); // Returns the impersonated signer
@@ -25,10 +25,13 @@ export async function impersonateSigner(signerAddress: string) {
  * @param address - The address to set the Ether balance for.
  * @param amount - The desired balance as a `BigNumber`.
  */
-export async function setEtherBalance(address: string, amount: bigint) {
-  await hre.network.provider.send('hardhat_setBalance', [
+export async function setEtherBalance(
+  address: string,
+  amount: bigint,
+): Promise<void> {
+  await hre.network.provider.send("hardhat_setBalance", [
     address, // Address to modify the balance of
-    '0x' + amount.toString(16), // Amount to set, formatted as a hex string
+    "0x" + amount.toString(16), // Amount to set, formatted as a hex string
   ]);
 }
 
@@ -39,12 +42,17 @@ export async function setEtherBalance(address: string, amount: bigint) {
  * @param rootAddress - The address of the root contract (e.g., GeniusOwnershipFacet).
  * @returns The address of the old owner.
  */
-export const updateOwnerForTest = async (rootAddress: string) => {
+export const updateOwnerForTest = async (
+  rootAddress: string,
+): Promise<string> => {
   // Retrieve the current signer in the Hardhat environment
   const curOwner = (await ethers.getSigners())[0];
 
   // Get a reference to the GeniusOwnershipFacet contract at the specified root address
-  const ownership = await ethers.getContractAt('GeniusOwnershipFacet', rootAddress) as GeniusOwnershipFacet;
+  const ownership = (await ethers.getContractAt(
+    "GeniusOwnershipFacet",
+    rootAddress,
+  )) as GeniusOwnershipFacet;
 
   // Retrieve the current owner of the contract
   const oldOwnerAddress = await ownership.owner();

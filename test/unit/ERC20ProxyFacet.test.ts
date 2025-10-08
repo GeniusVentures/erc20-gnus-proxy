@@ -1,4 +1,3 @@
-
 // import { ERC1155SupplyUpgradeable, ERC1155Upgradeable, ERC20ProxyFacet } from "../../typechain-types";
 // import { toWei, GNUS_TOKEN_ID } from "../../scripts/common";
 
@@ -117,7 +116,7 @@
 //         // Note: The ERC20ProxyFacet is designed to proxy to an ERC1155 contract
 //         // Since the ProxyDiamond doesn't include ERC1155 facets yet, we'll test the interface
 //         // For now, we verify that the ERC20 functions are properly deployed and accessible
-        
+
 //         // Use ERC20 interface directly instead of ProxyDiamond interface
 //         const erc20Contract = await ethersMultichain.getContractAt('IERC20Upgradeable', await proxyDiamond.getAddress());
 
@@ -133,18 +132,18 @@
 //         // Test that the functions exist by checking the interface
 //         const contractInterface = erc20Contract.interface;
 //         const requiredFunctions = ['totalSupply', 'balanceOf', 'transfer', 'approve', 'allowance', 'transferFrom'];
-        
+
 //         for (const func of requiredFunctions) {
 //           assert(
 //             contractInterface.getFunction(func as any),
 //             `Function ${func} should exist in the contract interface`
 //           );
 //         }
-        
+
 //         console.log("✅ All ERC20 function selectors are properly deployed and accessible");
 
 //         // TODO: Complete integration test once ERC1155 backing is properly configured
-//         // The remaining commented code tests full ERC20 functionality but requires 
+//         // The remaining commented code tests full ERC20 functionality but requires
 //         // a proper ERC1155 backing contract to be initialized
 //       });
 //     });

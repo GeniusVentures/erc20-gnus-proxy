@@ -1,38 +1,42 @@
-
-
-import { toWei, GNUS_TOKEN_ID, XMPL_TOKEN_ID } from "../../scripts/common";
-import { logEvents } from "../../scripts/utils/logEvents";
-import { debug } from 'debug';
-import { expect, assert } from 'chai';
-import { ethers } from 'hardhat';
-import { SignerWithAddress } from '@nomicfoundation/hardhat-ethers/signers';
-import { JsonRpcProvider } from '@ethersproject/providers';
-import { multichain } from 'hardhat-multichain';
-import { getInterfaceID } from '../../scripts/utils/helpers';
-import { LocalDiamondDeployer, LocalDiamondDeployerConfig } from '../../scripts/setup/LocalDiamondDeployer';
-import { Diamond, DeployedDiamondData } from 'diamonds';
+import { JsonRpcProvider } from "@ethersproject/providers";
+import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
+import { assert, expect } from "chai";
+import { debug } from "debug";
+import { DeployedDiamondData, Diamond } from "diamonds";
+import { formatEther, id } from "ethers";
+import { ethers } from "hardhat";
+import { multichain } from "hardhat-multichain";
+import { GeniusDiamond } from "../../diamond-typechain-types/GeniusDiamond";
+import { GNUS_TOKEN_ID, toWei } from "../../scripts/common";
 import {
-  IERC20Upgradeable__factory,
-} from '../../typechain-types';
-import { iObjToString } from '../../scripts/utils/iObjToString';
-import { loadDiamondContract } from '../../scripts/utils/loadDiamondArtifact';
-import { GeniusDiamond } from '../../diamond-typechain-types/GeniusDiamond';
-import { id, formatEther } from 'ethers';
+  LocalDiamondDeployer,
+  LocalDiamondDeployerConfig,
+} from "../../scripts/setup/LocalDiamondDeployer";
+import { getInterfaceID } from "../../scripts/utils/helpers";
+import { iObjToString } from "../../scripts/utils/iObjToString";
+import { loadDiamondContract } from "../../scripts/utils/loadDiamondArtifact";
+import { logEvents } from "../../scripts/utils/logEvents";
+import { IERC20Upgradeable__factory } from "../../typechain-types";
 
-describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () {
-  const diamondName = 'GeniusDiamond';
-  const log: debug.Debugger = debug('GNUSDeploy:log:${diamondName}');
+describe("🧪 Multichain Fork and Diamond Deployment Tests", async function () {
+  const diamondName = "GeniusDiamond";
+  const log: debug.Debugger = debug("GNUSDeploy:log:${diamondName}");
   this.timeout(0); // Extended indefinitely for diamond deployment time
 
-  const networkProviders = multichain.getProviders() || new Map<string, JsonRpcProvider>();
+  const networkProviders =
+    multichain.getProviders() || new Map<string, JsonRpcProvider>();
 
-  if (process.argv.includes('test-multichain')) {
-    const networkNames = process.argv[process.argv.indexOf('--chains') + 1].split(',');
-    if (networkNames.includes('hardhat')) {
-      networkProviders.set('hardhat', ethers.provider as any);
+  if (process.argv.includes("test-multichain")) {
+    const networkNames =
+      process.argv[process.argv.indexOf("--chains") + 1].split(",");
+    if (networkNames.includes("hardhat")) {
+      networkProviders.set("hardhat", ethers.provider as any);
     }
-  } else if (process.argv.includes('test') || process.argv.includes('coverage')) {
-    networkProviders.set('hardhat', ethers.provider as any);
+  } else if (
+    process.argv.includes("test") ||
+    process.argv.includes("coverage")
+  ) {
+    networkProviders.set("hardhat", ethers.provider as any);
   }
 
   for (const [networkName, provider] of networkProviders.entries()) {
@@ -45,24 +49,25 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
       let geniusOwner: string;
       let ownerGeniusSigner: SignerWithAddress;
       let geniusDiamond: GeniusDiamond;
-      let signer0Diamond: GeniusDiamond;
+      // let signer0Diamond: GeniusDiamond;
       let signer1Diamond: GeniusDiamond;
       let signer2Diamond: GeniusDiamond;
       let ownerGeniusDiamond: GeniusDiamond;
 
-  let ethersMultichain: typeof ethers;
-  let outerSnapshotId: string;
-  let innerSnapshotId: string;
-  let deployedDiamondData: DeployedDiamondData;
-  // Used for NFTFactory tests
-  let ParentNFTID: bigint;
-  
-  // Debug logging function
-  const debuglog = (message: string) => {
-    if (process.env.DEBUG) {
-      console.log(message);
-    }
-  };      before(async function () {
+      let ethersMultichain: typeof ethers;
+      let outerSnapshotId: string;
+      let innerSnapshotId: string;
+      let deployedDiamondData: DeployedDiamondData;
+      // Used for NFTFactory tests
+      let ParentNFTID: bigint;
+
+      // Debug logging function
+      const debuglog = (message: string) => {
+        if (process.env.DEBUG) {
+          console.log(message);
+        }
+      };
+      before(async function () {
         const config = {
           diamondName: diamondName,
           networkName: networkName,
@@ -76,9 +81,10 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
         diamond = await diamondDeployer.getDiamondDeployed();
         deployedDiamondData = diamond.getDeployedDiamondData();
 
-        const hardhatDiamondAbiPath = 'hardhat-diamond-abi/HardhatDiamondABI.sol:';
-        const diamondArtifactName = `${hardhatDiamondAbiPath}${diamond.diamondName}`;
-        geniusDiamond = await loadDiamondContract<GeniusDiamond>(diamond, deployedDiamondData.DiamondAddress!);
+        geniusDiamond = await loadDiamondContract<GeniusDiamond>(
+          diamond,
+          deployedDiamondData.DiamondAddress!,
+        );
 
         ethersMultichain = ethers;
         ethersMultichain.provider = provider as any;
@@ -88,7 +94,7 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
         signer0 = signers[0].address;
         signer1 = signers[1].address;
         signer2 = signers[2].address;
-        signer0Diamond = geniusDiamond.connect(signers[0]);
+        // signer0Diamond = geniusDiamond.connect(signers[0]);
         signer1Diamond = geniusDiamond.connect(signers[1]);
         signer2Diamond = geniusDiamond.connect(signers[2]);
 
@@ -98,65 +104,66 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
         if (!geniusOwner) {
           diamond.setSigner(signers[0]);
           geniusOwner = signer0;
-          ownerGeniusSigner
+          ownerGeniusSigner;
         }
         ownerGeniusSigner = await ethersMultichain.getSigner(geniusOwner);
 
         ownerGeniusDiamond = geniusDiamond.connect(ownerGeniusSigner);
 
-        // TODO probably not needed.
-        const chainID = await ethersMultichain.provider.getNetwork().then(network => network.chainId);
-
-        outerSnapshotId = await provider.send('evm_snapshot', []);
+        outerSnapshotId = await provider.send("evm_snapshot", []);
       });
 
       // Get the chain ID
 
-
       beforeEach(async function () {
-        innerSnapshotId = await provider.send('evm_snapshot', []);
+        innerSnapshotId = await provider.send("evm_snapshot", []);
       });
 
       afterEach(async () => {
-        await provider.send('evm_revert', [innerSnapshotId]);
+        await provider.send("evm_revert", [innerSnapshotId]);
       });
 
       after(async () => {
-        outerSnapshotId = await provider.send('evm_snapshot', []);
+        await provider.send("evm_revert", [outerSnapshotId]);
       });
 
       // These verify the GNUS Diamond contract is deployed properly so because
       // it is required by the integration tests.
-      describe('GNUS Diamond Deployment and Upgrade Validation Tests', async function () {
+      describe("GNUS Diamond Deployment and Upgrade Validation Tests", async function () {
         it(`should verify that GNUS diamond is deployed and we can get 
           hardhat signers on ${networkName}`, async function () {
           expect(geniusDiamond).to.not.be.null;
-          if (networkName !== 'hardhat') {
-            expect(geniusDiamond.getAddress()).to.be.eq(deployedDiamondData.DiamondAddress);
+          if (networkName !== "hardhat") {
+            expect(geniusDiamond.getAddress()).to.be.eq(
+              deployedDiamondData.DiamondAddress,
+            );
           }
           expect(geniusOwner).to.not.be.undefined;
-          expect(geniusOwner).to.be.a('string');
+          expect(geniusOwner).to.be.a("string");
           expect(ownerGeniusSigner).to.be.instanceOf(SignerWithAddress);
         });
 
         it(`should verify ERC173 contract ownership on ${networkName}`, async function () {
           // check if the owner is the deployer and transfer ownership to the deployer
           const currentContractOwner = await ownerGeniusDiamond.owner();
-          expect(currentContractOwner.toLowerCase()).to.be.eq(await geniusOwner.toLowerCase());
+          expect(currentContractOwner.toLowerCase()).to.be.eq(
+            await geniusOwner.toLowerCase(),
+          );
         });
 
         it(`should validate ERC165 interface compatibility on ${networkName}`, async function () {
           // Test ERC165 interface compatibility
-          const supportsERC165 = await geniusDiamond?.supportsInterface('0x01ffc9a7');
+          const supportsERC165 =
+            await geniusDiamond?.supportsInterface("0x01ffc9a7");
           expect(supportsERC165).to.be.true;
 
           log(`Diamond deployed and validated on ${networkName}`);
         });
 
         it(`should verify ERC165 supported interface for ERC1155 on ${networkName}`, async function () {
-
           // Test ERC165 interface compatibility for ERC1155
-          const supportsERC1155 = await geniusDiamond?.supportsInterface('0xd9b67a26');
+          const supportsERC1155 =
+            await geniusDiamond?.supportsInterface("0xd9b67a26");
           expect(supportsERC1155).to.be.true;
 
           log(`ERC1155 interface validated on ${networkName}`);
@@ -165,20 +172,21 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
         it(`should verify ERC165 supported interface for ERC20 on ${networkName}`, async function () {
           log(`Validating ERC20 interface on chain: ${networkName}`);
           // Retrieve the deployed GNUS Diamond contract
-          const IERC20UpgradeableInterface = IERC20Upgradeable__factory.createInterface();
+          const IERC20UpgradeableInterface =
+            IERC20Upgradeable__factory.createInterface();
           // Generate the ERC20 interface ID by XORing with the base interface ID.
           const IERC20InterfaceID = getInterfaceID(IERC20UpgradeableInterface);
           // Assert that the `GeniusDiamond` contract supports the ERC20 interface.
           assert(
             await geniusDiamond.supportsInterface(
-              '0x' + IERC20InterfaceID.toString(16).padStart(8, '0'),
+              "0x" + IERC20InterfaceID.toString(16).padStart(8, "0"),
             ),
             "Doesn't support IERC20Upgradeable",
           );
 
           // Test ERC165 interface compatibility for ERC20 '0x37c8e2a0'
           const supportsERC20 = await geniusDiamond.supportsInterface(
-            '0x' + IERC20InterfaceID.toString(16).padStart(8, '0'),
+            "0x" + IERC20InterfaceID.toString(16).padStart(8, "0"),
           );
           expect(supportsERC20).to.be.true;
 
@@ -187,26 +195,30 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
 
         it(`should verify that MINTER Role is set on ${networkName}`, async () => {
           console.log(`Verifying MINTER role on chain: ${networkName}`);
-          const ownershipFacet = await ethersMultichain.getContractAt('GeniusOwnershipFacet', await geniusDiamond.getAddress());
-          const minterRole = await geniusDiamond['MINTER_ROLE']();
+          const ownershipFacet = await ethersMultichain.getContractAt(
+            "GeniusOwnershipFacet",
+            await geniusDiamond.getAddress(),
+          );
+          const minterRole = await geniusDiamond["MINTER_ROLE"]();
           const owner = await ownershipFacet.connect(ownerGeniusSigner).owner();
           const hasMinterRole = await ownershipFacet.hasRole(minterRole, owner);
           expect(hasMinterRole).to.be.true;
         });
 
         // Test the ERC20Proxy Project integration with GNUS.ai Project
-        it('should verify the ERC20Proxy has the TestToken', async function () {
-
-        });
+        it("should verify the ERC20Proxy has the TestToken", async function () {});
       });
 
-      describe('NFTFactory Tests', async function () {
+      describe("NFTFactory Tests", async function () {
         beforeEach(async function () {
           // Grant the `CREATOR_ROLE` to the second signer for NFT creation
-          await ownerGeniusDiamond.grantRole(id('CREATOR_ROLE'), signer1);
+          await ownerGeniusDiamond.grantRole(id("CREATOR_ROLE"), signer1);
 
           // Mint sufficient GNUS tokens for testing
-          await ownerGeniusDiamond['mint(address,uint256)'](signer1, toWei(1000));
+          await ownerGeniusDiamond["mint(address,uint256)"](
+            signer1,
+            toWei(1000),
+          );
 
           // Retrieve information about the GNUS NFT
           const GNUSNFTInfo = await signer1Diamond.getNFTInfo(GNUS_TOKEN_ID);
@@ -217,52 +229,55 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
           // Create a new NFT with a specified exchange rate
           await signer1Diamond.createNFT(
             GNUS_TOKEN_ID,
-            'TEST GAME',
-            'TESTGAME',
+            "TEST GAME",
+            "TESTGAME",
             2.0, // Exchange rate: 2.0 tokens for 1 GNUS token
             toWei(50000000 * 2),
-            '',
+            "",
           );
 
           // Create multiple child NFTs with valid parameters
           await signer1Diamond.createNFTs(
             ParentNFTID,
-            ['TESTGAME:NFT1', 'TESTGAME:NFT2', 'TESTGAME:NFT3'],
-            ['', '', ''], // Metadata URIs
+            ["TESTGAME:NFT1", "TESTGAME:NFT2", "TESTGAME:NFT3"],
+            ["", "", ""], // Metadata URIs
             [1, 1, 1], // Exchange rates
             [100, 1, 1], // Supply limits
-            ['https://www.gnus.ai', '', ''], // URLs
+            ["https://www.gnus.ai", "", ""], // URLs
           );
         });
 
         // Test case to validate the burning of Tokens for NFT creation
-        it('Testing NFT Factory that Example Tokens will burn for address 1', async () => {
+        it("Testing NFT Factory that Example Tokens will burn for address 1", async () => {
           // Mint GNUS tokens to the second signer by the GNUS Contract Owner
           // This would be accomplished by purchasing GNUS in the real world.
-          await ownerGeniusDiamond['mint(address,uint256)'](signer1, toWei(2000));
+          await ownerGeniusDiamond["mint(address,uint256)"](
+            signer1,
+            toWei(2000),
+          );
 
           // Test that Signer1 can burn 1000 GNUS tokens from their own account
           // TODO: This should be a test
-          await signer1Diamond['burn(address,uint256,uint256)'](
+          await signer1Diamond["burn(address,uint256,uint256)"](
             signer1,
             GNUS_TOKEN_ID,
             toWei(1000),
           );
 
           // Attempt to burn tokens again, expecting rejection due to lack of approval
-          const tx = await expect(
-            ownerGeniusDiamond['burn(address,uint256,uint256)'](
+          await expect(
+            ownerGeniusDiamond["burn(address,uint256,uint256)"](
               signer1,
               GNUS_TOKEN_ID,
               toWei(1000),
             ),
-          ).to.eventually.be.rejectedWith(Error, /ERC1155: caller is not owner nor approved/);
-
-          // Log the transaction events for debugging
-          // await logEvents(tx);
+          ).to.eventually.be.rejectedWith(
+            Error,
+            /ERC1155: caller is not owner nor approved/,
+          );
 
           // Verify the remaining balance of the signer after burning
-          const amount = await signer1Diamond['balanceOf(address,uint256)'](
+          const amount = await signer1Diamond["balanceOf(address,uint256)"](
             signer1,
             GNUS_TOKEN_ID,
           );
@@ -275,10 +290,15 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
         });
 
         // Test case to validate restrictions on minting GNUS tokens
-        it('Testing NFT Factory to mint GNUS Token', async () => {
+        it("Testing NFT Factory to mint GNUS Token", async () => {
           // Attempt to mint GNUS tokens directly, expecting rejection due to factory restrictions
           await expect(
-            ownerGeniusDiamond["mint(address,uint256,uint256,bytes)"](geniusOwner, GNUS_TOKEN_ID, toWei(2000), "0x"),
+            ownerGeniusDiamond["mint(address,uint256,uint256,bytes)"](
+              geniusOwner,
+              GNUS_TOKEN_ID,
+              toWei(2000),
+              "0x",
+            ),
           ).to.eventually.be.rejectedWith(
             Error,
             /Shouldn\'t mint GNUS tokens tokens, only deposit and withdraw/,
@@ -286,16 +306,16 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
         });
 
         // Test case to validate restrictions on NFT creation for unauthorized users
-        it('Testing NFT Factory to create new token for non-creator nor admin', async () => {
+        it("Testing NFT Factory to create new token for non-creator nor admin", async () => {
           // Attempt to create an NFT as an unauthorized user (signer2), expecting rejection
           await expect(
             signer2Diamond.createNFT(
               GNUS_TOKEN_ID,
-              'Addr1Token',
-              'ADDR1',
+              "Addr1Token",
+              "ADDR1",
               200,
               toWei(50000000 * 200),
-              '',
+              "",
             ),
           ).to.eventually.be.rejectedWith(
             Error,
@@ -304,9 +324,9 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
         });
 
         // Test case to validate NFT creation functionality for authorized creators
-        it('Testing NFT Factory to create new NFT & child NFTs for creator', async () => {
+        it("Testing NFT Factory to create new NFT & child NFTs for creator", async () => {
           // Verify that the NFT was created in beforeEach
-          let newNFTInfo = await signer1Diamond.getNFTInfo(ParentNFTID);
+          const newNFTInfo = await signer1Diamond.getNFTInfo(ParentNFTID);
           assert(
             newNFTInfo.childCurIndex === 3n,
             `Should have created 3 NFT's, but created ${newNFTInfo.childCurIndex.toString()}`,
@@ -317,7 +337,7 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
           await expect(
             signer1Diamond.createNFTs(
               ParentNFTID,
-              ['TESTGAME:NFT4', 'TESTGAME:NFT5', 'TESTGAME:NFT6'],
+              ["TESTGAME:NFT4", "TESTGAME:NFT5", "TESTGAME:NFT6"],
               [],
               [],
               [100],
@@ -338,26 +358,32 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
         });
 
         // Test case to validate minting restrictions for unauthorized users
-        it('Testing NFT Factory to mint child tokens of GNUS with address 2', async () => {
+        it("Testing NFT Factory to mint child tokens of GNUS with address 2", async () => {
           // Attempt to mint child tokens as an unauthorized user, expecting rejection
           await expect(
-            signer2Diamond['mint(address,uint256,uint256,bytes)'](
+            signer2Diamond["mint(address,uint256,uint256,bytes)"](
               signer2, // Recipient address
               ParentNFTID, // Parent NFT ID
               toWei(5), // Amount to mint
               "0x", // Additional data
             ),
-          ).to.be.eventually.rejectedWith(Error, /Creator or Admin can only mint NFT/);
+          ).to.be.eventually.rejectedWith(
+            Error,
+            /Creator or Admin can only mint NFT/,
+          );
         });
 
         // Test case to validate successful minting of child NFTs by an authorized user
-        it('Testing NFT Factory to mint child NFTS (tokens) of GNUS with address 1', async () => {
+        it("Testing NFT Factory to mint child NFTS (tokens) of GNUS with address 1", async () => {
           // Retrieve the starting supply of GNUS tokens
-          const startingSupply = await geniusDiamond['totalSupply(uint256)'](GNUS_TOKEN_ID);
+          const startingSupply =
+            await geniusDiamond["totalSupply(uint256)"](GNUS_TOKEN_ID);
           debuglog(`Starting GNUS Supply: ${formatEther(startingSupply)}`);
 
           // Mint child NFTs using an authorized user
-          const tx = await signer1Diamond['mint(address,uint256,uint256,bytes)'](
+          const tx = await signer1Diamond[
+            "mint(address,uint256,uint256,bytes)"
+          ](
             signer2, // Recipient address
             ParentNFTID, // Parent NFT ID
             toWei(5), // Amount to mint
@@ -368,7 +394,8 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
           await logEvents(tx);
 
           // Retrieve the ending supply of GNUS tokens
-          const endingSupply = await geniusDiamond['totalSupply(uint256)'](GNUS_TOKEN_ID);
+          const endingSupply =
+            await geniusDiamond["totalSupply(uint256)"](GNUS_TOKEN_ID);
 
           // Calculate the burned supply as the difference between starting and ending supply
           const burntSupply = startingSupply - endingSupply;
@@ -383,7 +410,6 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
           debuglog(`Total GNUS burned: ${formatEther(burntSupply)}`);
         });
 
-
         // Test case to validate minting restrictions for unauthorized users
         it("Testing NFT Factory to mint child NFTs of Addr1 Token", async () => {
           // Calculate the child NFT ID based on the parent NFT ID
@@ -391,38 +417,47 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
 
           // Attempt to mint child NFTs as an unauthorized user, expecting rejection
           await expect(
-            signer2Diamond['mint(address,uint256,uint256,bytes)'](
+            signer2Diamond["mint(address,uint256,uint256,bytes)"](
               signer2, // Recipient address
               addr1childNFT1, // Child NFT ID
               toWei(5), // Amount to mint
               "0x", // Additional data
             ),
-          ).to.be.eventually.rejectedWith(Error, /Creator or Admin can only mint NFT/);
+          ).to.be.eventually.rejectedWith(
+            Error,
+            /Creator or Admin can only mint NFT/,
+          );
         });
 
         // Test case to validate successful minting of multiple child NFTs by an authorized user
-        it('Testing NFT Factory to mint child NFTs of Addr1 with address 1', async () => {
+        it("Testing NFT Factory to mint child NFTs of Addr1 with address 1", async () => {
           // Calculate IDs for three child NFTs based on the parent NFT ID
           const addr1childNFT1 = (ParentNFTID << 128n) | 0n;
           const addr1childNFT2 = (ParentNFTID << 128n) | 1n;
           const addr1childNFT3 = (ParentNFTID << 128n) | 2n;
 
           // Retrieve the starting supply of GNUS tokens
-          const startingSupply = await geniusDiamond['totalSupply(uint256)'](GNUS_TOKEN_ID);
+          const startingSupply =
+            await geniusDiamond["totalSupply(uint256)"](GNUS_TOKEN_ID);
           debuglog(`Starting GNUS Supply: ${formatEther(startingSupply)}`);
 
           // Attempt to mint more tokens than allowed, expecting rejection
           await expect(
-            signer1Diamond['mintBatch(address,uint256[],uint256[],bytes)'](
+            signer1Diamond["mintBatch(address,uint256[],uint256[],bytes)"](
               signer2, // Recipient address
               [addr1childNFT1, addr1childNFT2, addr1childNFT3], // Child NFT IDs
               [5, 100, 10], // Exceeding amounts
               "0x", // Additional data
             ),
-          ).to.be.eventually.rejectedWith(Error, 'Max Supply for NFT would be exceeded');
+          ).to.be.eventually.rejectedWith(
+            Error,
+            "Max Supply for NFT would be exceeded",
+          );
 
           // Mint valid amounts for child NFTs
-          const tx = await signer1Diamond['mintBatch(address,uint256[],uint256[],bytes)'](
+          const tx = await signer1Diamond[
+            "mintBatch(address,uint256[],uint256[],bytes)"
+          ](
             signer2, // Recipient address
             [addr1childNFT1, addr1childNFT2, addr1childNFT3], // Child NFT IDs
             [50, 1, 1], // Valid amounts
@@ -433,7 +468,8 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
           await logEvents(tx);
 
           // Retrieve the ending supply of GNUS tokens
-          const endingSupply = await geniusDiamond['totalSupply(uint256)'](GNUS_TOKEN_ID);
+          const endingSupply =
+            await geniusDiamond["totalSupply(uint256)"](GNUS_TOKEN_ID);
 
           // Calculate the burned supply as the difference between starting and ending supply
           const burntSupply = startingSupply - endingSupply;
@@ -477,7 +513,8 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
             const parentNFT = index % 5 ? 1 : 0; // Check if it's a parent NFT
             const childNFT = parentNFT ? Math.floor((index - 1) % 5) : 0; // Determine child NFT index
             debuglog(
-              `Address ${addr} has ${parentNFT && childNFT ? bn.toString() : formatEther(bn)
+              `Address ${addr} has ${
+                parentNFT && childNFT ? bn.toString() : formatEther(bn)
               } ${symbols[parentNFT]}::ChildNFT${childNFT} NFTs`,
             );
           });

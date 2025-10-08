@@ -1,41 +1,46 @@
-import { debug } from 'debug';
-import { pathExistsSync } from "fs-extra";
-import { expect, assert } from 'chai';
-import hre from 'hardhat';
-import '@nomicfoundation/hardhat-ethers';
-import { SignerWithAddress } from '@nomicfoundation/hardhat-ethers/signers';
-import { JsonRpcProvider } from '@ethersproject/providers';
-import { multichain } from 'hardhat-multichain';
-import { getInterfaceID } from '../../scripts/utils/helpers';
-import { LocalDiamondDeployer, LocalDiamondDeployerConfig } from '../../scripts/setup/LocalDiamondDeployer';
-import {
-  Diamond,
-  getDeployedFacetInterfaces,
-  diffDeployedFacets,
-  compareFacetSelectors,
-  isProtocolInitRegistered,
-  getDeployedFacets
-} from 'diamonds';
-import {
-  ProxyDiamond,
-} from '../../diamond-typechain-types/ProxyDiamond';
-import { DeployedDiamondData } from 'diamonds/src';
-import { loadDiamondContract } from '../../scripts/utils/loadDiamondArtifact';
+/* eslint-disable no-console, @typescript-eslint/no-unused-vars */
 
-describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () {
-  const diamondName = 'ProxyDiamond';
-  const log: debug.Debugger = debug('GNUSDeploy:log:${diamondName}');
+import { JsonRpcProvider } from "@ethersproject/providers";
+import "@nomicfoundation/hardhat-ethers";
+import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
+import { expect } from "chai";
+import { debug } from "debug";
+import {
+  compareFacetSelectors,
+  DeployedDiamondData,
+  Diamond,
+  diffDeployedFacets,
+  getDeployedFacets,
+  isProtocolInitRegistered,
+} from "diamonds";
+import hre from "hardhat";
+import { multichain } from "hardhat-multichain";
+import { ProxyDiamond } from "../../diamond-typechain-types/ProxyDiamond";
+import {
+  LocalDiamondDeployer,
+  LocalDiamondDeployerConfig,
+} from "../../scripts/setup/LocalDiamondDeployer";
+import { loadDiamondContract } from "../../scripts/utils/loadDiamondArtifact";
+
+describe("🧪 Multichain Fork and Diamond Deployment Tests", async function () {
+  const diamondName = "ProxyDiamond";
+  const log: debug.Debugger = debug("GNUSDeploy:log:${diamondName}");
   this.timeout(0); // Extended indefinitely for diamond deployment time
 
-  const networkProviders = multichain.getProviders() || new Map<string, JsonRpcProvider>();
+  const networkProviders =
+    multichain.getProviders() || new Map<string, JsonRpcProvider>();
 
-  if (process.argv.includes('test-multichain')) {
-    const networkNames = process.argv[process.argv.indexOf('--chains') + 1].split(',');
-    if (networkNames.includes('hardhat')) {
-      networkProviders.set('hardhat', hre.ethers.provider as any);
+  if (process.argv.includes("test-multichain")) {
+    const networkNames =
+      process.argv[process.argv.indexOf("--chains") + 1].split(",");
+    if (networkNames.includes("hardhat")) {
+      networkProviders.set("hardhat", hre.ethers.provider as any);
     }
-  } else if (process.argv.includes('test') || process.argv.includes('coverage')) {
-    networkProviders.set('hardhat', hre.ethers.provider as any);
+  } else if (
+    process.argv.includes("test") ||
+    process.argv.includes("coverage")
+  ) {
+    networkProviders.set("hardhat", hre.ethers.provider as any);
   }
 
   for (const [networkName, provider] of networkProviders.entries()) {
@@ -70,9 +75,13 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
         diamond = await diamondDeployer.getDiamondDeployed();
         deployedDiamondData = diamond.getDeployedDiamondData();
 
-        const hardhatDiamondAbiPath = 'hardhat-diamond-abi/HardhatDiamondABI.sol:';
+        const hardhatDiamondAbiPath =
+          "hardhat-diamond-abi/HardhatDiamondABI.sol:";
         const diamondArtifactName = `${hardhatDiamondAbiPath}${diamond.diamondName}`;
-        proxyDiamond = await loadDiamondContract<ProxyDiamond>(diamond, deployedDiamondData.DiamondAddress!);
+        proxyDiamond = await loadDiamondContract<ProxyDiamond>(
+          diamond,
+          deployedDiamondData.DiamondAddress!,
+        );
 
         ethersMultichain = hre.ethers;
         ethersMultichain.provider = provider as any;
@@ -99,25 +108,24 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
       });
 
       beforeEach(async function () {
-        snapshotId = await provider.send('evm_snapshot', []);
+        snapshotId = await provider.send("evm_snapshot", []);
       });
 
       afterEach(async () => {
-        await provider.send('evm_revert', [snapshotId]);
+        await provider.send("evm_revert", [snapshotId]);
       });
 
-      it('🧪 Should report any issues with facets and selectors that do not match',
-        async function () {
-          const diamondProvider = diamond.provider! as any;
-          const passFail = await diffDeployedFacets(
-            deployedDiamondData,
-            diamondProvider,
-            true,
-          );
-          expect(passFail).to.be.true;
-        });
+      it("🧪 Should report any issues with facets and selectors that do not match", async function () {
+        const diamondProvider = diamond.provider! as any;
+        const passFail = await diffDeployedFacets(
+          deployedDiamondData,
+          diamondProvider,
+          true,
+        );
+        expect(passFail).to.be.true;
+      });
 
-      it('🧪 Should compare the deployed facets with the config', async function () {
+      it("🧪 Should compare the deployed facets with the config", async function () {
         const onChainFacets = await getDeployedFacets(
           deployedDiamondData.DiamondAddress!,
           ownerSigner,
@@ -125,34 +133,53 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
           // true  // uncheck for console list of deployedContracts
         );
 
-        console.log('Deployment data facets:', deployedDiamondData.DeployedFacets);
-        console.log('On-chain facets:', onChainFacets);
+        console.log(
+          "Deployment data facets:",
+          deployedDiamondData.DeployedFacets,
+        );
+        console.log("On-chain facets:", onChainFacets);
 
         // If there's no deployment data stored, we should just verify that facets exist on-chain
-        if (!deployedDiamondData.DeployedFacets || Object.keys(deployedDiamondData.DeployedFacets).length === 0) {
-          console.log("No deployment data found, verifying on-chain facets exist...");
+        if (
+          !deployedDiamondData.DeployedFacets ||
+          Object.keys(deployedDiamondData.DeployedFacets).length === 0
+        ) {
+          console.log(
+            "No deployment data found, verifying on-chain facets exist...",
+          );
           expect(Object.keys(onChainFacets).length).to.be.greaterThan(0);
           console.log("✅ On-chain facets verified!");
           return;
         }
 
         // Count total selectors in deployment data vs on-chain
-        const deploymentSelectorCount = Object.values(deployedDiamondData.DeployedFacets).reduce((total, facet) => 
-          total + (facet.funcSelectors?.length || 0), 0);
-        const onChainSelectorCount = onChainFacets.reduce((total, facet) => 
-          total + facet.functionSelectors.length, 0);
+        const deploymentSelectorCount = Object.values(
+          deployedDiamondData.DeployedFacets,
+        ).reduce(
+          (total, facet) => total + (facet.funcSelectors?.length || 0),
+          0,
+        );
+        const onChainSelectorCount = onChainFacets.reduce(
+          (total, facet) => total + facet.functionSelectors.length,
+          0,
+        );
 
         // If deployment data has significantly fewer selectors, it's likely incomplete
         if (deploymentSelectorCount < onChainSelectorCount / 2) {
-          console.log("Deployment data appears incomplete (too few selectors), verifying on-chain facets exist...");
+          console.log(
+            "Deployment data appears incomplete (too few selectors), verifying on-chain facets exist...",
+          );
           expect(Object.keys(onChainFacets).length).to.be.greaterThan(0);
           expect(onChainSelectorCount).to.be.greaterThan(10); // Should have at least the ERC20 + Diamond selectors
           console.log("✅ On-chain facets verified!");
           return;
         }
 
-        const comparison = compareFacetSelectors(deployedDiamondData.DeployedFacets!, onChainFacets);
-        let passFail: boolean = true;;
+        const comparison = compareFacetSelectors(
+          deployedDiamondData.DeployedFacets!,
+          onChainFacets,
+        );
+        let passFail: boolean = true;
         for (const [facetName, diff] of Object.entries(comparison)) {
           if (diff.extraOnChain.length || diff.missingOnChain.length) {
             console.log(`🔎 Mismatch in ${facetName}:`);
@@ -172,19 +199,31 @@ describe('🧪 Multichain Fork and Diamond Deployment Tests', async function () 
         console.log("✅ All facets match!");
       });
 
-      it('🧪 Should compare the deployed facet initializer setup with the config', async function () {
+      it("🧪 Should compare the deployed facet initializer setup with the config", async function () {
         if (!diamond.getDeployConfig().protocolInitFacet) {
-          console.log("No ProtocolInitFacet defined: Skipping post-deployment validation.");
+          console.log(
+            "No ProtocolInitFacet defined: Skipping post-deployment validation.",
+          );
           return;
         }
         const facetInit = diamond.getDeployConfig().protocolInitFacet;
         const protocolVersion = diamond.getDeployConfig().protocolVersion;
-        const initFunctionName = diamond.getDeployConfig().facets[facetInit!].versions?.[protocolVersion]?.deployInit;
-        const protocolFacetOk = await isProtocolInitRegistered(deployedDiamondData, facetInit!, initFunctionName!);
-        console.log(protocolFacetOk ? "✅ Protocol initializer present." : "❌ Protocol initializer missing.");
+        const initFunctionName =
+          diamond.getDeployConfig().facets[facetInit!].versions?.[
+            protocolVersion
+          ]?.deployInit;
+        const protocolFacetOk = await isProtocolInitRegistered(
+          deployedDiamondData,
+          facetInit!,
+          initFunctionName!,
+        );
+        console.log(
+          protocolFacetOk
+            ? "✅ Protocol initializer present."
+            : "❌ Protocol initializer missing.",
+        );
         expect(protocolFacetOk).to.be.true;
       });
     });
   }
 });
-

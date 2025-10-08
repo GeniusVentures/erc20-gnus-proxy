@@ -1,11 +1,14 @@
-import { ethers } from 'hardhat';
-import { Interface, parseEther, FunctionFragment } from 'ethers';
+import { Interface, parseEther, FunctionFragment } from "ethers";
 
-export function getInterfaceID(contractInterface: Interface) {
+export function getInterfaceID(contractInterface: Interface): bigint {
   let interfaceID: bigint = 0n;
-  const fragments = contractInterface.fragments.filter(f => f.type === 'function') as FunctionFragment[];
+  const fragments = contractInterface.fragments.filter(
+    (f) => f.type === "function",
+  ) as FunctionFragment[];
   for (const fragment of fragments) {
-    interfaceID = interfaceID ^ BigInt(contractInterface.getFunction(fragment.name)!.selector);
+    interfaceID =
+      interfaceID ^
+      BigInt(contractInterface.getFunction(fragment.name)!.selector);
   }
 
   return interfaceID;

@@ -4,14 +4,14 @@ This directory contains comprehensive deployment, upgrade, and verification tool
 
 ## 📁 Contents
 
-| Script | Purpose | Description |
-|--------|---------|-------------|
-| `deploy-rpc.ts` | **Main Deployment** | Primary script for deploying Diamond contracts |
-| `upgrade-rpc.ts` | **Upgrade Management** | Handles Diamond contract upgrades with analysis |
-| `verify-rpc.ts` | **Verification** | Validates deployment integrity and contract verification |
-| `status-rpc.ts` | **Status Monitoring** | Shows deployment status and configuration details |
-| `deploy-rpc-manual.ts` | **Interactive Deployment** | Step-by-step manual deployment with confirmations |
-| `common.ts` | **Shared Infrastructure** | Common utilities and configuration management |
+| Script                 | Purpose                    | Description                                              |
+| ---------------------- | -------------------------- | -------------------------------------------------------- |
+| `deploy-rpc.ts`        | **Main Deployment**        | Primary script for deploying Diamond contracts           |
+| `upgrade-rpc.ts`       | **Upgrade Management**     | Handles Diamond contract upgrades with analysis          |
+| `verify-rpc.ts`        | **Verification**           | Validates deployment integrity and contract verification |
+| `status-rpc.ts`        | **Status Monitoring**      | Shows deployment status and configuration details        |
+| `deploy-rpc-manual.ts` | **Interactive Deployment** | Step-by-step manual deployment with confirmations        |
+| `common.ts`            | **Shared Infrastructure**  | Common utilities and configuration management            |
 
 ## 🚀 Quick Start
 
@@ -19,22 +19,22 @@ This directory contains comprehensive deployment, upgrade, and verification tool
 
 ```bash
 # Deploy to testnet (e.g., Sepolia)
-npx ts-node scripts/deploy/rpc/deploy-rpc.ts GNUSDAODiamond sepolia
+npx ts-node scripts/deploy/rpc/deploy-rpc.ts ProxyDiamond sepolia
 
 # Deploy to mainnet
-npx ts-node scripts/deploy/rpc/deploy-rpc.ts GNUSDAODiamond mainnet
+npx ts-node scripts/deploy/rpc/deploy-rpc.ts ProxyDiamond mainnet
 ```
 
 ### Check Deployment Status
 
 ```bash
-npx ts-node scripts/deploy/rpc/status-rpc.ts GNUSDAODiamond sepolia --detailed
+npx ts-node scripts/deploy/rpc/status-rpc.ts ProxyDiamond sepolia --detailed
 ```
 
 ### Verify Deployment
 
 ```bash
-npx ts-node scripts/deploy/rpc/verify-rpc.ts GNUSDAODiamond sepolia --etherscan
+npx ts-node scripts/deploy/rpc/verify-rpc.ts ProxyDiamond sepolia --etherscan
 ```
 
 ## 🛠️ Detailed Usage
@@ -77,7 +77,7 @@ npx ts-node scripts/deploy/rpc/deploy-rpc.ts <DiamondName> <network>
 **Advanced Options:**
 
 ```bash
-npx ts-node scripts/deploy/rpc/deploy-rpc.ts GNUSDAODiamond sepolia \
+npx ts-node scripts/deploy/rpc/deploy-rpc.ts ProxyDiamond sepolia \
   --rpc-url https://custom-rpc \
   --private-key 0x... \
   --gas-multiplier 1.5 \
@@ -90,10 +90,10 @@ npx ts-node scripts/deploy/rpc/deploy-rpc.ts GNUSDAODiamond sepolia \
 
 ```bash
 # Legacy format
-npx ts-node scripts/deploy/rpc/deploy-rpc.ts legacy GNUSDAODiamond sepolia
+npx ts-node scripts/deploy/rpc/deploy-rpc.ts legacy ProxyDiamond sepolia
 
 # Quick deployment with minimal output
-npx ts-node scripts/deploy/rpc/deploy-rpc.ts quick GNUSDAODiamond sepolia
+npx ts-node scripts/deploy/rpc/deploy-rpc.ts quick ProxyDiamond sepolia
 ```
 
 #### `deploy-rpc-manual.ts` - Interactive Deployment
@@ -101,7 +101,7 @@ npx ts-node scripts/deploy/rpc/deploy-rpc.ts quick GNUSDAODiamond sepolia
 Step-by-step deployment with user confirmations at each stage.
 
 ```bash
-npx ts-node scripts/deploy/rpc/deploy-rpc-manual.ts GNUSDAODiamond sepolia \
+npx ts-node scripts/deploy/rpc/deploy-rpc-manual.ts ProxyDiamond sepolia \
   --debug \
   --verbose
 ```
@@ -122,13 +122,13 @@ Handles Diamond contract upgrades with comprehensive analysis.
 **Basic Upgrade:**
 
 ```bash
-npx ts-node scripts/deploy/rpc/upgrade-rpc.ts GNUSDAODiamond sepolia
+npx ts-node scripts/deploy/rpc/upgrade-rpc.ts ProxyDiamond sepolia
 ```
 
 **Dry Run Analysis:**
 
 ```bash
-npx ts-node scripts/deploy/rpc/upgrade-rpc.ts GNUSDAODiamond sepolia \
+npx ts-node scripts/deploy/rpc/upgrade-rpc.ts ProxyDiamond sepolia \
   --dry-run \
   --verbose
 ```
@@ -136,7 +136,7 @@ npx ts-node scripts/deploy/rpc/upgrade-rpc.ts GNUSDAODiamond sepolia \
 **Advanced Options:**
 
 ```bash
-npx ts-node scripts/deploy/rpc/upgrade-rpc.ts GNUSDAODiamond sepolia \
+npx ts-node scripts/deploy/rpc/upgrade-rpc.ts ProxyDiamond sepolia \
   --target-version 2.0.0 \
   --force \
   --skip-analysis
@@ -157,10 +157,10 @@ Comprehensive status reporting for deployed contracts.
 
 ```bash
 # Basic status
-npx ts-node scripts/deploy/rpc/status-rpc.ts GNUSDAODiamond sepolia
+npx ts-node scripts/deploy/rpc/status-rpc.ts ProxyDiamond sepolia
 
 # Detailed status with facet information
-npx ts-node scripts/deploy/rpc/status-rpc.ts GNUSDAODiamond sepolia \
+npx ts-node scripts/deploy/rpc/status-rpc.ts ProxyDiamond sepolia \
   --detailed \
   --show-facets \
   --verbose
@@ -182,10 +182,10 @@ Validates deployment integrity and performs Etherscan verification.
 
 ```bash
 # Basic verification
-npx ts-node scripts/deploy/rpc/verify-rpc.ts GNUSDAODiamond sepolia
+npx ts-node scripts/deploy/rpc/verify-rpc.ts ProxyDiamond sepolia
 
 # Full verification with Etherscan
-npx ts-node scripts/deploy/rpc/verify-rpc.ts GNUSDAODiamond sepolia \
+npx ts-node scripts/deploy/rpc/verify-rpc.ts ProxyDiamond sepolia \
   --etherscan \
   --check-all \
   --verbose
@@ -203,38 +203,38 @@ npx ts-node scripts/deploy/rpc/verify-rpc.ts GNUSDAODiamond sepolia \
 
 ### Common Options (All Scripts)
 
-| Option | Description | Default |
-|--------|-------------|---------|
-| `--rpc-url` | Custom RPC endpoint | From .env |
-| `--private-key` | Deployment private key | From .env |
-| `--verbose` | Detailed logging | false |
-| `--config-path` | Custom config file path | Auto-detected |
-| `--deployments-path` | Deployment records path | ./diamonds |
-| `--gas-multiplier` | Gas limit multiplier | 1.2 |
-| `--max-retries` | Maximum retry attempts | 3 |
-| `--retry-delay` | Retry delay in ms | 2000 |
+| Option               | Description             | Default       |
+| -------------------- | ----------------------- | ------------- |
+| `--rpc-url`          | Custom RPC endpoint     | From .env     |
+| `--private-key`      | Deployment private key  | From .env     |
+| `--verbose`          | Detailed logging        | false         |
+| `--config-path`      | Custom config file path | Auto-detected |
+| `--deployments-path` | Deployment records path | ./diamonds    |
+| `--gas-multiplier`   | Gas limit multiplier    | 1.2           |
+| `--max-retries`      | Maximum retry attempts  | 3             |
+| `--retry-delay`      | Retry delay in ms       | 2000          |
 
 ### Deployment-Specific Options
 
-| Option | Description | Default |
-|--------|-------------|---------|
-| `--force` | Force deployment even if exists | false |
-| `--skip-verification` | Skip post-deployment verification | false |
+| Option                | Description                       | Default |
+| --------------------- | --------------------------------- | ------- |
+| `--force`             | Force deployment even if exists   | false   |
+| `--skip-verification` | Skip post-deployment verification | false   |
 
 ### Upgrade-Specific Options
 
-| Option | Description | Default |
-|--------|-------------|---------|
-| `--dry-run` | Analyze without executing | false |
-| `--target-version` | Specific version to upgrade to | Latest |
-| `--skip-analysis` | Skip pre-upgrade analysis | false |
+| Option             | Description                    | Default |
+| ------------------ | ------------------------------ | ------- |
+| `--dry-run`        | Analyze without executing      | false   |
+| `--target-version` | Specific version to upgrade to | Latest  |
+| `--skip-analysis`  | Skip pre-upgrade analysis      | false   |
 
 ### Verification-Specific Options
 
-| Option | Description | Default |
-|--------|-------------|---------|
-| `--etherscan` | Verify contracts on Etherscan | false |
-| `--check-all` | Perform comprehensive checks | false |
+| Option        | Description                   | Default |
+| ------------- | ----------------------------- | ------- |
+| `--etherscan` | Verify contracts on Etherscan | false   |
+| `--check-all` | Perform comprehensive checks  | false   |
 
 ## 📋 Deployment Procedures
 
@@ -244,7 +244,7 @@ npx ts-node scripts/deploy/rpc/verify-rpc.ts GNUSDAODiamond sepolia \
 
    ```bash
    # Archive or remove previous deployment records
-   mv deployments/GNUSDAODiamond/sepolia deployments/archive/
+   mv deployments/ProxyDiamond/sepolia deployments/archive/
    ```
 
 2. **Set Environment**
@@ -257,19 +257,19 @@ npx ts-node scripts/deploy/rpc/verify-rpc.ts GNUSDAODiamond sepolia \
 3. **Deploy Diamond**
 
    ```bash
-   npx ts-node scripts/deploy/rpc/deploy-rpc.ts GNUSDAODiamond sepolia --verbose
+   npx ts-node scripts/deploy/rpc/deploy-rpc.ts ProxyDiamond sepolia --verbose
    ```
 
 4. **Verify Deployment**
 
    ```bash
-   npx ts-node scripts/deploy/rpc/verify-rpc.ts GNUSDAODiamond sepolia --etherscan
+   npx ts-node scripts/deploy/rpc/verify-rpc.ts ProxyDiamond sepolia --etherscan
    ```
 
 5. **Check Status**
 
    ```bash
-   npx ts-node scripts/deploy/rpc/status-rpc.ts GNUSDAODiamond sepolia --detailed
+   npx ts-node scripts/deploy/rpc/status-rpc.ts ProxyDiamond sepolia --detailed
    ```
 
 ### Testnet Upgrade Procedure
@@ -277,19 +277,19 @@ npx ts-node scripts/deploy/rpc/verify-rpc.ts GNUSDAODiamond sepolia \
 1. **Analyze Upgrade**
 
    ```bash
-   npx ts-node scripts/deploy/rpc/upgrade-rpc.ts GNUSDAODiamond sepolia --dry-run
+   npx ts-node scripts/deploy/rpc/upgrade-rpc.ts ProxyDiamond sepolia --dry-run
    ```
 
 2. **Execute Upgrade**
 
    ```bash
-   npx ts-node scripts/deploy/rpc/upgrade-rpc.ts GNUSDAODiamond sepolia --verbose
+   npx ts-node scripts/deploy/rpc/upgrade-rpc.ts ProxyDiamond sepolia --verbose
    ```
 
 3. **Verify Upgrade**
 
    ```bash
-   npx ts-node scripts/deploy/rpc/verify-rpc.ts GNUSDAODiamond sepolia --check-all
+   npx ts-node scripts/deploy/rpc/verify-rpc.ts ProxyDiamond sepolia --check-all
    ```
 
 ### Mainnet Deployment Procedure
@@ -305,20 +305,20 @@ npx ts-node scripts/deploy/rpc/verify-rpc.ts GNUSDAODiamond sepolia \
 2. **Deploy with Manual Confirmations**
 
    ```bash
-   npx ts-node scripts/deploy/rpc/deploy-rpc-manual.ts GNUSDAODiamond mainnet --verbose
+   npx ts-node scripts/deploy/rpc/deploy-rpc-manual.ts ProxyDiamond mainnet --verbose
    ```
 
 3. **Comprehensive Verification**
 
    ```bash
-   npx ts-node scripts/deploy/rpc/verify-rpc.ts GNUSDAODiamond mainnet \
+   npx ts-node scripts/deploy/rpc/verify-rpc.ts ProxyDiamond mainnet \
      --etherscan --check-all --verbose
    ```
 
 4. **Final Status Check**
 
    ```bash
-   npx ts-node scripts/deploy/rpc/status-rpc.ts GNUSDAODiamond mainnet --detailed
+   npx ts-node scripts/deploy/rpc/status-rpc.ts ProxyDiamond mainnet --detailed
    ```
 
 ## 📝 Post-Deployment Tasks
@@ -327,8 +327,8 @@ npx ts-node scripts/deploy/rpc/verify-rpc.ts GNUSDAODiamond sepolia \
 
    ```bash
    git add deployments/
-   git commit -m "Deploy GNUSDAODiamond to [network] - [diamond-address]"
-   git tag -a v[version] -m "GNUSDAODiamond deployment v[version]"
+   git commit -m "Deploy ProxyDiamond to [network] - [diamond-address]"
+   git tag -a v[version] -m "ProxyDiamond deployment v[version]"
    ```
 
 2. **Update Documentation**
@@ -379,7 +379,7 @@ npx ts-node scripts/deploy/rpc/verify-rpc.ts GNUSDAODiamond sepolia \
 For detailed debugging, use:
 
 ```bash
-npx ts-node scripts/deploy/rpc/deploy-rpc-manual.ts GNUSDAODiamond sepolia \
+npx ts-node scripts/deploy/rpc/deploy-rpc-manual.ts ProxyDiamond sepolia \
   --debug --verbose
 ```
 

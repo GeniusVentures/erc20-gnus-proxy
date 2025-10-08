@@ -1,8 +1,8 @@
-import { debug } from 'debug';
-import * as uint32 from 'uint32';
+import { debug } from "debug";
+import * as uint32 from "uint32";
 
-const log: debug.Debugger = debug('xorwow:log');
-log.color = '141';
+const log: debug.Debugger = debug("xorwow:log");
+log.color = "141";
 
 // this is the main ZKSnark code that checks the validity of processed nodes.
 // Based on 11 total nodes, 10 micro processed blocks at a time for each node.
