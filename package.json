@@ -26,7 +26,7 @@
     "socket:scan": "SOCKET_CLI_API_TOKEN=$(grep SOCKET_CLI_API_TOKEN .env | cut -d'=' -f2) npx socket ci",
     "osv:scan": "./bin/osv-scanner --lockfile=yarn.lock --format=json",
     "semgrep:scan": "semgrep scan --config .semgrep.yml --exclude-rule weak-encryption --error",
-    "slither:scan": "slither . --config-file slither.config.json",
+    "slither:scan": "slither . --config-file slither.config.json --ignore-compile",
     "slither:check": "slither . --config-file slither.config.json --checklist",
     "git-secrets:scan": "git secrets --scan",
     "commitlint": "commitlint --edit",
