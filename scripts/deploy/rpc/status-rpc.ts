@@ -291,7 +291,7 @@ createQuickCommand(
   program,
   "quick",
   "Quick status check using environment variables",
-  async (config /* , options: StatusOptions */) => {
+  async (config) => {
     const startTime = Date.now();
 
     await showPreOperationInfo(config, "Quick Diamond Status Check");
