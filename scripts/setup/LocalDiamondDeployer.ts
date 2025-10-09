@@ -177,6 +177,9 @@ export class LocalDiamondDeployer {
       const instance = new LocalDiamondDeployer(config, repository);
       this.instances.set(key, instance);
 
+      // ToDo there should be a verification step here with configurable version checking
+      // for whatever abi contract release is expected. This is where we are getting
+      // repeated diamond ABI creation in the tests.
       // Generate Diamond ABI with Typechain using hardhat task
       await hre.run("diamond:generate-abi-typechain", {
         diamondName: config.diamondName,
