@@ -20,7 +20,7 @@ Current state (pre-hardening): the proxy's ERC-20 surface is broken for DeFi use
 
 - [ ] **PROXY-01**: Real amount-specific ERC-20 allowances — `_allowances` mapping in proxy storage; `approve(spender, amount)` sets a real allowance (NOT `setApprovalForAll`); `allowance()` returns the real value.
 - [ ] **PROXY-02**: Immutable proxy configuration — `initializeERC20Proxy` is one-shot; `childTokenId`, `erc1155Contract`, `name`, `symbol` cannot change after initialization.
-- [ ] **PROXY-03**: Redeem adapter for proxied-child → GNUS — lives **in the gnus-ai repo** as a generic diamond-side adapter (see Cross-Repo Dependencies); this repo's side is only the call-out and its tests.
+- [x] **PROXY-03**: Redeem adapter for proxied-child → GNUS — **DONE in gnus-ai (commit d731384, 2026-08-20).** Shipped as a **caller-bound direct-burn** `redeem(uint256 childId, uint256 amount)`: the user calls the diamond directly, no operator approvals, no proxy involvement. **This repo has NO PROXY-03 work** — the proxy never calls redeem. See Cross-Repo Dependencies.
 
 ### Out of Scope
 
@@ -37,7 +37,7 @@ Current state (pre-hardening): the proxy's ERC-20 surface is broken for DeFi use
 
 **Tests:** Hardhat/Mocha in `test/{unit,integration,deployment}`; `test-assets/deployments-test/GeniusDiamond` deployment fixtures. Tests deploy a GeniusDiamond from the nested submodule and attach the proxy to it.
 
-**Cross-repo context:** The controlling design decisions for this project live in `gnus-ai/.planning/phases/11-erc-20-proxy-hardening/11-CONTEXT.md` (D-01..D-14), captured 2026-08-19. This repo's Phase 1 implements the proxy-side half (PROXY-01/02 + DEX tests).
+**Cross-repo context:** The controlling design decisions for this project live in `gnus-ai/.planning/phases/11-erc-20-proxy-hardening/11-CONTEXT.md` (D-01..D-14), captured 2026-08-19. This repo's Phase 1 implements the proxy-side half (PROXY-01/02 + DEX tests). Note: 11-CONTEXT.md D-08 describes the superseded two-gate adapter design; the shipped caller-bound direct-burn redeem (see PROXY-03 above) removes any proxy/redeem interaction.
 
 ## Constraints
 
@@ -51,8 +51,9 @@ Current state (pre-hardening): the proxy's ERC-20 surface is broken for DeFi use
 
 | Dependency | Direction | Detail |
 |---|---|---|
-| gnus-ai Phase 11 (redeem adapter) | this repo ← gnus-ai | The generic redeem adapter (PROXY-03) is implemented diamond-side in gnus-ai. This repo's redeem tests need a nested `contracts/gnus-ai` pin that includes it. Ordering: gnus-ai lands first, then nested bump, then proxy tests. |
-| gnus-ai Phase 9 (conversion-native model) | design input | `GNUSTreasury.convert(childId, 0, amount, to)` is the ONLY redemption path — no reserve apparatus exists. |
+| gnus-ai Phase 11 (redeem adapter) | none (shipped) | PROXY-03 shipped in gnus-ai as caller-bound direct-burn `redeem(childId, amount)` (contracts `d731384`, gnus-ai `ff28e18`). The user calls the diamond directly — the proxy never calls redeem, holds no redeem role, and needs no redeem tests. The earlier "adapter target + approval chain" design (D-08 two-gate, PR #75 two-gate fix) is **superseded**. |
+| gnus-ai nested pin for tests | this repo ← gnus-ai | This repo's `contracts/gnus-ai` pin is STALE (Oct-2024 `7c0b237`). Phase 1 must bump it to a gnus-ai-contracts commit ≥ `d731384` so the test diamond includes Phase 9/10/11 (convert, bridgeIn, current redeem). Ordering: bump nested pin, then proxy tests. |
+| gnus-ai Phase 9 (conversion-native model) | design input | `GNUSTreasury.convert(childId, 0, amount, to)` is the underlying conversion path — no reserve apparatus exists. The caller-bound redeem performs the same 1:1 burn/mint pair directly. |
 | gnus-ai Phase 13 (entitlements) | constraint source | Proxy stays dumb; no proxy changes needed for Phase 13; AI Credits must never be redeemable. |
 
 ---

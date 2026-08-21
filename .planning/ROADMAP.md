@@ -16,7 +16,7 @@
 
 **Goal:** Fix ERC-20 proxy approval/allowance semantics and make child token ID (and all init config) immutable.
 
-**Context:** This phase is the proxy-side half of gnus-ai Phase 11. The controlling decisions (D-01..D-14) are in `gnus-ai/.planning/phases/11-erc-20-proxy-hardening/11-CONTEXT.md`. The redeem adapter (PROXY-03) is implemented in gnus-ai, not here — this phase only covers the proxy contract itself plus the nested-submodule bump needed for its tests.
+**Context:** This phase is the proxy-side half of gnus-ai Phase 11. The controlling decisions (D-01..D-14) are in `gnus-ai/.planning/phases/11-erc-20-proxy-hardening/11-CONTEXT.md`. The redeem adapter (PROXY-03) is **shipped** in gnus-ai as a caller-bound direct-burn `redeem(childId, amount)` — the proxy never calls redeem and has no PROXY-03 work. This phase only covers the proxy contract itself (PROXY-01/02) plus the nested-submodule bump needed for its tests.
 
 **Success Criteria:**
 
@@ -27,7 +27,7 @@
 5. DEX-style approve → transferFrom flow tested: allowance decreases correctly, zero-allowance rejection, allowance independent of operator approval.
 
 **Also in scope (enabler):**
-- Bump nested `contracts/gnus-ai` submodule pin from stale `7c0b237` (Oct 2024) to a gnus-ai commit including Phase 9/10/11 code — required so tests deploy a diamond with `GNUSTreasury.convert` and the redeem adapter.
+- Bump nested `contracts/gnus-ai` submodule pin from stale `7c0b237` (Oct 2024) to a gnus-ai-contracts commit ≥ `d731384` — required so tests deploy a diamond with `GNUSTreasury.convert` and the current Phase 9/10/11 code.
 - Bump nested `diamonds/GeniusDiamond` pin to match what current gnus-ai uses.
 
 **Requirements:** PROXY-01, PROXY-02
@@ -36,7 +36,7 @@
 **Assignee:** @Am0rfu5
 
 **GitHub:** [erc20-gnus-proxy#9](https://github.com/GeniusVentures/erc20-gnus-proxy/issues/9)
-**Cross-repo:** gnus-ai Phase 11 (redeem adapter, PROXY-03) — [erc20-gnus-proxy#10](https://github.com/GeniusVentures/erc20-gnus-proxy/issues/10) is diamond-side work tracked in `gnus-ai/.planning/`
+**Cross-repo:** gnus-ai Phase 11 (redeem adapter, PROXY-03) — **shipped** in gnus-ai (contracts `d731384`, 2026-08-20) as caller-bound direct-burn; no proxy-side work. [erc20-gnus-proxy#10](https://github.com/GeniusVentures/erc20-gnus-proxy/issues/10)'s reserve-adapter design is superseded.
 **Concerns addressed:** gnus-ai CONCERNS #5 (all-or-nothing approval), #23 (proxy tests)
 
 ---
