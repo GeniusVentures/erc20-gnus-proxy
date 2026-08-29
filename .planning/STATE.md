@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: proxy-hardening
 milestone_name: ERC-20 GNUS Proxy Hardening
 status: executing
-stopped_at: Phase 1 context gathered
-last_updated: "2026-08-29T18:59:34.267Z"
-last_activity: 2026-08-29 -- Phase 1 planning complete
+stopped_at: Phase 1 all plans executed — gates green, awaiting code-review + verification
+last_updated: "2026-08-29T23:30:00.000Z"
+last_activity: 2026-08-29 -- Phase 01 all 6 plans executed, full-suite gate green
 progress:
   total_phases: 1
   completed_phases: 0
   total_plans: 6
-  completed_plans: 0
-  percent: 0
+  completed_plans: 6
+  percent: 100
 ---
 
 # Project State
@@ -21,30 +21,30 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-19)
 
 **Core value:** A DEX-safe ERC-20 facade over GNUS.ai child tokens with real allowance semantics and immutable configuration.
-**Current focus:** Phase 1 — ERC-20 Proxy Hardening (parent milestone v1.1 Phase 16)
+**Current focus:** Phase 01 — erc-20-proxy-hardening (execution done, phase gates in progress)
 
 ## Current Position
 
-Phase: 1 of 1 (ERC-20 Proxy Hardening)
-Plan: 0 of 0 in current phase
-Status: Ready to execute
-Last activity: 2026-08-29 -- Phase 1 planning complete
+Phase: 01 (erc-20-proxy-hardening) — EXECUTING (all plans done)
+Plan: 6 of 6 (01-01 … 01-06 all complete, SUMMARYs written)
+Status: Full-suite gate green (85 passing / 0 failing, build+tsc exit 0); next: /gsd:code-review 1, then verification
+Last activity: 2026-08-29 -- Phase 01 execution finished on gsd/phase-1-erc-20-proxy-hardening
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [██████████] 100% (plans)
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 0
-- Average duration: —
-- Total execution time: —
+- Total plans completed: 6
+- Average duration: ~11 min/plan
+- Total execution time: ~67 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 1 | 0/0 | — | — |
+| 1 | 6/6 | ~67 min | ~11 min |
 
 ## Accumulated Context
 
@@ -53,18 +53,24 @@ Progress: [░░░░░░░░░░] 0%
 Decisions are logged in PROJECT.md Key Decisions table.
 Recent decisions affecting current work:
 
-- Phase 1 context (2026-08-28): allowance semantics mirror `GNUSBridge.sol` reference exactly (approve(max) infinite/no-decrement, direct overwrite); init = one-shot with static guards + `totalSupply` smoke test (reject zero address, `childTokenId == 0`, empty name/symbol); DEX tests = unit + new `test/integration/DEXFlow.test.ts` against the live bumped GeniusDiamond
+- Phase 1 context (2026-08-28): allowance semantics mirror `GNUSBridge.sol` reference exactly (approve(max) infinite/no-decrement, direct overwrite); init = one-shot with static guards + `totalSupply` smoke test; DEX tests = unit + new `test/integration/DEXFlow.test.ts` against the live bumped GeniusDiamond
+- Execution (2026-08-29): [SUS] package checkpoint approved by user — `@geniusventures/diamonds@1.3.4-gv` / `hardhat-diamonds@1.1.15-gv.2` / `hardhat-multichain@1.1.0-gv` installs authorized (provenance: same GitHub sources as prior git-URL deps, gnus-ai CI-green pairing)
+- Execution (2026-08-29): A3 closed — LOCAL `LocalDiamondDeployer` kept; the only pre-harness failure was the missing `GNUSLifecyclePolicy` link; every GeniusDiamond-deploying suite calls `await setupLifecyclePolicyLinking()` FIRST in `before()`
+- Execution (2026-08-29): uninitialized-state unit tests use a pre-init snapshot pool — Hardhat `evm_revert` consumes its target; re-arming is unreliable
+- Execution (2026-08-29): on the live diamond the `NFT_PROXY_OPERATOR_ROLE` override affects the `isApprovedForAll` VIEW only — `safeTransferFrom`'s internal check still reads base `_operatorApprovals`; criterion 5 proven in the exact pre-hardening exploit configuration (candidate upstream note to gnus-ai)
+- Execution (2026-08-29): factory mint at pin 61b7ca4 is direct-children-only (`GNUSNFTFactory.beforeMint` D6 depth gate); batch-mint tests batch direct children of GNUS; maxSupply enforcement lives in linked `GNUSLifecyclePolicy.enforceMintGate` (post-increment)
 
 ### Pending Todos
 
-None yet.
+- After phase completion: outer TokenContracts submodule pin-bump of this repo (deliberately outside these plans, recorded in 01-06-SUMMARY)
+- Deferred (01-01): `typechain-types/` missing from .gitignore; tracked `.yarn/install-state.gz` dirty
 
 ### Blockers/Concerns
 
-- Nested `contracts/gnus-ai` pin is stale (Oct-2024 `7c0b237`); Phase 1 bumps it ≥ `d731384` — deployment-harness rework expected (D-05 integration suite doubles as the proof)
+None — stale nested-pin blocker resolved (contracts/gnus-ai now 61b7ca4, diamonds/GeniusDiamond dfebdf0).
 
 ## Session Continuity
 
-Last session: 2026-08-28T23:06:57.995Z
-Stopped at: Phase 1 context gathered
-Resume file: .planning/phases/01-erc-20-proxy-hardening/01-CONTEXT.md
+Last session: 2026-08-29T23:21:48Z
+Stopped at: Phase 1 all 6 plans executed; build/test gates green; awaiting /gsd:code-review 1 then /gsd:verify-work
+Resume file: .planning/phases/01-erc-20-proxy-hardening/01-06-SUMMARY.md
