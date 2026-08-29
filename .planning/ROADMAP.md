@@ -8,7 +8,7 @@
 
 | #   | Phase           | Goal                                                              | Requirements         | Success Criteria |
 | --- | --------------- | ----------------------------------------------------------------- | -------------------- | ---------------- |
-| 1   | Proxy Hardening | Real ERC-20 allowances, immutable config, DEX-flow tests          | PROXY-01, PROXY-02   | 5                |
+| 1   | Proxy Hardening | Real ERC-20 allowances, immutable config, DEX-flow tests — 6/6 plans ✅ Complete 2026-08-29 | PROXY-01, PROXY-02   | 5                |
 
 ## Phase Details
 
