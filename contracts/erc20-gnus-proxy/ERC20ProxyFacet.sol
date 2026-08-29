@@ -98,7 +98,7 @@ contract ERC20ProxyFacet is Initializable, IERC20Upgradeable {
      * @return The amount of tokens still available for the spender.
      */
     function allowance(address owner, address spender) public view override returns (uint256) {
-        return ERC20ProxyStorage.layout().erc1155Contract.isApprovedForAll(owner, spender) ? type(uint256).max : 0;
+        return ERC20ProxyStorage.layout()._allowances[owner][spender];
     }
 
     /**
@@ -108,8 +108,7 @@ contract ERC20ProxyFacet is Initializable, IERC20Upgradeable {
      * @return A boolean that indicates if the operation was successful.
      */
     function approve(address spender, uint256 amount) public override returns (bool) {
-        ERC20ProxyStorage.layout().erc1155Contract.setApprovalForAll(spender, amount > 0);
-        emit Approval(msg.sender, spender, amount);
+        _approve(msg.sender, spender, amount);
         return true;
     }
 
@@ -121,11 +120,50 @@ contract ERC20ProxyFacet is Initializable, IERC20Upgradeable {
      * @return A boolean that indicates if the operation was successful.
      */
     function transferFrom(address sender, address recipient, uint256 amount) public override returns (bool) {
+        _spendAllowance(sender, msg.sender, amount);
         ERC20ProxyStorage.Layout storage l = ERC20ProxyStorage.layout();
-        require(l.erc1155Contract.isApprovedForAll(sender, msg.sender), "ERC20Proxy: transfer caller is not approved");
         l.erc1155Contract.safeTransferFrom(sender, recipient, l.childTokenId, amount, "");
         emit Transfer(sender, recipient, amount);
         return true;
+    }
+
+    /**
+     * @dev Internal function to set the allowance of a spender over the owner's tokens.
+     * Emits an {Approval} event.
+     *
+     * Requirements:
+     *
+     * - `owner` cannot be the zero address.
+     * - `spender` cannot be the zero address.
+     *
+     * @param owner The address of the token owner.
+     * @param spender The address of the spender.
+     * @param amount The amount of tokens to be approved for spending.
+     */
+    function _approve(address owner, address spender, uint256 amount) internal virtual {
+        require(owner != address(0), "ERC20: approve from the zero address");
+        require(spender != address(0), "ERC20: approve to the zero address");
+
+        ERC20ProxyStorage.layout()._allowances[owner][spender] = amount;
+        emit Approval(owner, spender, amount);
+    }
+
+    /**
+     * @dev Updates `owner` s allowance for `spender` based on spent `amount`.
+     *
+     * Does not update the allowance amount in case of infinite allowance.
+     * Revert if not enough allowance is available.
+     *
+     * Might emit an {Approval} event.
+     */
+    function _spendAllowance(address owner, address spender, uint256 amount) internal virtual {
+        uint256 currentAllowance = allowance(owner, spender);
+        if (currentAllowance != type(uint256).max) {
+            require(currentAllowance >= amount, "ERC20: insufficient allowance");
+            unchecked {
+                _approve(owner, spender, currentAllowance - amount);
+            }
+        }
     }
 
     /**
