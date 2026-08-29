@@ -75,7 +75,7 @@ describe("🧪 Multichain Fork and Diamond Deployment Tests", async function () 
           chainId: (await provider.getNetwork()).chainId,
           writeDeployedDiamondData: false,
           configFilePath: `diamonds/GeniusDiamond/geniusdiamond.config.json`,
-        } as LocalDiamondDeployerConfig;
+        } as unknown as LocalDiamondDeployerConfig;
         const diamondDeployer = await LocalDiamondDeployer.getInstance(config);
         await diamondDeployer.setVerbose(true);
         diamond = await diamondDeployer.getDiamondDeployed();
@@ -231,7 +231,7 @@ describe("🧪 Multichain Fork and Diamond Deployment Tests", async function () 
             GNUS_TOKEN_ID,
             "TEST GAME",
             "TESTGAME",
-            2.0, // Exchange rate: 2.0 tokens for 1 GNUS token
+            2.0, // Exchange rate (display-only at the new pin — no burn multiplication)
             toWei(50000000 * 2),
             "",
           );
@@ -400,10 +400,13 @@ describe("🧪 Multichain Fork and Diamond Deployment Tests", async function () 
           // Calculate the burned supply as the difference between starting and ending supply
           const burntSupply = startingSupply - endingSupply;
 
-          // Assert that the burned supply matches the expected value based on the exchange rate
+          // Assert that the burned supply matches the minted child amount 1:1.
+          // Phase 9 D1 at pin 61b7ca4: the 4-arg factory mint burns the caller's
+          // GNUS minion-denominated 1:1 — the minted amount (toWei(5)) is burned
+          // exactly. exchangeRate is stored display-only; no multiplication.
           assert(
-            burntSupply === toWei(5.0 * 2.0), // Exchange rate: 2.0 GNUS burned per minted token
-            `Burnt Supply should equal minted * exchange rate (5.0*2.0), but equals ${burntSupply.toString()}`,
+            burntSupply === toWei(5.0), // 1:1 — burn equals the minted child amount
+            `Burnt Supply should equal the minted child amount 1:1 (5.0), but equals ${burntSupply.toString()}`,
           );
 
           // Log the total GNUS burned for debugging
@@ -430,13 +433,32 @@ describe("🧪 Multichain Fork and Diamond Deployment Tests", async function () 
         });
 
         // Test case to validate successful minting of multiple child NFTs by an authorized user
-        it("Testing NFT Factory to mint child NFTs of Addr1 with address 1", async () => {
-          // Calculate IDs for three child NFTs based on the parent NFT ID
-          const addr1childNFT1 = (ParentNFTID << 128n) | 0n;
-          const addr1childNFT2 = (ParentNFTID << 128n) | 1n;
-          const addr1childNFT3 = (ParentNFTID << 128n) | 2n;
+        it("Testing NFT Factory to mintBatch child NFTs of GNUS with address 1 (1:1)", async () => {
+          // Phase 9 D6 depth gate at the new pin (GNUSNFTFactory.beforeMint):
+          // factory mint/mintBatch only accepts DIRECT children of GNUS
+          // ((id >> 128) == GNUS_TOKEN_ID); deeper descendants revert with
+          // "Direct children only; use convert() for descendants" and must be
+          // issued via GNUSTreasury.convert. The old grandchildren-of-Addr1
+          // batch is therefore unmintable — this test now batches three fresh
+          // direct children of GNUS created here with the same supply limits.
+          const firstBatchChildID = (
+            await signer1Diamond.getNFTInfo(GNUS_TOKEN_ID)
+          ).childCurIndex;
+          await signer1Diamond.createNFTs(
+            GNUS_TOKEN_ID,
+            ["TESTGAME:BATCH1", "TESTGAME:BATCH2", "TESTGAME:BATCH3"],
+            ["", "", ""], // Metadata URIs
+            [1, 1, 1], // Exchange rates (display-only at the new pin)
+            [100, 1, 1], // Supply limits
+            ["", "", ""], // URLs
+          );
+          const addr1childNFT1 = firstBatchChildID;
+          const addr1childNFT2 = firstBatchChildID + 1n;
+          const addr1childNFT3 = firstBatchChildID + 2n;
 
-          // Retrieve the starting supply of GNUS tokens
+          // Retrieve the starting supply of GNUS tokens (read after the
+          // createNFTs above — creation performs no burns, but this keeps the
+          // delta scoped to the mintBatch itself)
           const startingSupply =
             await geniusDiamond["totalSupply(uint256)"](GNUS_TOKEN_ID);
           debuglog(`Starting GNUS Supply: ${formatEther(startingSupply)}`);
@@ -473,53 +495,28 @@ describe("🧪 Multichain Fork and Diamond Deployment Tests", async function () 
 
           // Calculate the burned supply as the difference between starting and ending supply
           const burntSupply = startingSupply - endingSupply;
-          debuglog(`Total GNUS burned: ${formatEther(burntSupply)}`);
+          debuglog(`Total GNUS burned: ${burntSupply.toString()}`);
 
-          // Iterate through the child NFTs to log their total supply
-          // Only needed for troubleshooting.
-          // for (let i = 0; i < 3; i++) {
-          //   const nftID = ParentNFTID.shl(128).or(i);
-          //   const totalSupply = await signer1Diamond['totalSupply(uint256)'](nftID);
-          //   debuglog(`Total Supply for ParentNFT1:NFT${i + 1} ${totalSupply}`);
-          // }
+          // Assert the 1:1 burn rule (Phase 9 D1): the burn equals the total
+          // child amount minted (50 + 1 + 1 = 52 minions, plain
+          // minion-denominated), no exchange-rate multiplication anywhere.
+          assert(
+            burntSupply === 52n,
+            `Burnt Supply should equal the minted child amounts 1:1 (52), but equals ${burntSupply.toString()}`,
+          );
 
-          // Retrieve and store symbols for the GNUS token and parent NFT
-          const symbols: string[] = [];
-          symbols.push((await geniusDiamond.getNFTInfo(GNUS_TOKEN_ID)).symbol);
-          symbols.push((await geniusDiamond.getNFTInfo(ParentNFTID)).symbol);
-
-          // Prepare arrays to query batch balances
-          const addrs: string[] = [];
-          const tokenIDs: bigint[] = [];
-
-          // Fill the arrays with addresses and token IDs
-          for (let i = 0; i < 3; i++) {
-            addrs.push(signers[i].address);
-            tokenIDs.push(GNUS_TOKEN_ID); // GNUS token
-            addrs.push(signers[i].address);
-            tokenIDs.push(ParentNFTID); // Parent NFT
-            for (let j = 0; j < 3; j++) {
-              addrs.push(signers[i].address);
-              tokenIDs.push((ParentNFTID << 128n) | BigInt(j)); // Child NFTs
-            }
-          }
-
-          // Query batch balances for the prepared addresses and token IDs
-          const ownedNFTs = await geniusDiamond.balanceOfBatch(addrs, tokenIDs);
-
-          // Log the balances for each address and NFT
-          ownedNFTs.forEach((bn, index) => {
-            const addr = Math.floor(index / 5); // Determine address index
-            const parentNFT = index % 5 ? 1 : 0; // Check if it's a parent NFT
-            const childNFT = parentNFT ? Math.floor((index - 1) % 5) : 0; // Determine child NFT index
-            debuglog(
-              `Address ${addr} has ${
-                parentNFT && childNFT ? bn.toString() : formatEther(bn)
-              } ${symbols[parentNFT]}::ChildNFT${childNFT} NFTs`,
+          // Verify the recipient received exactly the minted amounts
+          const batchAmounts = [50, 1, 1];
+          const recipientBalances = await geniusDiamond.balanceOfBatch(
+            [signer2, signer2, signer2],
+            [addr1childNFT1, addr1childNFT2, addr1childNFT3],
+          );
+          recipientBalances.forEach((balance, index) => {
+            assert(
+              balance === BigInt(batchAmounts[index]),
+              `Recipient balance for child ${index} should equal ${batchAmounts[index]}, but equals ${balance.toString()}`,
             );
           });
-
-          // TODO There is no test at the end of all this processing.  Its just a lot of logging.
         });
       });
     });
