@@ -187,9 +187,17 @@ describe("🧪 Multichain Fork and Diamond Deployment Tests", async function () 
         }
         const configBlockNumber =
           hre.config.chainManager?.chains?.[networkName]?.blockNumber ?? 0;
+        // The fork was created at or after the pinned block — the meaningful
+        // invariant on every network.
         expect(blockNumber).to.be.gte(configBlockNumber);
 
-        expect(blockNumber).to.be.lte(configBlockNumber + 500);
+        // The upper bound is only deterministic on the in-memory hardhat
+        // chain (no pinned block, head starts at 0); on forked/live networks
+        // the head advances past any fixed window, so a wall-clock upper
+        // bound there is a time bomb, not a check.
+        if (networkName === "hardhat") {
+          expect(blockNumber).to.be.lte(configBlockNumber + 500);
+        }
       });
 
       // it(`should verify ERC173 contract ownership on ${networkName}`, async function () {
