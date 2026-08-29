@@ -17,12 +17,14 @@ library ERC20ProxyStorage {
      * @param childTokenId The ID of the child token in the ERC1155 contract.
      * @param name The name of the ERC20 token.
      * @param symbol The symbol of the ERC20 token.
+     * @param _allowances The amount-specific ERC-20 approvals (owner => spender => amount).
      */
     struct Layout {
         ERC1155SupplyUpgradeable erc1155Contract;
         uint256 childTokenId;
         string name;
         string symbol;
+        mapping(address => mapping(address => uint256)) _allowances;
     }
 
     /**

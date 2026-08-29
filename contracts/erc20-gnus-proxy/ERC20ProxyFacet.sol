@@ -3,7 +3,6 @@ pragma solidity ^0.8.2;
 
 import "@gnus.ai/contracts-upgradeable-diamond/proxy/utils/Initializable.sol";
 import "@gnus.ai/contracts-upgradeable-diamond/token/ERC20/IERC20Upgradeable.sol";
-import "@gnus.ai/contracts-upgradeable-diamond/token/ERC20/ERC20Storage.sol";
 import "@gnus.ai/contracts-upgradeable-diamond/token/ERC1155/IERC1155Upgradeable.sol";
 import "./ProxyDiamond.sol";
 import "./ERC20ProxyStorage.sol";
