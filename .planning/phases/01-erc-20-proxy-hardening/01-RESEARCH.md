@@ -413,17 +413,20 @@ references it and MUST be replaced, not patched.
 | A3 | The 2.6 config's fresh-local-deploy behavior in THIS repo matches gnus-ai's (same framework + same nested pin) — the one untested variable is this repo's local `LocalDiamondDeployer` copy if it is kept instead of the framework-shipped one | Pattern 4 / Pitfall 8 | Medium: this repo's copy has a different `getInstance(config)` signature than the framework's `getInstance(hre, config)`; planner must either adapt the copy (verify config keys pass through) or migrate tests to the framework's deployer (as gnus-ai's tests do) |
 | A4 | RPC-deploy fixtures (`test-assets/deployments-test/**`) do not gate the D-05 suites — local tests deploy fresh with `writeDeployedDiamondData: false` | Runtime State Inventory | Low: verified in test source; only the RPC script flows would need regenerated fixtures |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Keep the local `LocalDiamondDeployer` copy or migrate to the framework-shipped one?**
    - What we know: gnus-ai's tests import `LocalDiamondDeployer`/`loadDiamondContract` from `@geniusventures/hardhat-diamonds/dist/utils` with `getInstance(hre, {diamondName, network})`. This repo has a local copy (multichain-provider aware, `getInstance(config)`) used by all three test dirs.
    - What's unclear: whether the local copy passes the 2.6 config keys through unmodified under the old call signature (A3).
    - Recommendation: try the local copy first (smallest diff); if the framework version is needed, migrate in the same harness task. Do not ship both.
+   - **RESOLVED at planning → 02-T2** (try local copy first; migrate only on observed failure; ship exactly one deployer).
 2. **Unit-test ERC-1155 target: minimal mock vs real GeniusDiamond?**
    - What we know: D-04 requires a live, ABI-correct target at init; the deploy callback's self-pointing init no longer works (Pitfall 3). gnus-ai's `contracts/mocks/` pattern exists but lives in the gnus-ai repo (not the submodule) — copying is a new file here.
    - Recommendation: a ~40-line mock ERC1155 in `contracts/erc20-gnus-proxy/mocks/` keeps unit tests fast and diamond-independent (matches the unit/integration split in D-05); the real pair is exercised in DEXFlow.
+   - **RESOLVED at planning → 04-T1** (minimal ~40-line `MockERC1155Supply` in `contracts/erc20-gnus-proxy/mocks/`, reverting operator plane).
 3. **Does the phase regenerate RPC deployment fixtures?**
    - Recommendation: no (out of D-05 scope; fixtures are stale-but-unused by local suites). Note it in the plan as explicit non-work.
+   - **RESOLVED at planning → 06-T3** (explicit non-work record; RPC fixtures not regenerated).
 
 ## Environment Availability
 
