@@ -16,11 +16,7 @@
     "ERC20ProxyFacet": {
       "priority": 40,
       "versions": {
-        "0.0": {
-          "callbacks": [
-            "createXMPLToken"
-          ]
-        }
+        "0.0": {}
       }
     }
   }
