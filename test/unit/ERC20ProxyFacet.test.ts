@@ -23,7 +23,7 @@ import {
 
 describe("🧪 ERC20ProxyFacet Unit Tests", function () {
   const diamondName = "ProxyDiamond";
-  const log: debug.Debugger = debug("GNUSDeploy:log:${diamondName}");
+  const log: debug.Debugger = debug(`GNUSDeploy:log:${diamondName}`);
   this.timeout(0); // Extended indefinitely for diamond deployment time
 
   const networkProviders =
