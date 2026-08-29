@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: proxy-hardening
 milestone_name: ERC-20 GNUS Proxy Hardening
-status: executing
-stopped_at: Phase 1 all plans executed — gates green, awaiting code-review + verification
-last_updated: "2026-08-29T23:30:00.000Z"
+status: milestone_complete
+stopped_at: Milestone complete (Phase 01 was final phase)
+last_updated: 2026-08-29T23:41:08.642Z
 last_activity: 2026-08-29 -- Phase 01 all 6 plans executed, full-suite gate green
 progress:
   total_phases: 1
   completed_phases: 0
   total_plans: 6
   completed_plans: 6
-  percent: 100
+  percent: 0
 ---
 
 # Project State
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-19)
 
 **Core value:** A DEX-safe ERC-20 facade over GNUS.ai child tokens with real allowance semantics and immutable configuration.
-**Current focus:** Phase 01 — erc-20-proxy-hardening (execution done, phase gates in progress)
+**Current focus:** Milestone complete
 
 ## Current Position
 
-Phase: 01 (erc-20-proxy-hardening) — EXECUTING (all plans done)
-Plan: 6 of 6 (01-01 … 01-06 all complete, SUMMARYs written)
-Status: Full-suite gate green (85 passing / 0 failing, build+tsc exit 0); next: /gsd:code-review 1, then verification
-Last activity: 2026-08-29 -- Phase 01 execution finished on gsd/phase-1-erc-20-proxy-hardening
+Phase: 01
+Plan: Not started
+Status: Milestone complete
+Last activity: 2026-08-29
 
 Progress: [██████████] 100% (plans)
 
@@ -36,7 +36,7 @@ Progress: [██████████] 100% (plans)
 
 **Velocity:**
 
-- Total plans completed: 6
+- Total plans completed: 12
 - Average duration: ~11 min/plan
 - Total execution time: ~67 min
 
@@ -45,6 +45,7 @@ Progress: [██████████] 100% (plans)
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 1 | 6/6 | ~67 min | ~11 min |
+| 01 | 6 | - | - |
 
 ## Accumulated Context
 
