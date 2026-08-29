@@ -4,11 +4,13 @@
 
 The `erc20-gnus-proxy` repo is a **standalone ERC-20 proxy diamond** (ProxyDiamond + ERC20ProxyFacet) that presents one ERC-1155 child token from the GNUS.ai GeniusDiamond as a standard ERC-20 token. It is a separate contract from the gnus-ai diamond — not a facet on it.
 
-Current state (pre-hardening): the proxy's ERC-20 surface is broken for DeFi use:
-- `approve(spender, amount)` maps to `setApprovalForAll(spender, amount > 0)` — all-or-nothing, not amount-specific. DEX flows break.
-- `allowance(owner, spender)` returns `type(uint256).max` or `0` — not real ERC-20 allowance semantics.
-- `transferFrom()` requires ERC-1155 operator approval instead of spending an allowance.
-- `initializeERC20Proxy()` is owner-callable repeatedly — child token ID, ERC-1155 contract address, name, and symbol are all mutable after deployment (attack vector).
+Current state (post-hardening, Phase 01 complete 2026-08-29): the proxy's ERC-20 surface is DEX-safe —
+- Real `_allowances` mapping in `ERC20ProxyStorage.Layout` (append-only, slot 4); `approve`/`allowance`/`transferFrom` use real amount-specific allowances mirroring `GNUSBridge.sol` exactly (approve(max) infinite, never decremented).
+- Zero operator-plane calls on the ERC-20 surface (no `setApprovalForAll`/`isApprovedForAll`).
+- `initializeERC20Proxy()` is one-shot (`initializer` modifier) with static guards + `totalSupply` warm-up; all four config fields immutable after init.
+- Full suite 85 passing / 0 failing (unit 34, DEXFlow live-pair 9 incl. criterion 5, deployment 27, integration 15); toolchain pinned to `@geniusventures` npm packages, compiler 0.8.19, nested pins `contracts/gnus-ai@61b7ca4` / `diamonds/GeniusDiamond@dfebdf0`.
+
+Pre-hardening history (for reference): approve mapped to `setApprovalForAll(spender, amount > 0)`; allowance returned max/0; `transferFrom()` required operator approval; `initializeERC20Proxy()` was re-callable (config mutable after deployment).
 
 ## Core Value
 
@@ -18,8 +20,8 @@ Current state (pre-hardening): the proxy's ERC-20 surface is broken for DeFi use
 
 ### Active
 
-- [ ] **PROXY-01**: Real amount-specific ERC-20 allowances — `_allowances` mapping in proxy storage; `approve(spender, amount)` sets a real allowance (NOT `setApprovalForAll`); `allowance()` returns the real value.
-- [ ] **PROXY-02**: Immutable proxy configuration — `initializeERC20Proxy` is one-shot; `childTokenId`, `erc1155Contract`, `name`, `symbol` cannot change after initialization.
+- [x] **PROXY-01**: Real amount-specific ERC-20 allowances — `_allowances` mapping in proxy storage; `approve(spender, amount)` sets a real allowance (NOT `setApprovalForAll`); `allowance()` returns the real value. *Validated in Phase 01 (2026-08-29) — VERIFICATION.md 6/6.*
+- [x] **PROXY-02**: Immutable proxy configuration — `initializeERC20Proxy` is one-shot; `childTokenId`, `erc1155Contract`, `name`, `symbol` cannot change after initialization. *Validated in Phase 01 (2026-08-29) — VERIFICATION.md 6/6.*
 - [x] **PROXY-03**: Redeem adapter for proxied-child → GNUS — **DONE in gnus-ai (commit d731384, 2026-08-20).** Shipped as a **caller-bound direct-burn** `redeem(uint256 childId, uint256 amount)`: the user calls the diamond directly, no operator approvals, no proxy involvement. **This repo has NO PROXY-03 work** — the proxy never calls redeem. See Cross-Repo Dependencies.
 
 ### Out of Scope
@@ -32,7 +34,7 @@ Current state (pre-hardening): the proxy's ERC-20 surface is broken for DeFi use
 ## Context
 
 **Repo structure:** Own diamond (`ProxyDiamond`) with facets in `contracts/erc20-gnus-proxy/`. Nested submodules:
-- `contracts/gnus-ai` — GeniusDiamond contracts used to deploy a test diamond (pin is STALE at Oct-2024 `7c0b237`; Phase 1 bumps it).
+- `contracts/gnus-ai` — GeniusDiamond contracts used to deploy a test diamond (pin bumped in Phase 01 from stale Oct-2024 `7c0b237` to `61b7ca4`).
 - `diamonds/GeniusDiamond` — diamond deployment tooling.
 
 **Tests:** Hardhat/Mocha in `test/{unit,integration,deployment}`; `test-assets/deployments-test/GeniusDiamond` deployment fixtures. Tests deploy a GeniusDiamond from the nested submodule and attach the proxy to it.
@@ -59,3 +61,4 @@ Current state (pre-hardening): the proxy's ERC-20 surface is broken for DeFi use
 ---
 
 *Created: 2026-08-19 — bootstrapped during gnus-ai Phase 11 discuss-phase restructure*
+*Last updated: 2026-08-29 — Phase 01 (erc-20-proxy-hardening) complete: PROXY-01/PROXY-02 validated, milestone proxy-hardening executed*
