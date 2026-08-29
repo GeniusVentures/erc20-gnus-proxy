@@ -20,6 +20,45 @@ import {
 } from "../../typechain-types";
 import { loadDiamondContract } from "../../scripts/utils/loadDiamondArtifact";
 import { GeniusDiamond } from "../../diamond-typechain-types/GeniusDiamond";
+import { setupLifecyclePolicyLinking } from "../../scripts/utils/GNUSLifecyclePolicyLinking";
+import * as fs from "fs";
+
+/**
+ * Minimal shape of the GeniusDiamond facet config this suite validates against
+ * (the full schema is @geniusventures/diamonds DeployConfigSchema).
+ */
+interface FacetVersionConfigJson {
+  deployInit?: string;
+  upgradeInit?: string;
+  fromVersions?: number[];
+  deployInclude?: string[];
+  deployExclude?: string[];
+}
+
+interface GeniusDiamondConfigJson {
+  protocolVersion: number;
+  protocolInitFacet?: string;
+  facets: Record<
+    string,
+    { priority: number; versions: Record<string, FacetVersionConfigJson> }
+  >;
+}
+
+const geniusDiamondConfig = JSON.parse(
+  fs.readFileSync("diamonds/GeniusDiamond/geniusdiamond.config.json", "utf8"),
+) as GeniusDiamondConfigJson;
+
+/**
+ * Latest (max numeric) version key configured for a facet — the version a fresh
+ * deployment ships (BaseDeploymentStrategy deploys Math.max of the version keys).
+ */
+function latestVersionKey(
+  versions: Record<string, FacetVersionConfigJson>,
+): string {
+  return Object.keys(versions).reduce((a, b) =>
+    Number(b) > Number(a) ? b : a,
+  );
+}
 
 describe("🧪 Multichain Fork and Diamond Deployment Tests", async function () {
   const diamondName = "GeniusDiamond";
@@ -61,6 +100,10 @@ describe("🧪 Multichain Fork and Diamond Deployment Tests", async function () 
       let snapshotId: string;
 
       before(async function () {
+        // Pitfall 1: GNUSNFTFactory (and every other GNUSLifecyclePolicy-linking
+        // facet) cannot deploy through the diamonds framework without the library
+        // linked — install the linker BEFORE the deployer builds any facet factory.
+        await setupLifecyclePolicyLinking();
         const config = {
           diamondName: diamondName,
           networkName: networkName,
@@ -68,7 +111,7 @@ describe("🧪 Multichain Fork and Diamond Deployment Tests", async function () 
           chainId: (await provider.getNetwork()).chainId,
           writeDeployedDiamondData: false,
           configFilePath: `diamonds/GeniusDiamond/geniusdiamond.config.json`,
-        } as LocalDiamondDeployerConfig;
+        } as unknown as LocalDiamondDeployerConfig;
         const diamondDeployer = await LocalDiamondDeployer.getInstance(config);
         await diamondDeployer.setVerbose(true);
         diamond = await diamondDeployer.getDiamondDeployed();
@@ -240,6 +283,149 @@ describe("🧪 Multichain Fork and Diamond Deployment Tests", async function () 
         expect(supportsERC20).to.be.true;
 
         log(`ERC20 interface validated on ${networkName}`);
+      });
+
+      it(`should deploy exactly the 2.6 config facet set on ${networkName}`, async function () {
+        const newDeployedFacets = diamond.getNewDeployedFacets();
+        // DiamondCutFacet is deployed explicitly alongside the Diamond (recorded in
+        // DeployedDiamondData.DeployedFacets, not in newDeployedFacets) — include
+        // it in the comparison.
+        const deployedFacetNames = [
+          ...Object.keys(newDeployedFacets),
+          "DiamondCutFacet",
+        ].sort();
+        const configFacetNames = Object.keys(geniusDiamondConfig.facets).sort();
+
+        // Config-vs-deployed comparison: the deployed diamond carries exactly the
+        // facets the 2.6 config registers — GeniusAI removed, 2.6 facets present.
+        expect(deployedFacetNames).to.deep.equal(configFacetNames);
+        expect(deployedFacetNames).to.not.include("GeniusAI");
+        expect(deployedFacetNames).to.include.members([
+          "GNUSBridgeAttestor",
+          "GNUSTreasury",
+          "GNUSRedeemAdapter",
+          "GNUSLifecycle",
+          "GNUSLifecycleMint",
+          "GNUSLicensing",
+          "GNUSLicensingPurchase",
+        ]);
+        expect(
+          diamond.getDeployedDiamondData().DeployedFacets?.DiamondCutFacet
+            ?.address,
+        ).to.not.be.undefined;
+      });
+
+      it(`should deploy each facet at its latest configured version and priority on ${networkName}`, async function () {
+        const newDeployedFacets = diamond.getNewDeployedFacets();
+        for (const [facetName, deployedFacet] of Object.entries(
+          newDeployedFacets,
+        )) {
+          const facetConfig = geniusDiamondConfig.facets[facetName];
+          expect(facetConfig, `facet ${facetName} is not in the 2.6 config`).to
+            .not.be.undefined;
+          // A fresh deployment ships Math.max of each facet's configured version
+          // keys (DiamondCutFacet is deployed outside this flow — version 0).
+          const expectedVersion = Number(
+            latestVersionKey(facetConfig.versions ?? {}),
+          );
+          expect(deployedFacet.version, facetName).to.equal(expectedVersion);
+          expect(deployedFacet.priority, facetName).to.equal(
+            facetConfig.priority,
+          );
+        }
+      });
+
+      it(`should record the 2.6 protocol version for the deployment on ${networkName}`, async function () {
+        expect(geniusDiamondConfig.protocolVersion).to.equal(2.6);
+        expect(diamond.getDeployedDiamondData().protocolVersion).to.equal(
+          geniusDiamondConfig.protocolVersion,
+        );
+      });
+
+      it(`should run the 2.6 deploy-init functions on ${networkName}`, async function () {
+        const initializerRegistry = diamond.initializerRegistry;
+        const expectedInits = new Map<string, string>();
+        for (const [facetName, facetConfig] of Object.entries(
+          geniusDiamondConfig.facets,
+        )) {
+          if (facetName === geniusDiamondConfig.protocolInitFacet) {
+            continue;
+          }
+          const deployInit =
+            facetConfig.versions?.[latestVersionKey(facetConfig.versions ?? {})]
+              ?.deployInit;
+          if (deployInit) {
+            expectedInits.set(facetName, deployInit);
+          }
+        }
+
+        expect(initializerRegistry.size).to.equal(expectedInits.size);
+        for (const [facetName, initFunction] of expectedInits.entries()) {
+          expect(initializerRegistry.get(facetName), facetName).to.equal(
+            initFunction,
+          );
+        }
+
+        // 2.6 shift spot checks
+        expect(initializerRegistry.get("GNUSNFTFactory")).to.equal(
+          "GNUSNFTFactory_Initialize230()",
+        );
+        expect(initializerRegistry.get("GNUSTreasury")).to.equal(
+          "GNUSTreasury_Initialize260()",
+        );
+      });
+
+      it(`should wire the protocol init facet through the diamond cut on ${networkName}`, async function () {
+        const initFacetName = geniusDiamondConfig.protocolInitFacet!;
+        // The protocol init facet runs via the diamondCut init calldata
+        // (diamondInitialize250 at protocol version 2.6), not the registry.
+        expect(diamond.initializerRegistry.has(initFacetName)).to.be.false;
+        expect(
+          geniusDiamondConfig.facets[initFacetName].versions?.["2.6"]
+            ?.deployInit,
+        ).to.equal("diamondInitialize250()");
+        expect(diamond.getInitAddress()).to.equal(
+          diamond.getNewDeployedFacets()[initFacetName].address,
+        );
+      });
+
+      it(`should expose only deployInclude selectors for ERC1155ProxyOperator on ${networkName}`, async function () {
+        const facetConfig = geniusDiamondConfig.facets.ERC1155ProxyOperator;
+        const includeSignatures =
+          facetConfig.versions?.[latestVersionKey(facetConfig.versions ?? {})]
+            ?.deployInclude ?? [];
+        const expectedSelectors = includeSignatures
+          .map((sig) => ethers.id(sig).slice(0, 10))
+          .sort();
+
+        // The registry pass moves deployInclude selectors out of the in-memory
+        // funcSelectors residue, so assert against the on-chain loupe instead.
+        // (Array.from: the ethers v6 Result is a frozen Array subclass.)
+        const facetAddress =
+          diamond.getNewDeployedFacets().ERC1155ProxyOperator.address;
+        const onChainSelectors = Array.from(
+          await geniusDiamond.facetFunctionSelectors(facetAddress),
+        ).sort();
+
+        expect(onChainSelectors).to.deep.equal(expectedSelectors);
+      });
+
+      it(`should match on-chain loupe facets to the deployed config facets on ${networkName}`, async function () {
+        const newDeployedFacets = diamond.getNewDeployedFacets();
+        const loupeFacets = await geniusDiamond.facets();
+
+        // Every configured facet is deployed as its own distinct on-chain facet
+        // (the 18 versioned facets + the explicitly deployed DiamondCutFacet).
+        expect(loupeFacets).to.have.lengthOf(
+          Object.keys(geniusDiamondConfig.facets).length,
+        );
+        const loupeAddresses = new Set(
+          loupeFacets.map((facet) => facet.facetAddress.toLowerCase()),
+        );
+        for (const [facetName, facet] of Object.entries(newDeployedFacets)) {
+          expect(loupeAddresses.has(facet.address.toLowerCase()), facetName).to
+            .be.true;
+        }
       });
     });
   }
