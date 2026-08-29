@@ -344,6 +344,103 @@ describe("🧪 ERC20ProxyFacet Unit Tests", function () {
         });
       });
 
+      describe("ERC20ProxyFacet Allowance State Machine Tests", function () {
+        const childTokenId = 1;
+
+        it("Should set and read a finite allowance with an Approval event", async () => {
+          const amount = ethers.parseEther("42");
+          await expect(signer0Diamond.approve(signer1, amount))
+            .to.emit(proxyDiamond, "Approval")
+            .withArgs(signer0, signer1, amount);
+          expect(await proxyDiamond.allowance(signer0, signer1)).to.equal(
+            amount,
+          );
+        });
+
+        it("Should decrement allowance to zero on a full spend and move the tokens", async () => {
+          const amount = ethers.parseEther("10");
+          await mockToken.mint(signer0, childTokenId, amount);
+          await signer0Diamond.approve(signer1, amount);
+
+          const fromBefore = await proxyDiamond.balanceOf(signer0);
+          const toBefore = await proxyDiamond.balanceOf(signer2);
+          await signer1Diamond.transferFrom(signer0, signer2, amount);
+
+          expect(await proxyDiamond.allowance(signer0, signer1)).to.equal(0n);
+          expect(await proxyDiamond.balanceOf(signer0)).to.equal(
+            fromBefore - amount,
+          );
+          expect(await proxyDiamond.balanceOf(signer2)).to.equal(
+            toBefore + amount,
+          );
+        });
+
+        it("Should emit Approval on the finite decrement path", async () => {
+          const amount = ethers.parseEther("10");
+          const spend = ethers.parseEther("4");
+          await mockToken.mint(signer0, childTokenId, amount);
+          await signer0Diamond.approve(signer1, amount);
+
+          await expect(signer1Diamond.transferFrom(signer0, signer2, spend))
+            .to.emit(proxyDiamond, "Approval")
+            .withArgs(signer0, signer1, amount - spend);
+          expect(await proxyDiamond.allowance(signer0, signer1)).to.equal(
+            amount - spend,
+          );
+        });
+
+        it("Should revert on over-spend and move nothing", async () => {
+          const amount = ethers.parseEther("10");
+          await mockToken.mint(signer0, childTokenId, amount);
+          await signer0Diamond.approve(signer1, amount);
+
+          const fromBefore = await proxyDiamond.balanceOf(signer0);
+          await expect(
+            signer1Diamond.transferFrom(signer0, signer2, amount + 1n),
+          ).to.be.revertedWith("ERC20: insufficient allowance");
+          // A failed spend leaves both the allowance and the balances intact.
+          expect(await proxyDiamond.allowance(signer0, signer1)).to.equal(
+            amount,
+          );
+          expect(await proxyDiamond.balanceOf(signer0)).to.equal(fromBefore);
+        });
+
+        it("Should reject a spend with no prior approval (zero allowance)", async () => {
+          const amount = ethers.parseEther("10");
+          await mockToken.mint(signer0, childTokenId, amount);
+          await expect(
+            signer1Diamond.transferFrom(signer0, signer2, amount),
+          ).to.be.revertedWith("ERC20: insufficient allowance");
+        });
+
+        it("Should directly overwrite an allowance without a zero-first step", async () => {
+          // D-02 explicitly rejects the USDT-style approve-to-zero-first rule.
+          await signer0Diamond.approve(signer1, ethers.parseEther("10"));
+          await signer0Diamond.approve(signer1, ethers.parseEther("20"));
+          expect(await proxyDiamond.allowance(signer0, signer1)).to.equal(
+            ethers.parseEther("20"),
+          );
+        });
+
+        it("Should never decrement a MaxUint256 allowance across two spends", async () => {
+          const amount = ethers.parseEther("10");
+          await mockToken.mint(signer0, childTokenId, amount * 2n);
+          await signer0Diamond.approve(signer1, ethers.MaxUint256);
+
+          await signer1Diamond.transferFrom(signer0, signer2, amount);
+          expect(await proxyDiamond.allowance(signer0, signer1)).to.equal(
+            ethers.MaxUint256,
+          );
+
+          // The infinite allowance survives a second spend unchanged.
+          await signer1Diamond.transferFrom(signer0, signer2, amount);
+          expect(await proxyDiamond.allowance(signer0, signer1)).to.equal(
+            ethers.MaxUint256,
+          );
+          expect(await proxyDiamond.balanceOf(signer2)).to.equal(amount * 2n);
+        });
+      });
+
       describe("ERC20ProxyFacet Initialization Guard Tests", function () {
         beforeEach(async function () {
           // Every guard test starts from the uninitialized state.
@@ -475,6 +572,26 @@ describe("🧪 ERC20ProxyFacet Unit Tests", function () {
           expect(func).to.not.be.null;
           expect(func).to.not.be.undefined;
           console.log("✅ Function initializeERC20Proxy exists in ABI");
+        });
+
+        it("Should NOT expose setApprovalForAll on the ERC-20 surface", async () => {
+          // The operator plane is structurally absent from the aggregated
+          // proxy ABI. The mock's reverting setApprovalForAll/isApprovedForAll
+          // double as runtime tripwires: every passing transfer/approve test
+          // above also proves the facet never touches the operator plane.
+          // (Absence check via getFunction: ethers v6 does not reliably throw
+          // for a missing name on this version, so normalize both outcomes.)
+          const contractInterface = proxyDiamond.interface;
+          let operatorPlaneFunction: unknown = "present";
+          try {
+            operatorPlaneFunction = contractInterface.getFunction(
+              "setApprovalForAll" as any,
+            );
+          } catch {
+            operatorPlaneFunction = undefined;
+          }
+          // null (this ethers version) and undefined (newer) both mean absent.
+          expect(operatorPlaneFunction).to.not.be.ok;
         });
       });
     });
