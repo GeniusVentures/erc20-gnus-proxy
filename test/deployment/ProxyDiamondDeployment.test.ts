@@ -33,19 +33,13 @@ describe("🧪 Multichain Fork and Diamond Deployment Tests", async function () 
     const networkNames =
       process.argv[process.argv.indexOf("--chains") + 1].split(",");
     if (networkNames.includes("hardhat")) {
-      networkProviders.set(
-        "hardhat",
-        ethers.provider as unknown as JsonRpcProvider,
-      );
+      networkProviders.set("hardhat", ethers.provider as any);
     }
   } else if (
     process.argv.includes("test") ||
     process.argv.includes("coverage")
   ) {
-    networkProviders.set(
-      "hardhat",
-      ethers.provider as unknown as JsonRpcProvider,
-    );
+    networkProviders.set("hardhat", ethers.provider as any);
   }
 
   for (const [networkName, provider] of networkProviders.entries()) {
@@ -67,14 +61,17 @@ describe("🧪 Multichain Fork and Diamond Deployment Tests", async function () 
       let snapshotId: string;
 
       before(async function () {
+        // Callback-free config (post-Plan-01): the diamond deploys
+        // UNINITIALIZED — initializeERC20Proxy is an explicit, owner-only,
+        // one-shot act performed by the fixtures that need initialized state.
         const config = {
           diamondName: diamondName,
           networkName: networkName,
           provider: provider,
-          // chainId: (await provider.getNetwork()).chainId,
-          // writeDeployedDiamondData: false,
-          // configFilePath: `diamonds/GeniusDiamond/proxydiamond.config.json`,
-        } as LocalDiamondDeployerConfig;
+          chainId: (await provider.getNetwork()).chainId,
+          writeDeployedDiamondData: false,
+          configFilePath: `diamonds/ProxyDiamond/proxydiamond.config.json`,
+        } as unknown as LocalDiamondDeployerConfig;
         const diamondDeployer = await LocalDiamondDeployer.getInstance(config);
         diamond = await diamondDeployer.getDiamondDeployed();
         const deployedDiamondData = diamond.getDeployedDiamondData();

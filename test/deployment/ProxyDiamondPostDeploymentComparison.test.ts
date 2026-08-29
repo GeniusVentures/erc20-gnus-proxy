@@ -70,7 +70,7 @@ describe("🧪 Multichain Fork and Diamond Deployment Tests", async function () 
           chainId: (await provider.getNetwork()).chainId,
           writeDeployedDiamondData: false,
           configFilePath: `diamonds/ProxyDiamond/proxydiamond.config.json`,
-        } as LocalDiamondDeployerConfig;
+        } as unknown as LocalDiamondDeployerConfig;
         const diamondDeployer = await LocalDiamondDeployer.getInstance(config);
         diamond = await diamondDeployer.getDiamondDeployed();
         deployedDiamondData = diamond.getDeployedDiamondData();
