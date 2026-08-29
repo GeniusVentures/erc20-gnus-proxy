@@ -76,9 +76,6 @@ describe("🧪 Multichain Fork and Diamond Deployment Tests", async function () 
         diamond = await diamondDeployer.getDiamondDeployed();
         const deployedDiamondData = diamond.getDeployedDiamondData();
 
-        const hardhatDiamondAbiPath =
-          "hardhat-diamond-abi/HardhatDiamondABI.sol:";
-        const diamondArtifactName = `${hardhatDiamondAbiPath}${diamond.diamondName}`;
         proxyDiamond = await loadDiamondContract<ProxyDiamond>(
           diamond,
           deployedDiamondData.DiamondAddress!,

@@ -54,7 +54,6 @@ describe("🧪 ERC20ProxyFacet Unit Tests", function () {
       let proxyDiamond: ProxyDiamond;
       let signer0Diamond: ProxyDiamond;
       let signer1Diamond: ProxyDiamond;
-      let signer2Diamond: ProxyDiamond;
       let ownerDiamond: ProxyDiamond;
       let mockToken: MockERC1155Supply;
       let mockAddress: string;
@@ -106,9 +105,6 @@ describe("🧪 ERC20ProxyFacet Unit Tests", function () {
         diamond = await diamondDeployer.getDiamondDeployed();
         const deployInfo = diamond.getDeployedDiamondData();
 
-        const hardhatDiamondAbiPath =
-          "hardhat-diamond-abi/HardhatDiamondABI.sol:";
-        const diamondArtifactName = `${hardhatDiamondAbiPath}${diamond.diamondName}`;
         proxyDiamond = await loadDiamondContract<ProxyDiamond>(
           diamond,
           deployInfo.DiamondAddress!,
@@ -125,7 +121,6 @@ describe("🧪 ERC20ProxyFacet Unit Tests", function () {
         signer2 = signers[2].address;
         signer0Diamond = proxyDiamond.connect(signers[0]);
         signer1Diamond = proxyDiamond.connect(signers[1]);
-        signer2Diamond = proxyDiamond.connect(signers[2]);
 
         // get the signer for the owner
         owner = deployInfo.DeployerAddress!;

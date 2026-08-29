@@ -104,7 +104,6 @@ describe("🧪 Multichain Fork and Diamond Deployment Tests", async function () 
         if (!geniusOwner) {
           diamond.setSigner(signers[0]);
           geniusOwner = signer0;
-          ownerGeniusSigner;
         }
         ownerGeniusSigner = await ethersMultichain.getSigner(geniusOwner);
 

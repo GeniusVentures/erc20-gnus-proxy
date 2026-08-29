@@ -139,7 +139,6 @@ describe("🧪 Multichain Fork and Diamond Deployment Tests", async function () 
         if (!owner) {
           diamond.setSigner(signers[0]);
           owner = signer0;
-          ownerSigner;
         }
         ownerSigner = await ethersMultichain.getSigner(owner);
 
