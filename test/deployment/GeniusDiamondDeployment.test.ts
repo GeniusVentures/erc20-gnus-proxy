@@ -51,13 +51,30 @@ const geniusDiamondConfig = JSON.parse(
 /**
  * Latest (max numeric) version key configured for a facet — the version a fresh
  * deployment ships (BaseDeploymentStrategy deploys Math.max of the version keys).
+ * Compares major/minor NUMERICALLY per component: a float comparison would make
+ * "2.10" (Number("2.10") === 2.1) lose to "2.6".
  */
 function latestVersionKey(
   versions: Record<string, FacetVersionConfigJson>,
 ): string {
-  return Object.keys(versions).reduce((a, b) =>
-    Number(b) > Number(a) ? b : a,
-  );
+  const keys = Object.keys(versions);
+  if (keys.length === 0) {
+    throw new Error("latestVersionKey: facet has no configured versions");
+  }
+  const components = (key: string): number[] =>
+    key.split(".").map((part) => Number(part) || 0);
+  return keys.reduce((a, b) => {
+    const ac = components(a);
+    const bc = components(b);
+    const depth = Math.max(ac.length, bc.length);
+    for (let i = 0; i < depth; i++) {
+      const delta = (bc[i] ?? 0) - (ac[i] ?? 0);
+      if (delta !== 0) {
+        return delta > 0 ? b : a;
+      }
+    }
+    return a;
+  });
 }
 
 describe("🧪 Multichain Fork and Diamond Deployment Tests", async function () {
