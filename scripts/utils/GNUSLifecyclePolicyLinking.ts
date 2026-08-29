@@ -76,7 +76,10 @@ const HARDHAT_MODULE = "hardhat";
 // address broke any process that touches two networks (test-multichain, RPC entry
 // points iterating networks): the library deployed on chain A was baked into facet
 // bytecode "linked" on chain B — a DELEGATECALL stub targeting an address with no code.
-const linkedLibraryAddressByChainKey = new Map<string, string>();
+// Values are IN-FLIGHT deployment promises (not resolved addresses): two concurrent
+// factory requests for linking artifacts on the same chain await the SAME deployment
+// instead of racing two library deploys onto the chain (see rememberLibraryDeployment).
+const linkedLibraryAddressByChainKey = new Map<string, Promise<string>>();
 let linkerInstalled = false;
 
 /**
@@ -110,6 +113,33 @@ function runtimeHre(): any {
 }
 
 /**
+ * Memoize a library deployment as an in-flight promise per chain key: the cache
+ * check and set are serialized through the map, so concurrent
+ * `getContractFactory` calls for linking artifacts on the same chain (e.g. a
+ * `Promise.all` facet deployment) all await the SAME deployment instead of
+ * double-deploying the library. A failed deployment is evicted so the next
+ * request retries rather than caching the rejection forever.
+ * @param key The per-network cache key.
+ * @param deploy Deploys the library and resolves to its (lowercase) address.
+ * @returns The memoized deployment promise for the chain key.
+ */
+function rememberLibraryDeployment(
+  key: string,
+  deploy: () => Promise<string>,
+): Promise<string> {
+  const inFlight = linkedLibraryAddressByChainKey.get(key);
+  if (inFlight) {
+    return inFlight;
+  }
+  const deployment = deploy().catch((error: unknown) => {
+    linkedLibraryAddressByChainKey.delete(key);
+    throw error;
+  });
+  linkedLibraryAddressByChainKey.set(key, deployment);
+  return deployment;
+}
+
+/**
  * Deploy GNUSLifecyclePolicy once per process (idempotent) and return its address.
  * @param hre Optional explicit HRE (config/extendEnvironment path); defaults to the
  *   runtime HRE.
@@ -118,17 +148,13 @@ function runtimeHre(): any {
 export async function deployAndLinkLifecyclePolicy(hre?: any): Promise<string> {
   const env = hre ?? runtimeHre();
   const key = await chainKey(undefined, env);
-  const cached = linkedLibraryAddressByChainKey.get(key);
-  if (cached) {
-    return cached;
-  }
-  const [deployer] = await env.ethers.getSigners();
-  const factory = await env.ethers.getContractFactory(LIBRARY_NAME, deployer);
-  const library = await factory.deploy();
-  await library.waitForDeployment();
-  const address = (await library.getAddress()).toLowerCase();
-  linkedLibraryAddressByChainKey.set(key, address);
-  return address;
+  return rememberLibraryDeployment(key, async () => {
+    const [deployer] = await env.ethers.getSigners();
+    const factory = await env.ethers.getContractFactory(LIBRARY_NAME, deployer);
+    const library = await factory.deploy();
+    await library.waitForDeployment();
+    return (await library.getAddress()).toLowerCase();
+  });
 }
 
 /**
@@ -146,17 +172,13 @@ export async function deployAndLinkLifecyclePolicyWithSigner(
   signer: any,
 ): Promise<string> {
   const key = await chainKey(signer);
-  const cached = linkedLibraryAddressByChainKey.get(key);
-  if (cached) {
-    return cached;
-  }
-  const env = runtimeHre();
-  const factory = await env.ethers.getContractFactory(LIBRARY_NAME, signer);
-  const library = await factory.deploy();
-  await library.waitForDeployment();
-  const address = (await library.getAddress()).toLowerCase();
-  linkedLibraryAddressByChainKey.set(key, address);
-  return address;
+  return rememberLibraryDeployment(key, async () => {
+    const env = runtimeHre();
+    const factory = await env.ethers.getContractFactory(LIBRARY_NAME, signer);
+    const library = await factory.deploy();
+    await library.waitForDeployment();
+    return (await library.getAddress()).toLowerCase();
+  });
 }
 
 /**
@@ -201,8 +223,11 @@ function patchGetContractFactory(hre: any, lazyDeploy: boolean): void {
           // The cache is per network (chain id) — a miss on the CURRENT network's
           // key falls through to a fresh deploy even when another network is cached.
           const key = await chainKey(signer, hre);
-          let libraryAddress = linkedLibraryAddressByChainKey.get(key);
-          if (!libraryAddress) {
+          const cachedDeployment = linkedLibraryAddressByChainKey.get(key);
+          let libraryAddress: string;
+          if (cachedDeployment) {
+            libraryAddress = await cachedDeployment;
+          } else {
             if (!lazyDeploy) {
               throw new Error(
                 `${LIBRARY_NAME} linker installed without a deployed library address — ` +
@@ -252,11 +277,12 @@ export async function installLifecyclePolicyLinker(
   hre?: any,
 ): Promise<void> {
   const key = await chainKey(undefined, hre);
-  const existing = linkedLibraryAddressByChainKey.get(key);
-  linkedLibraryAddressByChainKey.set(
-    key,
-    (existing ?? libraryAddress).toLowerCase(),
-  );
+  if (!linkedLibraryAddressByChainKey.has(key)) {
+    linkedLibraryAddressByChainKey.set(
+      key,
+      Promise.resolve(libraryAddress.toLowerCase()),
+    );
+  }
   patchGetContractFactory(hre ?? runtimeHre(), false);
 }
 
