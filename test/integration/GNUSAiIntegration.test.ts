@@ -206,7 +206,24 @@ describe("🧪 Multichain Fork and Diamond Deployment Tests", async function () 
         });
 
         // Test the ERC20Proxy Project integration with GNUS.ai Project
-        it("should verify the ERC20Proxy has the TestToken", async function () {});
+        it("should verify the GeniusDiamond carries the ERC-1155 surface the ERC20Proxy targets", async function () {
+          // ERC20ProxyFacet's D-04 warm-up and balance leg call exactly these
+          // ERC-1155 overloads on its target contract, so this deployment can
+          // back a proxy only if it answers both for the GNUS token id.
+          // (Full proxy wiring against a live child token — totalSupply()/
+          // balanceOf() parity through a deployed ProxyDiamond — is covered by
+          // the DEXFlow "Live Pair Wiring" suite.)
+          const gnusTotalSupply = await geniusDiamond["totalSupply(uint256)"](
+            GNUS_TOKEN_ID,
+          );
+          const ownerBalance = await geniusDiamond["balanceOf(address,uint256)"](
+            geniusOwner,
+            GNUS_TOKEN_ID,
+          );
+          expect(gnusTotalSupply).to.be.a("bigint");
+          expect(ownerBalance).to.be.a("bigint");
+          expect(ownerBalance).to.be.at.most(gnusTotalSupply);
+        });
       });
 
       describe("NFTFactory Tests", async function () {
