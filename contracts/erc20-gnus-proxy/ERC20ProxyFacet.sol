@@ -31,7 +31,6 @@ contract ERC20ProxyFacet is Initializable, IERC20Upgradeable {
         string memory _name,
         string memory _symbol
     ) initializer onlyOwnerRole external {
-        LibDiamond.enforceIsContractOwner();
         require(
             _erc1155Address != address(0),
             "ERC20Proxy: ERC1155 contract cannot be zero address"
