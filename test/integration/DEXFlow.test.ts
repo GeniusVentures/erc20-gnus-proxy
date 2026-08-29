@@ -3,6 +3,7 @@ import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 import { expect } from "chai";
 import { debug } from "debug";
 import { Diamond } from "@geniusventures/diamonds";
+import { MaxUint256 } from "ethers";
 import { ethers } from "hardhat";
 import { multichain } from "@geniusventures/hardhat-multichain";
 import { GeniusDiamond } from "../../diamond-typechain-types/GeniusDiamond";
@@ -110,6 +111,12 @@ describe("🧪 DEXFlow Integration Tests (D-05 Router Pattern)", async function 
           chainId: (await provider.getNetwork()).chainId,
           writeDeployedDiamondData: false,
           configFilePath: "diamonds/ProxyDiamond/proxydiamond.config.json",
+          // This suite initializes its own ProxyDiamond instance. Without a
+          // distinct deployer key it would share the process-wide
+          // (ProxyDiamond, network, chainId) cache entry with the unit suite,
+          // whose before() would then hit "Initializable: contract is already
+          // initialized" in the full-suite run.
+          localDiamondDeployerKey: "dexflow-proxy",
         } as unknown as LocalDiamondDeployerConfig;
         const proxyDeployer =
           await LocalDiamondDeployer.getInstance(proxyConfig);
@@ -186,14 +193,24 @@ describe("🧪 DEXFlow Integration Tests (D-05 Router Pattern)", async function 
         );
 
         // Pitfall 6: the proxy is the operator on the ERC-1155 leg — without
-        // this role grant every proxy transferFrom reverts inside the DIAMOND,
-        // not the facet. With it, isApprovedForAll(user, proxy) is true for
-        // ALL users: the strongest arrangement under which criterion 5
-        // (operator approval must not grant ERC-20 allowance) must still hold.
+        // the role grant every proxy transferFrom reverts inside the DIAMOND,
+        // not the facet. With the role, isApprovedForAll(user, proxy) reads
+        // true for ALL users: the strongest arrangement under which criterion
+        // 5 (operator approval must not grant ERC-20 allowance) must still hold.
         await ownerGeniusDiamond.grantRole(
           NFT_PROXY_OPERATOR_ROLE,
           proxyDiamondAddress,
         );
+
+        // Pitfall 6, second half: safeTransferFrom's internal operator check
+        // reads the base ERC1155 _operatorApprovals mapping — the diamond-cut
+        // isApprovedForAll override answers the external view selector only,
+        // it does not intercept the transfer facet's internal call (gnus-ai's
+        // own suite pairs the role with an explicit approval for this reason).
+        // The holder must therefore approve the proxy itself on the diamond.
+        // This is also the exact configuration under which the pre-hardening
+        // facet was exploitable: operator approval present, allowance absent.
+        await holderGeniusDiamond.setApprovalForAll(proxyDiamondAddress, true);
 
         // Wire the proxy to the live diamond. The D-04 warm-up
         // (totalSupply(uint256) on the child id) passes against the live pair,
@@ -267,6 +284,217 @@ describe("🧪 DEXFlow Integration Tests (D-05 Router Pattern)", async function 
               childTokenId,
             ),
           ).to.equal(CHILD_MINT_AMOUNT);
+        });
+      });
+
+      describe("🔁 DEX Router Pattern (D-05)", function () {
+        // A DEX router is just approve + transferFrom from a plain signer —
+        // no fork infrastructure, no extra dependencies.
+        const APPROVE_AMOUNT = 1000n;
+        const SPEND_AMOUNT = 400n;
+
+        it("1) holder approve(router, n) records exactly n spendable allowance", async () => {
+          await expect(
+            holderProxyDiamond.approve(router.address, APPROVE_AMOUNT),
+          )
+            .to.emit(proxyDiamond, "Approval")
+            .withArgs(holder.address, router.address, APPROVE_AMOUNT);
+          expect(
+            await proxyDiamond.allowance(holder.address, router.address),
+          ).to.equal(APPROVE_AMOUNT);
+        });
+
+        it("2) router transferFrom moves child tokens through the proxy and zeroes the allowance", async () => {
+          await holderProxyDiamond.approve(router.address, SPEND_AMOUNT);
+          const holderBefore = await proxyDiamond.balanceOf(holder.address);
+          const recipientBefore = await proxyDiamond.balanceOf(
+            recipient.address,
+          );
+
+          await routerProxyDiamond.transferFrom(
+            holder.address,
+            recipient.address,
+            SPEND_AMOUNT,
+          );
+
+          expect(await proxyDiamond.balanceOf(holder.address)).to.equal(
+            holderBefore - SPEND_AMOUNT,
+          );
+          expect(await proxyDiamond.balanceOf(recipient.address)).to.equal(
+            recipientBefore + SPEND_AMOUNT,
+          );
+          // The allowance is consumed down to zero by the full spend.
+          expect(
+            await proxyDiamond.allowance(holder.address, router.address),
+          ).to.equal(0n);
+          // The moved balance is the live diamond's ERC-1155 balance — the
+          // transfer really rode the operator role, not a proxy-local ledger.
+          expect(
+            await geniusDiamond["balanceOf(address,uint256)"](
+              recipient.address,
+              childTokenId,
+            ),
+          ).to.equal(recipientBefore + SPEND_AMOUNT);
+        });
+
+        it("3) partial spends leave the exact finite remainder (decreasing allowance)", async () => {
+          const approved = 1000n;
+          const firstSpend = 300n;
+          const secondSpend = 450n;
+          await holderProxyDiamond.approve(router.address, approved);
+
+          await routerProxyDiamond.transferFrom(
+            holder.address,
+            recipient.address,
+            firstSpend,
+          );
+          expect(
+            await proxyDiamond.allowance(holder.address, router.address),
+          ).to.equal(approved - firstSpend);
+
+          await expect(
+            routerProxyDiamond.transferFrom(
+              holder.address,
+              recipient.address,
+              secondSpend,
+            ),
+          )
+            .to.emit(proxyDiamond, "Approval")
+            .withArgs(
+              holder.address,
+              router.address,
+              approved - firstSpend - secondSpend,
+            );
+          expect(
+            await proxyDiamond.allowance(holder.address, router.address),
+          ).to.equal(approved - firstSpend - secondSpend);
+        });
+
+        it("4) over-spend reverts with ERC20: insufficient allowance and moves nothing", async () => {
+          await holderProxyDiamond.approve(router.address, APPROVE_AMOUNT);
+          const holderBefore = await proxyDiamond.balanceOf(holder.address);
+
+          await expect(
+            routerProxyDiamond.transferFrom(
+              holder.address,
+              recipient.address,
+              APPROVE_AMOUNT + 1n,
+            ),
+          ).to.be.revertedWith("ERC20: insufficient allowance");
+
+          // The failed spend leaves both the allowance and the balances intact.
+          expect(
+            await proxyDiamond.allowance(holder.address, router.address),
+          ).to.equal(APPROVE_AMOUNT);
+          expect(await proxyDiamond.balanceOf(holder.address)).to.equal(
+            holderBefore,
+          );
+        });
+
+        it("5) a spender with no approve is rejected (zero-allowance rejection)", async () => {
+          expect(
+            await proxyDiamond.allowance(holder.address, freshSpender.address),
+          ).to.equal(0n);
+          await expect(
+            freshSpenderProxyDiamond.transferFrom(
+              holder.address,
+              recipient.address,
+              1n,
+            ),
+          ).to.be.revertedWith("ERC20: insufficient allowance");
+        });
+
+        it("6) criterion 5: setApprovalForAll neither grants nor is required for ERC-20 allowance", async () => {
+          // Direction B first, on pristine state: the router has NO operator
+          // approval on the ERC-1155 plane, yet a real ERC-20 allowance spends
+          // fine — the proxy's own operator rights (role + the holder's
+          // setApprovalForAll(proxy)) cover the ERC-1155 leg, so operator
+          // approval for the ROUTER is not required for ERC-20 spending.
+          expect(
+            await geniusDiamond.isApprovedForAll(
+              holder.address,
+              router.address,
+            ),
+          ).to.be.false;
+          await holderProxyDiamond.approve(router.address, SPEND_AMOUNT);
+          const holderBefore = await proxyDiamond.balanceOf(holder.address);
+          await routerProxyDiamond.transferFrom(
+            holder.address,
+            recipient.address,
+            SPEND_AMOUNT,
+          );
+          expect(await proxyDiamond.balanceOf(holder.address)).to.equal(
+            holderBefore - SPEND_AMOUNT,
+          );
+
+          // Direction A: operator approval on the ERC-1155 plane — for the
+          // router, and (re-affirmed) for the proxy itself — grants zero
+          // ERC-20 allowance. This is the exact state the pre-hardening facet
+          // was exploitable in: operator approval present, allowance absent.
+          await holderGeniusDiamond.setApprovalForAll(router.address, true);
+          await holderGeniusDiamond.setApprovalForAll(
+            proxyDiamondAddress,
+            true,
+          );
+          expect(
+            await geniusDiamond.isApprovedForAll(
+              holder.address,
+              router.address,
+            ),
+          ).to.be.true;
+          expect(
+            await geniusDiamond.isApprovedForAll(
+              holder.address,
+              proxyDiamondAddress,
+            ),
+          ).to.be.true;
+
+          // The allowance was consumed by the real spend above and the
+          // operator approvals did NOT replenish or create any of it.
+          expect(
+            await proxyDiamond.allowance(holder.address, router.address),
+          ).to.equal(0n);
+          expect(
+            await proxyDiamond.allowance(holder.address, proxyDiamondAddress),
+          ).to.equal(0n);
+          await expect(
+            routerProxyDiamond.transferFrom(
+              holder.address,
+              recipient.address,
+              1n,
+            ),
+          ).to.be.revertedWith("ERC20: insufficient allowance");
+        });
+
+        it("7) approve(MaxUint256) is infinite: no decrement across two spends", async () => {
+          const firstSpend = 250n;
+          const secondSpend = 125n;
+          await holderProxyDiamond.approve(router.address, MaxUint256);
+          const recipientBefore = await proxyDiamond.balanceOf(
+            recipient.address,
+          );
+
+          await routerProxyDiamond.transferFrom(
+            holder.address,
+            recipient.address,
+            firstSpend,
+          );
+          // type(uint256).max is never decremented (D-02 / T-1-12).
+          expect(
+            await proxyDiamond.allowance(holder.address, router.address),
+          ).to.equal(MaxUint256);
+
+          await routerProxyDiamond.transferFrom(
+            holder.address,
+            recipient.address,
+            secondSpend,
+          );
+          expect(
+            await proxyDiamond.allowance(holder.address, router.address),
+          ).to.equal(MaxUint256);
+          expect(await proxyDiamond.balanceOf(recipient.address)).to.equal(
+            recipientBefore + firstSpend + secondSpend,
+          );
         });
       });
     });
