@@ -7,10 +7,20 @@ import "hardhat-abi-exporter";
 import "@geniusventures/hardhat-diamonds";
 import "hardhat-gas-reporter";
 import "@geniusventures/hardhat-multichain";
-import { HardhatUserConfig, task } from "hardhat/config";
+import { extendEnvironment, HardhatUserConfig, task } from "hardhat/config";
 import "solidity-coverage";
+import { installLazyLifecyclePolicyLinker } from "./scripts/utils/GNUSLifecyclePolicyLinking";
 
 dotenv.config();
+
+// Install the lazy GNUSLifecyclePolicy library linker on every hardhat process —
+// facets that compile-time-link GNUSLifecyclePolicy (GNUSNFTFactory, GNUSBridge, ...)
+// cannot deploy through the unmodified diamonds framework. Lazy mode: nothing deploys
+// at config-load/compile time; the library is deployed on first linking use.
+// See scripts/utils/GNUSLifecyclePolicyLinking.ts for the full rationale.
+extendEnvironment((hre) => {
+  installLazyLifecyclePolicyLinker(hre);
+});
 
 /*
  * Destructuring environment variables required for the configuration.
