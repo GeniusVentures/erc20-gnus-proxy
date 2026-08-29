@@ -127,12 +127,12 @@ const config: HardhatUserConfig = {
       sepolia: {
         rpcUrl: sepoliaUrl,
         blockNumber: sepoliaBlock,
-        chainId: 11155112,
+        chainId: 11155111,
       },
       polygon_amoy: {
         rpcUrl: amoyUrl,
         blockNumber: amoyBlock,
-        chainId: 800002,
+        chainId: 80002,
       },
       hardhat: {
         rpcUrl: multichainHardhat,
@@ -169,11 +169,6 @@ const config: HardhatUserConfig = {
       // Chains without Hardhat built in definitions
       chains: {
         80002: {
-          hardforkHistory: {
-            london: 10000000,
-          },
-        },
-        800002: {
           hardforkHistory: {
             london: 10000000,
           },
