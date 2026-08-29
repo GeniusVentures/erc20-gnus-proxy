@@ -66,6 +66,11 @@ contract ERC20ProxyFacet is Initializable, IERC20Upgradeable {
      * @return The number of decimals.
      */
     function decimals() external pure returns (uint8) {
+        // Deliberate metadata decision: child-token amounts are plain
+        // minion-denominated counts, but 18 is advertised for standard ERC-20
+        // tooling compatibility. Consumers that scale by this value will
+        // mis-display amounts by 18 orders of magnitude — recorded as a
+        // conscious choice (review IN-07), not an accident.
         return 18;
     }
 
