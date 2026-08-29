@@ -441,6 +441,43 @@ describe("🧪 ERC20ProxyFacet Unit Tests", function () {
         });
       });
 
+      describe("ERC20ProxyFacet Transfer Tests", function () {
+        const childTokenId = 1;
+
+        it("Should move child-token balance and emit Transfer on a successful transfer", async () => {
+          const amount = ethers.parseEther("10");
+          await mockToken.mint(signer0, childTokenId, amount);
+
+          const fromBefore = await proxyDiamond.balanceOf(signer0);
+          const toBefore = await proxyDiamond.balanceOf(signer2);
+          await expect(signer0Diamond.transfer(signer2, amount))
+            .to.emit(proxyDiamond, "Transfer")
+            .withArgs(signer0, signer2, amount);
+
+          expect(await proxyDiamond.balanceOf(signer0)).to.equal(
+            fromBefore - amount,
+          );
+          expect(await proxyDiamond.balanceOf(signer2)).to.equal(
+            toBefore + amount,
+          );
+        });
+
+        it("Should revert an over-balance transfer inside the mock's balance check", async () => {
+          const amount = ethers.parseEther("10");
+          await mockToken.mint(signer0, childTokenId, amount);
+
+          const fromBefore = await proxyDiamond.balanceOf(signer0);
+          const toBefore = await proxyDiamond.balanceOf(signer2);
+          await expect(
+            signer0Diamond.transfer(signer2, amount + 1n),
+          ).to.be.revertedWith("MockERC1155Supply: insufficient balance");
+
+          // The failed transfer leaves both balances untouched.
+          expect(await proxyDiamond.balanceOf(signer0)).to.equal(fromBefore);
+          expect(await proxyDiamond.balanceOf(signer2)).to.equal(toBefore);
+        });
+      });
+
       describe("ERC20ProxyFacet Initialization Guard Tests", function () {
         beforeEach(async function () {
           // Every guard test starts from the uninitialized state.
@@ -577,8 +614,9 @@ describe("🧪 ERC20ProxyFacet Unit Tests", function () {
         it("Should NOT expose setApprovalForAll on the ERC-20 surface", async () => {
           // The operator plane is structurally absent from the aggregated
           // proxy ABI. The mock's reverting setApprovalForAll/isApprovedForAll
-          // double as runtime tripwires: every passing transfer/approve test
-          // above also proves the facet never touches the operator plane.
+          // double as runtime tripwires: every passing transfer/transferFrom/
+          // approve test above also proves the facet never touches the
+          // operator plane.
           // (Absence check via getFunction: ethers v6 does not reliably throw
           // for a missing name on this version, so normalize both outcomes.)
           const contractInterface = proxyDiamond.interface;
