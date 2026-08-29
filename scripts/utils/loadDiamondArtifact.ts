@@ -1,4 +1,4 @@
-import { Diamond } from "diamonds";
+import { Diamond } from "@geniusventures/diamonds";
 import * as fs from "fs";
 import { ethers } from "hardhat";
 import type { Signer, Provider } from "ethers";

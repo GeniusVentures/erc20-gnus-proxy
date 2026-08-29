@@ -2,9 +2,9 @@ import { JsonRpcProvider } from "@ethersproject/providers";
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 import { expect } from "chai";
 import { debug } from "debug";
-import { Diamond } from "diamonds";
+import { Diamond } from "@geniusventures/diamonds";
 import { ethers } from "hardhat";
-import { multichain } from "hardhat-multichain";
+import { multichain } from "@geniusventures/hardhat-multichain";
 import { ProxyDiamond } from "../../diamond-typechain-types/ProxyDiamond";
 import {
   LocalDiamondDeployer,

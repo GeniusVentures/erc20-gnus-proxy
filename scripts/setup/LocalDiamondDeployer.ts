@@ -11,9 +11,9 @@ import {
   LocalDeploymentStrategy,
   cutKey,
   impersonateAndFundSigner,
-} from "diamonds";
+} from "@geniusventures/diamonds";
 import hre, { ethers } from "hardhat";
-import "hardhat-diamonds";
+import "@geniusventures/hardhat-diamonds";
 import { join } from "path";
 
 // Hardhat task system used for Diamond ABI generation

@@ -4,9 +4,9 @@ import "@nomicfoundation/hardhat-toolbox";
 import "@nomicfoundation/hardhat-web3-v4";
 import "@typechain/hardhat";
 import "hardhat-abi-exporter";
-import "hardhat-diamonds";
+import "@geniusventures/hardhat-diamonds";
 import "hardhat-gas-reporter";
-import "hardhat-multichain";
+import "@geniusventures/hardhat-multichain";
 import { HardhatUserConfig, task } from "hardhat/config";
 import "solidity-coverage";
 
@@ -96,7 +96,7 @@ console.log(`Using chain ID: ${MOCK_CHAIN_ID}`);
 
 const config: HardhatUserConfig = {
   solidity: {
-    version: "0.8.9",
+    version: "0.8.19",
     settings: {
       optimizer: {
         enabled: true,

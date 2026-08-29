@@ -6,13 +6,13 @@ import { ethers } from "hardhat";
 import hre from "hardhat";
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 import { JsonRpcProvider } from "ethers";
-import { multichain } from "hardhat-multichain";
+import { multichain } from "@geniusventures/hardhat-multichain";
 import { getInterfaceID } from "../../scripts/utils/helpers";
 import {
   LocalDiamondDeployer,
   LocalDiamondDeployerConfig,
 } from "../../scripts/setup/LocalDiamondDeployer";
-import { Diamond } from "diamonds";
+import { Diamond } from "@geniusventures/diamonds";
 import {
   IERC20Upgradeable__factory,
   IDiamondCut__factory,
