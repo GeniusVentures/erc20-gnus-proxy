@@ -2,10 +2,10 @@ import { JsonRpcProvider } from "@ethersproject/providers";
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 import { assert, expect } from "chai";
 import { debug } from "debug";
-import { DeployedDiamondData, Diamond } from "diamonds";
+import { DeployedDiamondData, Diamond } from "@geniusventures/diamonds";
 import { formatEther, id } from "ethers";
 import { ethers } from "hardhat";
-import { multichain } from "hardhat-multichain";
+import { multichain } from "@geniusventures/hardhat-multichain";
 import { GeniusDiamond } from "../../diamond-typechain-types/GeniusDiamond";
 import { GNUS_TOKEN_ID, toWei } from "../../scripts/common";
 import {

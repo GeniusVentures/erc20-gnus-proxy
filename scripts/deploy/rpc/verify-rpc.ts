@@ -6,7 +6,7 @@
  */
 
 import chalk from "chalk";
-import { Diamond } from "diamonds";
+import { Diamond } from "@geniusventures/diamonds";
 import { ethers } from "ethers";
 import { RPCDiamondDeployer } from "../../setup/RPCDiamondDeployer";
 import {

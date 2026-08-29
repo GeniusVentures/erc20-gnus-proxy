@@ -12,9 +12,9 @@ import {
   diffDeployedFacets,
   getDeployedFacets,
   isProtocolInitRegistered,
-} from "diamonds";
+} from "@geniusventures/diamonds";
 import hre from "hardhat";
-import { multichain } from "hardhat-multichain";
+import { multichain } from "@geniusventures/hardhat-multichain";
 import { ProxyDiamond } from "../../diamond-typechain-types/ProxyDiamond";
 import {
   LocalDiamondDeployer,

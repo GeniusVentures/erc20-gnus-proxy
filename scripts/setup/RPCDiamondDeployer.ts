@@ -10,13 +10,13 @@ import {
   FileDeploymentRepository,
   RPCDeploymentStrategy,
   cutKey,
-} from "diamonds";
+} from "@geniusventures/diamonds";
 import * as dotenv from "dotenv";
 import { JsonRpcProvider } from "ethers";
 import { existsSync } from "fs";
 import hre, { ethers } from "hardhat";
-import "hardhat-diamonds";
-import "hardhat-multichain";
+import "@geniusventures/hardhat-diamonds";
+import "@geniusventures/hardhat-multichain";
 import { join } from "path";
 
 // Hardhat task system used for Diamond ABI generation
