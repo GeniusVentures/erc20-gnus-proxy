@@ -176,8 +176,14 @@ function patchGetContractFactory(hre: any, lazyDeploy: boolean): void {
 
   const ethersRef: any = hre.ethers;
   const original = ethersRef.getContractFactory.bind(ethersRef);
-  ethersRef.getContractFactory = async (nameOrAbi: any, opts?: any) => {
+  // Forward the FULL argument list: hardhat-ethers exposes a 3-argument
+  // overload getContractFactory(abi, bytecode, signer); a two-parameter
+  // replacement would rebind `bytecode` as `opts` and silently drop the
+  // signer, deploying ABI-form factories from the default account.
+  ethersRef.getContractFactory = async (...args: any[]) => {
+    const nameOrAbi = args[0];
     if (typeof nameOrAbi === "string") {
+      let opts = args[1];
       let artifact: any;
       try {
         artifact = await hre.artifacts.readArtifact(nameOrAbi);
@@ -226,10 +232,11 @@ function patchGetContractFactory(hre: any, lazyDeploy: boolean): void {
               [LIBRARY_FQN]: libraryAddress,
             },
           };
+          args[1] = opts;
         }
       }
     }
-    return original(nameOrAbi, opts);
+    return original(...args);
   };
 }
 
