@@ -20,7 +20,7 @@ import { IERC20Upgradeable__factory } from "../../typechain-types";
 
 describe("🧪 Multichain Fork and Diamond Deployment Tests", async function () {
   const diamondName = "GeniusDiamond";
-  const log: debug.Debugger = debug("GNUSDeploy:log:${diamondName}");
+  const log: debug.Debugger = debug(`GNUSDeploy:log:${diamondName}`);
   this.timeout(0); // Extended indefinitely for diamond deployment time
 
   const networkProviders =
