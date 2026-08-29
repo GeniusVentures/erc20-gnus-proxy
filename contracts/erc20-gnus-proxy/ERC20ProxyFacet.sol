@@ -15,21 +15,33 @@ contract ERC20ProxyFacet is Initializable, IERC20Upgradeable {
     using ERC20ProxyStorage for ERC20ProxyStorage.Layout;
 
     /**
-     * @notice Initializes the ERC20 Proxy with the given parameters.
-     * @param _erc1155Address The address of the ERC1155 contract.
-     * @param _childTokenId The ID of the child token in the ERC1155 contract.
-     * @param _name The name of the ERC20 token.
-     * @param _symbol The symbol of the ERC20 token.
+     * @notice Initializes the ERC20 Proxy with the given parameters. One-shot: a second call
+     * reverts with "Initializable: contract is already initialized".
+     * @dev Validates the ERC-1155 target with static guards plus a totalSupply(uint256) warm-up
+     * call (live-contract and ABI proof) BEFORE any state commits; a failure reverts the whole
+     * transaction so no partial state lands.
+     * @param _erc1155Address The address of the ERC1155 contract (cannot be the zero address).
+     * @param _childTokenId The ID of the child token in the ERC1155 contract (cannot be zero).
+     * @param _name The name of the ERC20 token (cannot be empty).
+     * @param _symbol The symbol of the ERC20 token (cannot be empty).
      */
     function initializeERC20Proxy(
         address _erc1155Address,
         uint256 _childTokenId,
         string memory _name,
         string memory _symbol
-    ) onlyOwnerRole external {
+    ) initializer onlyOwnerRole external {
         LibDiamond.enforceIsContractOwner();
+        require(
+            _erc1155Address != address(0),
+            "ERC20Proxy: ERC1155 contract cannot be zero address"
+        );
+        require(_childTokenId != 0, "ERC20Proxy: child token ID cannot be zero");
+        require(bytes(_name).length > 0, "ERC20Proxy: name cannot be empty");
+        require(bytes(_symbol).length > 0, "ERC20Proxy: symbol cannot be empty");
         ERC20ProxyStorage.Layout storage l = ERC20ProxyStorage.layout();
         l.erc1155Contract = ERC1155SupplyUpgradeable(_erc1155Address);
+        l.erc1155Contract.totalSupply(_childTokenId);
         l.childTokenId = _childTokenId;
         l.name = _name;
         l.symbol = _symbol;
