@@ -156,6 +156,12 @@ describe("🧪 ERC20ProxyFacet Unit Tests", function () {
         snapshotId = await provider.send("evm_snapshot", []);
       });
 
+      // Snapshot-semantics note: inside the three "(Uninitialized)" describes
+      // below, the inner beforeEach rewinds to a pooled root snapshot taken
+      // BEFORE this outer snapshot. evm_revert invalidates snapshots created
+      // after the reverted one, so this outer revert targets a dead snapshot
+      // there and quietly no-ops — isolation inside those describes comes
+      // from their own per-test rewind, not from this hook.
       afterEach(async () => {
         await provider.send("evm_revert", [snapshotId]);
       });
