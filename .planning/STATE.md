@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: proxy-hardening
 milestone_name: ERC-20 GNUS Proxy Hardening
-status: milestone_complete
-stopped_at: Milestone complete (Phase 01 was final phase)
-last_updated: 2026-08-29T23:41:08.642Z
-last_activity: 2026-08-29 -- Phase 01 all 6 plans executed, full-suite gate green
+status: "Phase 01 shipped — PR #12"
+stopped_at: "Milestone complete — Phase 01 verified (VERIFICATION.md passed 6/6); 6 review warnings open pre-PR (/gsd:code-review 01 --fix)"
+last_updated: "2026-08-30T02:44:27.101Z"
+last_activity: 2026-08-29
 progress:
   total_phases: 1
   completed_phases: 1
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-08-19)
 
 Phase: 01
 Plan: Not started
-Status: Milestone complete
+Status: Phase 01 shipped — PR #12
 Last activity: 2026-08-29
 
 Progress: [██████████] 100% (plans)
