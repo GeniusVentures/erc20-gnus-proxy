@@ -1,0 +1,8 @@
+# Prepared upstream application; this file alone does not enroll the project.
+# Copy into anthropics/oss-scanner/projects/erc20-gnus-proxy/project.yaml after CI passes.
+repo: https://github.com/GeniusVentures/erc20-gnus-proxy#develop
+primary_contact: admin@gnus.ai
+homepage: https://docs.gnus.ai
+disabled: false
+dockerfile: .oss-scanner/Dockerfile
+threat_model: .oss-scanner/threat_model.md

@@ -1,0 +1,46 @@
+name: OSS Scanner Docker build
+
+on:
+  pull_request:
+    paths:
+      - '.oss-scanner/**'
+      - '.github/workflows/oss-scanner-build.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  scanner-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout source without credentials
+        uses: actions/checkout@v5
+        with:
+          submodules: false
+          persist-credentials: false
+
+      - name: Validate intended scan target
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fx 'repo: https://github.com/GeniusVentures/erc20-gnus-proxy#develop' .oss-scanner/project.yaml
+          grep -Fx 'primary_contact: admin@gnus.ai' .oss-scanner/project.yaml
+          grep -Fx 'FROM ghcr.io/geniusventures/almalinux-8:latest' .oss-scanner/Dockerfile
+          test -s .oss-scanner/threat_model.md
+          ! grep -nE 'GNUS_TOKEN_1|GH_TOKEN|secrets\\.|--mount=type=secret' .oss-scanner/Dockerfile
+
+      - name: Docker build with anonymous dependencies
+        run: docker build --pull --progress=plain -f .oss-scanner/Dockerfile -t erc20-gnus-proxy-oss:check .
+
+      - name: Run local Hardhat tests without network
+        shell: bash
+        run: |
+          docker run --rm --network none --entrypoint /bin/bash erc20-gnus-proxy-oss:check -euo pipefail -c '
+            cd /src
+            test -d artifacts
+            test -d contracts/gnus-ai
+            test -d diamond-typechain-types
+            yarn hardhat test --no-compile test/unit/ERC20ProxyFacet.test.ts
+          '
